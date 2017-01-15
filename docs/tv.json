@@ -1,0 +1,98 @@
+object(stdClass)#957 (6) {
+	["id"]=> int(2467492248)
+	["watched_at"]=> string(24) "2017-01-07T14:05:00.000Z"
+	["action"]=> string(5) "watch"
+	["type"]=> string(7) "episode"
+	["episode"]=> object(stdClass)#951 (4) {
+		["season"]=> int(2)
+		["number"]=> int(5)
+		["title"]=> string(16) "Dog Adoption Day"
+		["ids"]=> object(stdClass)#971 (5) {
+			["trakt"]=> int(2313955)
+			["tvdb"]=> int(5741808)
+			["imdb"]=> string(9) "tt6034010"
+			["tmdb"]=> int(1224275)
+			["tvrage"]=> int(0)
+		}
+	}
+	["show"]=> object(stdClass)#950 (3) {
+		["title"]=> string(10) "Superstore"
+		["year"]=> int(2015)
+		["ids"]=> object(stdClass)#965 (6) {
+			["trakt"]=> int(98985)
+			["slug"]=> string(10) "superstore"
+			["tvdb"]=> int(295648)
+			["imdb"]=> string(9) "tt4477976"
+			["tmdb"]=> int(62649)
+			["tvrage"]=> int(47320)
+		}
+	}
+}
+
+object(stdClass)#957 (6) {
+	["id"]=> int(2467492248)
+	["watched_at"]=> string(24) "2017-01-07T14:05:00.000Z"
+	["action"]=> string(5) "watch"
+	["type"]=> string(7) "episode"
+	["episode"]=> object(stdClass)#951 (11) {
+		["season"]=> int(2)
+		["number"]=> int(5)
+		["title"]=> string(16) "Dog Adoption Day"
+		["ids"]=> object(stdClass)#971 (5) {
+			["trakt"]=> int(2313955)
+			["tvdb"]=> int(5741808)
+			["imdb"]=> string(9) "tt6034010"
+			["tmdb"]=> int(1224275)
+			["tvrage"]=> int(0)
+		}
+		["number_abs"]=> NULL
+		["overview"]=> string(216) "New parents Cheyenne and Bo fight, prompting Amy and Glenn to give them advice in very different forms; Mateo and Jonah oversee dog adoption at the store; Garrett taunts Dina when she refuses to adjust his time card."
+		["rating"]=> float(7.68296)
+		["votes"]=> int(716)
+		["first_aired"]=> string(24) "2016-10-21T00:00:00.000Z"
+		["updated_at"]=> string(24) "2017-01-08T18:35:31.000Z"
+		["available_translations"]=> array(1) {
+			[0]=> string(2) "en"
+		}
+	}
+	["show"]=> object(stdClass)#950 (20) {
+		["title"]=> string(10) "Superstore"
+		["year"]=> int(2015)
+		["ids"]=> object(stdClass)#965 (6) {
+			["trakt"]=> int(98985)
+			["slug"]=> string(10) "superstore"
+			["tvdb"]=> int(295648)
+			["imdb"]=> string(9) "tt4477976"
+			["tmdb"]=> int(62649)
+			["tvrage"]=> int(47320)
+		}
+		["overview"]=> string(385) "America Ferrera and Ben Feldman star in a hilarious workplace comedy about a unique family of employees at a super-sized mega store. From the bright-eyed newbies and the seen-it-all veterans to the clueless summer hires and the in-it-for-life managers, together they hilariously tackle the day-to-day grind of rabid bargain hunters, riot-causing sales and nap-worthy training sessions."
+		["first_aired"]=> string(24) "2015-11-30T08:00:00.000Z"
+		["airs"]=> object(stdClass)#973 (3) {
+			["day"]=> string(8) "Thursday"
+			["time"]=> string(5) "20:00"
+			["timezone"]=> string(16) "America/New_York"
+		}
+		["runtime"]=> int(30)
+		["certification"]=> string(5) "TV-14"
+		["network"]=> string(3) "NBC"
+		["country"]=> string(2) "us"
+		["trailer"]=> NULL
+		["homepage"]=> string(25) "http://nbc.com/superstore"
+		["status"]=> string(16) "returning series"
+		["rating"]=> float(7.5736)
+		["votes"]=> int(394)
+		["updated_at"]=> string(24) "2017-01-07T11:04:59.000Z"
+		["language"]=> string(2) "en"
+		["available_translations"]=> array(12) {
+			[0]=> string(2) "cs"
+			[1]=> string(2) "da"
+			[2]=> string(2) "en"
+			[11]=> string(2) "ru"
+		}
+		["genres"]=> array(1) {
+			[0]=> string(6) "comedy"
+		}
+		["aired_episodes"]=> int(21)
+	}
+}
