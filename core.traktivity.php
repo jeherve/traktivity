@@ -52,9 +52,16 @@ class Traktivity_Calls {
 	 *
 	 * @since 1.0.0
 	 *
+	 * @param array $args {
+	 * 	Optional. Array of possible query args for the call to Trakt.tv API.
+	 *
+	 *	@int int page  Number of page of results to be returned. Accepts integers.
+	 *	@int int limit Number of results to return per page. Accepts integers.
+	 * }
+	 *
 	 * @return null|array
 	 */
-	private function get_trakt_activity() {
+	private function get_trakt_activity( $args ) {
 
 		// Start with an empty response.
 		$response_body = array();
@@ -71,14 +78,22 @@ class Traktivity_Calls {
 			'trakt-api-key'     => $this->get_option( 'api_key' ),
 		);
 		$query_url = sprintf(
-/*
- to-do: maybe up that limit here. Not sure, it's really only useful the first time, for past views. Maybe make it a filter.
- http://docs.trakt.apiary.io/#reference/users/history/get-watched-history
-*/
 			'%1$s/users/%2$s/history?page=1&limit=10&extended=full',
 			TRAKTIVITY__API_URL,
 			$username
 		);
+
+		/**
+		 * If one specified an array of $args when calling get_trakt_activity(),
+		 * those arguments will be added to the query.
+		 * Possible args could be `page` or `limit`.
+		 */
+		if ( is_array( $args ) && ! empty( $args ) ) {
+			$query_url = add_query_arg(
+				$args,
+				$query_url
+			);
+		}
 
 		$data = wp_remote_get(
 			esc_url_raw( $query_url ),
