@@ -129,138 +129,139 @@ class Traktivity_Calls {
 				);
 				$does_event_exist = new WP_Query( $event_exists_args );
 
-				// If no post exists with that ID, let's go on and publish a post.
-				if ( ! $does_event_exist->have_posts() ) {
+				// If a post already exists with that ID, we can skip it.
+				if ( $does_event_exist->have_posts() ) {
+					continue;
+				}
 
+				/**
+				 * Store the event ID returned by Trakt.tv as post meta.
+				 *
+				 * We'll keep adding to that $meta array to form an array of
+				 * all the meta data to add to each post.
+				 */
+				$meta = array( 'trakt_event_id' => intval( $event->id ) );
+
+				/**
+				 * Gather data about what we're watching.
+				 * We'll collect that info in different taxonomies.
+				 */
+				$taxonomies = array();
+
+				// Let's start with movies.
+				if ( 'movie' === $event->type ) {
+
+					$taxonomies['trakt_type'] = esc_html__( 'movie', 'traktivity' );
+					// Let's capitalize genres.
+					$taxonomies['trakt_genre'] = array_map( 'ucwords', $event->movie->genres );
+					$taxonomies['trakt_year'] = intval( $event->year );
+
+					$meta['trakt_movie_id'] = intval( $event->movie->ids->trakt );
+					$meta['imdb_movie_id'] = esc_html( $event->movie->ids->imdb );
+					$meta['tmdb_movie_id'] = esc_html( $event->movie->ids->tmdb );
+					$meta['trakt_runtime'] = intval( $event->movie->runtime );
+
+					$post_excerpt = $event->movie->tagline;
+					$post_content = $event->movie->overview;
+					//var_dump( $event );
+
+				} elseif ( 'episode' === $event->type ) { // Then let's gather info about series.
+
+					$taxonomies['trakt_type'] = esc_html__( 'TV Series', 'traktivity' );
+					// Let's capitalize genres.
+					$taxonomies['trakt_genre'] = array_map( 'ucwords', $event->show->genres );
+					$taxonomies['trakt_year'] = intval( $event->show->year );
+					$taxonomies['trakt_show'] = esc_html( $event->show->title );
+					$taxonomies['trakt_season'] = intval( $event->episode->season );
+					$taxonomies['trakt_episode'] = intval( $event->episode->number );
+
+					$meta['trakt_episode_id'] = intval( $event->episode->ids->trakt );
+					$meta['trakt_show_id'] = intval( $event->show->ids->trakt );
+					$meta['imdb_episode_id'] = esc_html( $event->episode->ids->imdb );
+					$meta['imdb_show_id'] = esc_html( $event->show->ids->imdb );
+					$meta['tmdb_episode_id'] = esc_html( $event->episode->ids->tmdb );
+					$meta['tmdb_show_id'] = esc_html( $event->show->ids->tmdb );
+					$meta['trakt_runtime'] = intval( $event->show->runtime );
+
+					$post_excerpt = $event->episode->overview;
+					$post_content = $event->episode->overview;
+					//var_dump( $event );
+
+				} else { // If it's neither a movie nor a tv show, we don't need to log it.
+					continue;
+				}
+
+				// Grab the event title.
+				if ( 'movie' === $event->type ) {
+					$title = $event->movie->title;
+				} elseif ( 'episode' === $event->type ) {
 					/**
-					 * Store the event ID returned by Trakt.tv as post meta.
-					 *
-					 * We'll keep adding to that $meta array to form an array of
-					 * all the meta data to add to each post.
+					 * For TV Shows, it might be best to append the show's name to the episode name.
+					 * This way, slugs won't conflict when 2 shows have an episode that has the same name.
+					 * (think common episode names like "Pilot" for example.)
 					 */
-					$meta = array( 'trakt_event_id' => intval( $event->id ) );
-
-					/**
-					 * Gather data about what we're watching.
-					 * We'll collect that info in different taxonomies.
-					 */
-					$taxonomies = array();
-
-					// Let's start with movies.
-					if ( 'movie' === $event->type ) {
-
-						$taxonomies['trakt_type'] = esc_html__( 'movie', 'traktivity' );
-						// Let's capitalize genres.
-						$taxonomies['trakt_genre'] = array_map( 'ucwords', $event->movie->genres );
-						$taxonomies['trakt_year'] = intval( $event->year );
-
-						$meta['trakt_movie_id'] = intval( $event->movie->ids->trakt );
-						$meta['imdb_movie_id'] = esc_html( $event->movie->ids->imdb );
-						$meta['tmdb_movie_id'] = esc_html( $event->movie->ids->tmdb );
-						$meta['trakt_runtime'] = intval( $event->movie->runtime );
-
-						$post_excerpt = $event->movie->tagline;
-						$post_content = $event->movie->overview;
-						//var_dump( $event );
-
-					} elseif ( 'episode' === $event->type ) { // Then let's gather info about series.
-
-						$taxonomies['trakt_type'] = esc_html__( 'TV Series', 'traktivity' );
-						// Let's capitalize genres.
-						$taxonomies['trakt_genre'] = array_map( 'ucwords', $event->show->genres );
-						$taxonomies['trakt_year'] = intval( $event->show->year );
-						$taxonomies['trakt_show'] = esc_html( $event->show->title );
-						$taxonomies['trakt_season'] = intval( $event->episode->season );
-						$taxonomies['trakt_episode'] = intval( $event->episode->number );
-
-						$meta['trakt_episode_id'] = intval( $event->episode->ids->trakt );
-						$meta['trakt_show_id'] = intval( $event->show->ids->trakt );
-						$meta['imdb_episode_id'] = esc_html( $event->episode->ids->imdb );
-						$meta['imdb_show_id'] = esc_html( $event->show->ids->imdb );
-						$meta['tmdb_episode_id'] = esc_html( $event->episode->ids->tmdb );
-						$meta['tmdb_show_id'] = esc_html( $event->show->ids->tmdb );
-						$meta['trakt_runtime'] = intval( $event->show->runtime );
-
-						$post_excerpt = $event->episode->overview;
-						$post_content = $event->episode->overview;
-						//var_dump( $event );
-
-					} else { // If it's neither a movie nor a tv show, we don't need to log it.
-						continue;
-					}
-
-					// Grab the event title.
-					if ( 'movie' === $event->type ) {
-						$title = $event->movie->title;
-					} elseif ( 'episode' === $event->type ) {
-						/**
-						 * For TV Shows, it might be best to append the show's name to the episode name.
-						 * This way, slugs won't conflict when 2 shows have an episode that has the same name.
-						 * (think common episode names like "Pilot" for example.)
-						 */
-						$title = sprintf(
-							'%1$s -- %2$s',
-							$event->episode->title,
-							$event->show->title
-						);
-					} else {
-						continue;
-					}
+					$title = sprintf(
+						'%1$s -- %2$s',
+						$event->episode->title,
+						$event->show->title
+					);
+				} else {
+					continue;
+				}
 
 /*
- Register meta Maybe
- https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-example-of-adding-metabox-to-taxonomy
+Register meta Maybe
+https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-example-of-adding-metabox-to-taxonomy
 */
 
-					// Let it all come together as a list of things we'll add to the post we're creating.
-					$event_args = array(
-						/**
-						 * Filter the Events' Post Title.
-						 *
-						 * @since 1.0.0
-						 *
-						 * @param string $title Event title. By default it's the movie title, or the episode title followed by the show title.
-						 * @param array  $event Array of details about the event.
-						 */
-						'post_title'   => apply_filters( 'traktivity_event_title', esc_html( $title ), $event ),
-						'post_type'    => 'traktivity_event', // to-do: add a filter here and in cpt declaration for folks wanting to publish regular posts instead.
-						'post_status'  => 'publish',
-						'post_date'    => $event->watched_at,
-						'tax_input'    => $taxonomies,
-						'meta_input'   => $meta,
-						'post_content' => esc_html( $post_content ),
-						'post_excerpt' => esc_html( $post_excerpt ),
-					);
-
-					// Create our post.
-					$post_id = wp_insert_post( $event_args );
-
+				// Let it all come together as a list of things we'll add to the post we're creating.
+				$event_args = array(
 					/**
-					 * Establish the relationship between terms and taxonomies.
+					 * Filter the Events' Post Title.
+					 *
+					 * @since 1.0.0
+					 *
+					 * @param string $title Event title. By default it's the movie title, or the episode title followed by the show title.
+					 * @param array  $event Array of details about the event.
 					 */
-					foreach ( $taxonomies as $taxonomy => $value ) {
-						$term_taxonomy_ids = wp_set_object_terms( $post_id, $value, $taxonomy, true );
-						/**
-						 * Since wp_set_object_terms returned an array of term_taxonomy_ids after running,
-						 * we can use it to add more info to each term.
-						 * From Term taxonomy IDs, we'll get term IDs.
-						 * Then from there, we'l update the term and add a description if needed.
-						 */
-						if ( is_array( $term_taxonomy_ids ) && ! empty( $term_taxonomy_ids ) ) {
-							foreach ( $term_taxonomy_ids as $term_taxonomy_id ) {
-								$term_id_object = get_term_by( 'term_taxonomy_id', $term_taxonomy_id, 'trakt_show', ARRAY_A );
-								if ( is_array( $term_id_object ) ) {
-									$term_id = (int) $term_id_object['term_id'];
-									// If we added a new show, we'll add its description here.
-									$show_args = array(
-										'description' => esc_html( $event->show->overview ),
-									);
-									wp_update_term( $term_id, 'trakt_show', $show_args );
-								}
+					'post_title'   => apply_filters( 'traktivity_event_title', esc_html( $title ), $event ),
+					'post_type'    => 'traktivity_event', // to-do: add a filter here and in cpt declaration for folks wanting to publish regular posts instead.
+					'post_status'  => 'publish',
+					'post_date'    => $event->watched_at,
+					'tax_input'    => $taxonomies,
+					'meta_input'   => $meta,
+					'post_content' => esc_html( $post_content ),
+					'post_excerpt' => esc_html( $post_excerpt ),
+				);
+
+				// Create our post.
+				$post_id = wp_insert_post( $event_args );
+
+				/**
+				 * Establish the relationship between terms and taxonomies.
+				 */
+				foreach ( $taxonomies as $taxonomy => $value ) {
+					$term_taxonomy_ids = wp_set_object_terms( $post_id, $value, $taxonomy, true );
+					/**
+					 * Since wp_set_object_terms returned an array of term_taxonomy_ids after running,
+					 * we can use it to add more info to each term.
+					 * From Term taxonomy IDs, we'll get term IDs.
+					 * Then from there, we'l update the term and add a description if needed.
+					 */
+					if ( is_array( $term_taxonomy_ids ) && ! empty( $term_taxonomy_ids ) ) {
+						foreach ( $term_taxonomy_ids as $term_taxonomy_id ) {
+							$term_id_object = get_term_by( 'term_taxonomy_id', $term_taxonomy_id, 'trakt_show', ARRAY_A );
+							if ( is_array( $term_id_object ) ) {
+								$term_id = (int) $term_id_object['term_id'];
+								// If we added a new show, we'll add its description here.
+								$show_args = array(
+									'description' => esc_html( $event->show->overview ),
+								);
+								wp_update_term( $term_id, 'trakt_show', $show_args );
 							}
 						}
 					}
-
+				} // End loop for each taxonomy that was created.
 
 /*
 Upload poster images from tmdb
@@ -270,9 +271,8 @@ https://developers.themoviedb.org/3/movies/get-movie-images
 https://developers.themoviedb.org/3/authentication
 https://developers.themoviedb.org/3/tv/get-tv-images
 */
-				}
-			}
-		}
-	}
-}
+			} // End loop for each event.
+		} // End check for valid array of events.
+	} // End publish_event().
+} // End class.
 new Traktivity_Calls();
