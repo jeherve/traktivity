@@ -237,13 +237,27 @@ class Traktivity_Calls {
 
 					/**
 					 * Establish the relationship between terms and taxonomies.
-					 * Since it returns an array of term_taxonomy_ids after running, we can use it to add more info to each term.
 					 */
 					foreach ( $taxonomies as $taxonomy => $value ) {
-						$terms = wp_set_object_terms( $post_id, $value, $taxonomy, true );
-						if ( is_array( $terms ) && ! empty( $terms ) ) {
-							var_dump( $terms );
-							// https://developer.wordpress.org/reference/functions/wp_update_term/
+						$term_taxonomy_ids = wp_set_object_terms( $post_id, $value, $taxonomy, true );
+						/**
+						 * Since wp_set_object_terms returned an array of term_taxonomy_ids after running,
+						 * we can use it to add more info to each term.
+						 * From Term taxonomy IDs, we'll get term IDs.
+						 * Then from there, we'l update the term and add a description if needed.
+						 */
+						if ( is_array( $term_taxonomy_ids ) && ! empty( $term_taxonomy_ids ) ) {
+							foreach ( $term_taxonomy_ids as $term_taxonomy_id ) {
+								$term_id_object = get_term_by( 'term_taxonomy_id', $term_taxonomy_id, 'trakt_show', ARRAY_A );
+								if ( is_array( $term_id_object ) ) {
+									$term_id = (int) $term_id_object['term_id'];
+									// If we added a new show, we'll add its description here.
+									$show_args = array(
+										'description' => esc_html( $event->show->overview ),
+									);
+									wp_update_term( $term_id, 'trakt_show', $show_args );
+								}
+							}
 						}
 					}
 
