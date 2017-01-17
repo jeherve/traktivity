@@ -62,7 +62,7 @@ class Traktivity_Calls {
 	 *
 	 * @return null|array
 	 */
-	private function get_trakt_activity( $args ) {
+	private function get_trakt_activity( $args = array() ) {
 
 		// Start with an empty response.
 		$response_body = array();
@@ -89,7 +89,7 @@ class Traktivity_Calls {
 		 * those arguments will be added to the query.
 		 * Possible args could be `page` or `limit`.
 		 */
-		if ( is_array( $args ) && ! empty( $args ) ) {
+		if ( isset( $args ) && is_array( $args ) && ! empty( $args ) ) {
 			$query_url = add_query_arg(
 				$args,
 				$query_url
