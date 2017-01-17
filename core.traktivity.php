@@ -9,7 +9,8 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 
 /**
- * Trakt.tv API Calls
+ * API Calls to get our data, and then store it in our custom post type and taxonomies.
+ * The core of the plugin's work happens here.
  *
  * @since 1.0.0
  */
@@ -111,6 +112,104 @@ class Traktivity_Calls {
 		$response_body = json_decode( $data['body'] );
 
 		return $response_body;
+	}
+
+	/**
+	 * Get Movie / Show / Episode poster from themoviedb.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $type Item type. Accepts movie, show, episode.
+	 * @param string $id   Movie / Show / Episode TMDB ID.
+	 *
+	 * @return null|array $image {
+	 * 	Array of images details.
+	 * 		@string string url   Image  URL.
+	 * 		@int    int    width Image  Width.
+	 * 		@int    int    height Image Height.
+	 * }
+	 */
+	private function get_item_poster( $type, $id ) {
+
+/**
+ * For testing we will bypass all TMDB calls and return something I got when testing the function below.
+ */
+		return array(
+			'url' => 'https://image.tmdb.org/t/p/original/tqRO7eGEYZRvupWAVpBAhMqkzEl.jpg',
+			'width' => 1920,
+			'height' => 1080
+		);
+/** */
+
+		if ( 'movie' === $type ) {
+			$endpoint = sprintf(
+				'movie/%s/images',
+				esc_html( $id )
+			);
+		} elseif ( 'show' === $type ) {
+			$endpoint = sprintf(
+				'tv/%s/images',
+				esc_html( $id )
+			);
+		} elseif ( 'episode' === $type ) {
+			$endpoint = sprintf(
+				'tv/%1$s/season/%2$s/episode/%3$s/images',
+				esc_html( $id ),
+				'1', // to-do: Gotta pull those in at some point.
+				'1' // to-do: Gotta pull those in at some point.
+			);
+		} else {
+			return;
+		}
+
+		$query_url = sprintf(
+			'%1$s/%2$s/%3$s?api_key=%4$s',
+			TRAKTIVITY__TMDB_API_URL,
+			TRAKTIVITY__TMDB_API_VERSION,
+			$endpoint,
+			$this->get_option( 'tmdb_api_key' )
+		);
+
+		$data = wp_remote_get( esc_url_raw( $query_url ) );
+		if (
+			is_wp_error( $data )
+			|| 200 != $data['response']['code']
+			|| empty( $data['body'] )
+		) {
+			return;
+		}
+
+		$resp = json_decode( $data['body'] );
+
+		if ( ! isset( $resp ) || ! is_object( $resp ) ) {
+			return;
+		}
+
+		// We will pick the first backdrop and move from there.
+		if ( ! empty( $resp->backdrops ) ) {
+			$img_details = $resp->backdrops[0];
+		} elseif ( ! empty( $resp->posters ) ) { // If there are no backdrops, we'll pick the first poster.
+			$img_details = $resp->posters[0];
+		} else {
+			return;
+		}
+
+		// Let's start with an empty $image array we'll fill in with some image details.
+		$image = array();
+
+		// Build the image URL.
+		$image['url'] = sprintf(
+			'https://image.tmdb.org/t/p/original%s',
+			$img_details->file_path
+		);
+
+		// Add image width.
+		$image['width'] = (int) $img_details->width;
+
+		// Add image height.
+		$image['height'] = (int) $img_details->height;
+
+		return $image;
 	}
 
 	/**
@@ -282,9 +381,6 @@ https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-
 Upload poster images from tmdb
 https://gist.github.com/m1r0/f22d5237ee93bcccb0d9
 https://codex.wordpress.org/Function_Reference/wp_insert_attachment
-https://developers.themoviedb.org/3/movies/get-movie-images
-https://developers.themoviedb.org/3/authentication
-https://developers.themoviedb.org/3/tv/get-tv-images
 */
 			} // End loop for each event.
 		} // End check for valid array of events.

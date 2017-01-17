@@ -15,10 +15,12 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
-define( 'TRAKTIVITY__VERSION',     '1.0.0' );
-define( 'TRAKTIVITY__API_URL',     'https://api.trakt.tv' );
-define( 'TRAKTIVITY__API_VERSION', '2' );
-define( 'TRAKTIVITY__PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
+define( 'TRAKTIVITY__VERSION',          '1.0.0' );
+define( 'TRAKTIVITY__API_URL',          'https://api.trakt.tv' );
+define( 'TRAKTIVITY__API_VERSION',      '2' );
+define( 'TRAKTIVITY__TMDB_API_URL',     'https://api.themoviedb.org' );
+define( 'TRAKTIVITY__TMDB_API_VERSION', '3' );
+define( 'TRAKTIVITY__PLUGIN_DIR',       plugin_dir_path( __FILE__ ) );
 
 /**
  * Create our main plugin class.

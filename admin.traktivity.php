@@ -48,8 +48,15 @@ function traktivity_options_init() {
 	);
 	add_settings_field(
 		'api_key',
-		__( 'API Key', 'traktivity' ),
+		__( 'Trakt.tv API Key', 'traktivity' ),
 		'traktivity_app_settings_apikey_callback',
+		'traktivity',
+		'traktivity_app_settings'
+	);
+	add_settings_field(
+		'tmdb_api_key',
+		__( 'TMDB API Key', 'traktivity' ),
+		'traktivity_app_settings_tmdb_api_key_callback',
 		'traktivity',
 		'traktivity_app_settings'
 	);
@@ -71,6 +78,8 @@ function traktivity_app_settings_callback() {
 	esc_html_e( 'In the Redirect uri field, you can enter your site URL. You can give it both checkin and scrobble permissions.', 'traktivity' );
 	echo '<br/>';
 	esc_html_e( 'Once you created your app, copy the "Client ID" value below. You will also want to enter your Trakt.tv username.', 'traktivity' );
+	echo '<br/>';
+	esc_html_e( 'To get images for each TV show, episode, and movie, we will also need to use another service, The Movie Database API.', 'traktivity' );
 	echo '</p>';
 }
 
@@ -92,13 +101,24 @@ function traktivity_app_settings_username_callback() {
 }
 
 /**
- * Access Token option.
+ * Trakt.tv API Key callback.
  */
 function traktivity_app_settings_apikey_callback() {
 	$options = (array) get_option( 'traktivity' );
 	printf(
 		'<input type="text" name="traktivity[api_key]" value="%s" class="regular-text" />',
 		isset( $options['api_key'] ) ? esc_attr( $options['api_key'] ) : ''
+	);
+}
+
+/**
+ * TMDB API Key callback.
+ */
+function traktivity_app_settings_tmdb_api_key_callback() {
+	$options = (array) get_option( 'traktivity' );
+	printf(
+		'<input type="text" name="traktivity[tmdb_api_key]" value="%s" class="regular-text" />',
+		isset( $options['tmdb_api_key'] ) ? esc_attr( $options['tmdb_api_key'] ) : ''
 	);
 }
 
@@ -111,8 +131,9 @@ function traktivity_app_settings_apikey_callback() {
  * @return array $input Sanitized options.
  */
 function traktivity_settings_validate( $input ) {
-	$input['username'] = sanitize_text_field( $input['username'] );
-	$input['api_key']  = sanitize_key( $input['api_key'] );
+	$input['username']      = sanitize_text_field( $input['username'] );
+	$input['api_key']       = sanitize_key( $input['api_key'] );
+	$input['tmdb_api_key']  = sanitize_key( $input['tmdb_api_key'] );
 
 	return $input;
 }
