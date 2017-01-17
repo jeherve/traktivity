@@ -325,6 +325,15 @@ class Traktivity_Calls {
 					continue;
 				}
 
+				/**
+				 * Filter the Events' Post Title.
+				 *
+				 * @since 1.0.0
+				 *
+				 * @param string $title Event title. By default it's the movie title, or the episode title followed by the show title.
+				 * @param array  $event Array of details about the event.
+				 */
+				$title = apply_filters( 'traktivity_event_title', $title, $event );
 /*
 Register meta Maybe
 https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-example-of-adding-metabox-to-taxonomy
@@ -332,15 +341,7 @@ https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-
 
 				// Let it all come together as a list of things we'll add to the post we're creating.
 				$event_args = array(
-					/**
-					 * Filter the Events' Post Title.
-					 *
-					 * @since 1.0.0
-					 *
-					 * @param string $title Event title. By default it's the movie title, or the episode title followed by the show title.
-					 * @param array  $event Array of details about the event.
-					 */
-					'post_title'   => apply_filters( 'traktivity_event_title', esc_html( $title ), $event ),
+					'post_title'   => esc_html( $title ),
 					'post_type'    => 'traktivity_event', // to-do: add a filter here and in cpt declaration for folks wanting to publish regular posts instead.
 					'post_status'  => 'publish',
 					'post_date'    => $event->watched_at,
