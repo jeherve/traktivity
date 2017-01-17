@@ -119,8 +119,10 @@ class Traktivity_Calls {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $type Item type. Accepts movie, show, episode.
-	 * @param string $id   Movie / Show / Episode TMDB ID.
+	 * @param string $type        Item type. Accepts movie, show, episode.
+	 * @param string $id          Movie / Show / Episode TMDB ID.
+	 * @param int    $season_num  Season number if we're talking about a TV episode.
+	 * @param int    $episode_num Episode number if we're talking about a TV episode.
 	 *
 	 * @return null|array $image {
 	 * 	Array of images details.
@@ -129,17 +131,16 @@ class Traktivity_Calls {
 	 * 		@int    int    height Image Height.
 	 * }
 	 */
-	private function get_item_poster( $type, $id ) {
+	private function get_item_poster( $type, $id, $season_num, $episode_num ) {
 
-/**
- * For testing we will bypass all TMDB calls and return something I got when testing the function below.
- */
+		/**
+		 * For testing we will bypass all TMDB calls and return something I got when testing the function below.
+		 */
 		return array(
 			'url' => 'https://image.tmdb.org/t/p/original/tqRO7eGEYZRvupWAVpBAhMqkzEl.jpg',
 			'width' => 1920,
-			'height' => 1080
+			'height' => 1080,
 		);
-/** */
 
 		if ( 'movie' === $type ) {
 			$endpoint = sprintf(
@@ -155,8 +156,8 @@ class Traktivity_Calls {
 			$endpoint = sprintf(
 				'tv/%1$s/season/%2$s/episode/%3$s/images',
 				esc_html( $id ),
-				'1', // to-do: Gotta pull those in at some point.
-				'1' // to-do: Gotta pull those in at some point.
+				(int) $season_num,
+				(int) $episode_num
 			);
 		} else {
 			return;
