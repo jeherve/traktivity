@@ -190,6 +190,8 @@ class Traktivity_Calls {
 			$img_details = $resp->backdrops[0];
 		} elseif ( ! empty( $resp->posters ) ) { // If there are no backdrops, we'll pick the first poster.
 			$img_details = $resp->posters[0];
+		} elseif ( ! empty( $resp->stills ) ) { // If there are no posters either, we'll pick from the stills.
+			$img_details = $resp->stills[0];
 		} else {
 			return;
 		}
