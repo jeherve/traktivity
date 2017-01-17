@@ -216,6 +216,67 @@ class Traktivity_Calls {
 	}
 
 	/**
+	 * Upload, attach, and set an image as Featured Image for a post.
+	 * Used to take the poster image for each show / episode / movie, and add it to a post.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $url     Image URL.
+	 * @param string $post_id Post ID.
+	 * @param string $title   Post Title.
+	 *
+	 * @return string $post_image Div containing a large version of the lcoal image.
+	 */
+	private function sideload_image( $url, $post_id, $title ) {
+		// Start with an empty post image.
+		$post_image = '';
+
+		/**
+		 * Load necessary libs for media_sideload_image() to work.
+		 */
+		if ( ! function_exists( 'media_sideload_image' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/media.php';
+		}
+		if ( ! function_exists( 'download_url' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		if ( ! function_exists( 'wp_read_image_metadata' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+		}
+
+		/**
+		 * Create our local image, based on the remote image URL.
+		 * The image is then attached to our post ID.
+		 * We use the post title as the image description.
+		 */
+		$local_img = media_sideload_image( $url, $post_id, $title, 'src' );
+
+		// Was the upload successful? Let's update the post.
+		if ( is_string( $local_img ) ) {
+			/**
+			 * Retrieve all images attached to the post.
+			 * We expect only the image we just added.
+			 */
+			$images = get_attached_media( 'image', $post_id );
+			if ( ! empty( $images ) ) {
+				// Let's only keep the first image.
+				$first_image = array_shift( $images );
+
+				// Set the featured image.
+				set_post_thumbnail( $post_id, $first_image->ID );
+
+				// Create a div containing a large version of the image, to be added to the post if needed.
+				$post_image = sprintf(
+					'<div class="poster-image">%s</div>',
+					wp_get_attachment_image( $first_image->ID, 'large' )
+				);
+			}
+		}
+
+		return $post_image;
+	}
+
+	/**
 	 * Publish GitHub Event.
 	 *
 	 * @since 1.0
@@ -280,7 +341,6 @@ class Traktivity_Calls {
 
 					$post_excerpt = $event->movie->tagline;
 					$post_content = $event->movie->overview;
-					//var_dump( $event );
 
 				} elseif ( 'episode' === $event->type ) { // Then let's gather info about series.
 
@@ -302,7 +362,6 @@ class Traktivity_Calls {
 
 					$post_excerpt = $event->episode->overview;
 					$post_content = $event->episode->overview;
-					//var_dump( $event );
 
 				} else { // If it's neither a movie nor a tv show, we don't need to log it.
 					continue;
@@ -356,6 +415,30 @@ https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-
 				$post_id = wp_insert_post( $event_args );
 
 				/**
+				 * Grab the event image, add it to the post content.
+				 */
+				if ( 'episode' === $event->type ) {
+					$tmdb_id = $meta['tmdb_show_id'];
+					$season_num = $taxonomies['trakt_season'];
+					$episode_num = $taxonomies['trakt_episode'];
+				} else {
+					$tmdb_id = $meta['tmdb_movie_id'];
+					$season_num = 0;
+					$episode_num = 0;
+				}
+				$image = $this->get_item_poster( $event->type, $tmdb_id, $season_num, $episode_num );
+
+				if ( is_array( $image ) && ! empty( $image ) ) {
+					$post_image = $this->sideload_image( $image['url'], $post_id, $title );
+
+					$post_with_image = array(
+						'ID'           => $post_id,
+						'post_content' => $post_image . $post_content,
+					);
+					wp_update_post( $post_with_image );
+				}
+
+				/**
 				 * Establish the relationship between terms and taxonomies.
 				 */
 				foreach ( $taxonomies as $taxonomy => $value ) {
@@ -381,13 +464,11 @@ https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-
 					}
 				} // End loop for each taxonomy that was created.
 
-/*
-Upload poster images from tmdb
-https://gist.github.com/m1r0/f22d5237ee93bcccb0d9
-https://codex.wordpress.org/Function_Reference/wp_insert_attachment
-*/
 			} // End loop for each event.
+
 		} // End check for valid array of events.
+
 	} // End publish_event().
+
 } // End class.
 new Traktivity_Calls();
