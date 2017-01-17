@@ -221,15 +221,21 @@ class Traktivity_Calls {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $url     Image URL.
-	 * @param string $post_id Post ID.
-	 * @param string $title   Post Title.
+	 * @param string $url      Image URL.
+	 * @param string $post_id  Post ID.
+	 * @param string $title    Post Title.
+	 * @param bool   $featured Should the image be a featured image.
 	 *
-	 * @return string $post_image Div containing a large version of the lcoal image.
+	 * @return array $post_image {
+	 * 	Array containing information about the post image.
+	 *
+	 * 		@int    int    id  Attachment ID for this image.
+	 * 		@string string tag Image HTML tag of a large version of the image.
+	 * }
 	 */
-	private function sideload_image( $url, $post_id, $title ) {
-		// Start with an empty post image.
-		$post_image = '';
+	private function sideload_image( $url, $post_id, $title, $featured ) {
+		// Start with an empty array.
+		$post_image = array();
 
 		/**
 		 * Load necessary libs for media_sideload_image() to work.
@@ -262,11 +268,16 @@ class Traktivity_Calls {
 				// Let's only keep the first image.
 				$first_image = array_shift( $images );
 
-				// Set the featured image.
-				set_post_thumbnail( $post_id, $first_image->ID );
+				if ( true === $featured ) {
+					// Set the featured image.
+					set_post_thumbnail( $post_id, $first_image->ID );
+				}
+
+				// Store the attachment ID.
+				$post_image['id'] = (int) $first_image->ID;
 
 				// Create a div containing a large version of the image, to be added to the post if needed.
-				$post_image = sprintf(
+				$post_image['tag'] = sprintf(
 					'<div class="poster-image">%s</div>',
 					wp_get_attachment_image( $first_image->ID, 'large' )
 				);
@@ -394,10 +405,6 @@ class Traktivity_Calls {
 				 * @param array  $event Array of details about the event.
 				 */
 				$title = apply_filters( 'traktivity_event_title', $title, $event );
-/*
-Register meta Maybe
-https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-example-of-adding-metabox-to-taxonomy
-*/
 
 				// Let it all come together as a list of things we'll add to the post we're creating.
 				$event_args = array(
@@ -431,13 +438,15 @@ https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-
 					$image = $this->get_item_poster( $event->type, $tmdb_id, $season_num, $episode_num );
 
 					if ( is_array( $image ) && ! empty( $image ) ) {
-						$post_image = $this->sideload_image( $image['url'], $post_id, $title );
+						$post_image = $this->sideload_image( $image['url'], $post_id, $title, true );
 
-						$post_with_image = array(
-							'ID'           => $post_id,
-							'post_content' => $post_image . $post_content,
-						);
-						wp_update_post( $post_with_image );
+						if ( ! empty( $post_image ) ) {
+							$post_with_image = array(
+								'ID'           => $post_id,
+								'post_content' => $post_image['tag'] . $post_content,
+							);
+							wp_update_post( $post_with_image );
+						}
 					}
 				}
 
@@ -462,6 +471,12 @@ https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-
 									'description' => esc_html( $event->show->overview ),
 								);
 								wp_update_term( $term_id, 'trakt_show', $show_args );
+								/**
+								 * Register meta Maybe
+								 * https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-example-of-adding-metabox-to-taxonomy
+								 * use update_term_meta()
+								 * pass an image thanks to get_item_poster and sideload_image
+								*/
 							}
 						}
 					}
