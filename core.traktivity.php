@@ -416,26 +416,29 @@ https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-
 
 				/**
 				 * Grab the event image, add it to the post content.
+				 * We can only do this if the user specified a TMDB API Key.
 				 */
-				if ( 'episode' === $event->type ) {
-					$tmdb_id = $meta['tmdb_show_id'];
-					$season_num = $taxonomies['trakt_season'];
-					$episode_num = $taxonomies['trakt_episode'];
-				} else {
-					$tmdb_id = $meta['tmdb_movie_id'];
-					$season_num = 0;
-					$episode_num = 0;
-				}
-				$image = $this->get_item_poster( $event->type, $tmdb_id, $season_num, $episode_num );
+				if ( ! empty( $this->get_option( 'tmdb_api_key' ) ) ) {
+					if ( 'episode' === $event->type ) {
+						$tmdb_id = $meta['tmdb_show_id'];
+						$season_num = $taxonomies['trakt_season'];
+						$episode_num = $taxonomies['trakt_episode'];
+					} else {
+						$tmdb_id = $meta['tmdb_movie_id'];
+						$season_num = 0;
+						$episode_num = 0;
+					}
+					$image = $this->get_item_poster( $event->type, $tmdb_id, $season_num, $episode_num );
 
-				if ( is_array( $image ) && ! empty( $image ) ) {
-					$post_image = $this->sideload_image( $image['url'], $post_id, $title );
+					if ( is_array( $image ) && ! empty( $image ) ) {
+						$post_image = $this->sideload_image( $image['url'], $post_id, $title );
 
-					$post_with_image = array(
-						'ID'           => $post_id,
-						'post_content' => $post_image . $post_content,
-					);
-					wp_update_post( $post_with_image );
+						$post_with_image = array(
+							'ID'           => $post_id,
+							'post_content' => $post_image . $post_content,
+						);
+						wp_update_post( $post_with_image );
+					}
 				}
 
 				/**
