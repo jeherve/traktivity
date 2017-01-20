@@ -79,7 +79,7 @@ class Traktivity_Calls {
 			'trakt-api-key'     => $this->get_option( 'api_key' ),
 		);
 		$query_url = sprintf(
-			'%1$s/users/%2$s/history?page=1&limit=10&extended=full',
+			'%1$s/users/%2$s/history?extended=full',
 			TRAKTIVITY__API_URL,
 			$username
 		);
