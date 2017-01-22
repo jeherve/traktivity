@@ -493,20 +493,36 @@ class Traktivity_Calls {
 					if ( is_array( $term_taxonomy_ids ) && ! empty( $term_taxonomy_ids ) ) {
 						foreach ( $term_taxonomy_ids as $term_taxonomy_id ) {
 							$term_id_object = get_term_by( 'term_taxonomy_id', $term_taxonomy_id, 'trakt_show', ARRAY_A );
-							if ( is_array( $term_id_object ) ) {
+							/**
+							 * Let's search for show taxonomies with empty descriptions.
+							 * This means these shows weren't existing before. We just created them.
+							 * We will consequently give them a description and a show poster.
+							 */
+							if (
+								is_array( $term_id_object )
+								&& 'trakt_show' === $term_id_object['taxonomy']
+								&& empty( $term_id_object['description'] )
+							) {
 								$term_id = (int) $term_id_object['term_id'];
-								// If we added a new show, we'll add its description here.
+
+								/**
+								 * If we added a new show, we'll add its description here.
+								 */
 								$show_args = array(
 									'description' => esc_html( $event->show->overview ),
 								);
 								wp_update_term( $term_id, 'trakt_show', $show_args );
+
 								/**
-								 * Register meta Maybe
-								 * https://wordpress.stackexchange.com/questions/211703/need-a-simple-but-complete-example-of-adding-metabox-to-taxonomy
-								 * use update_term_meta()
-								 * pass an image thanks to get_item_poster and sideload_image
-								*/
-							}
+								 * Get a poster image for that new show.
+								 */
+								$show_image = $this->get_item_poster( 'show', $meta['tmdb_show_id'], false, false );
+								if ( is_array( $show_image ) && ! empty( $show_image ) ) {
+									$local_image = $this->sideload_image( $show_image['url'], $post_id, $taxonomies['trakt_show'], false );
+
+									update_term_meta( $term_id, 'trakt_show_poster', $local_image );
+								}
+							} // End adding extra info to new shows.
 						}
 					}
 				} // End loop for each taxonomy that was created.
