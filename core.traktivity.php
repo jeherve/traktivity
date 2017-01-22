@@ -119,10 +119,10 @@ class Traktivity_Calls {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $type        Item type. Accepts movie, show, episode.
-	 * @param string $id          Movie / Show / Episode TMDB ID.
-	 * @param int    $season_num  Season number if we're talking about a TV episode.
-	 * @param int    $episode_num Episode number if we're talking about a TV episode.
+	 * @param string   $type        Item type. Accepts movie, show, episode.
+	 * @param string   $id          Movie / Show / Episode TMDB ID.
+	 * @param int|bool $season_num  Season number if we're talking about a TV episode. False if it doesn't apply.
+	 * @param int|bool $episode_num Episode number if we're talking about a TV episode. False if it doesn't apply.
 	 *
 	 * @return null|array $image {
 	 * 	Array of images details.
@@ -261,25 +261,54 @@ class Traktivity_Calls {
 		if ( is_string( $local_img ) ) {
 			/**
 			 * Retrieve all images attached to the post.
-			 * We expect only the image we just added.
 			 */
 			$images = get_attached_media( 'image', $post_id );
 			if ( ! empty( $images ) ) {
-				// Let's only keep the first image.
-				$first_image = array_shift( $images );
+				/**
+				 * From here we have 3 case scenarios:
+				 * 1. Movies: only one image was uploaded and is attached to that post: the movie poster.
+				 * 2. Episode in an existing series: only one image was uploaded and is attached to that post: the episode screenshot (still).
+				 * 3. Episode of a new series:
+				 *  	First time this sideload_image runs, there will only be one image attached to the post: the episode screenshot.
+				 *  	2nd time it runs, the show poster will be added as well. We want the function to return that second image then.
+				 */
 
+				/**
+				 * If featured is set to true, we know we're in scenario 1 or 2.
+				 * Let's set the image as featured image and set it as the one that will be returned.
+				 */
 				if ( true === $featured ) {
+					// Let's only keep the first image. There should be only one, but just in case.
+					$first_image = array_shift( $images );
+
 					// Set the featured image.
 					set_post_thumbnail( $post_id, $first_image->ID );
+
+					// Set the attachment ID we'll add to the returned post image array.
+					$post_image_id = $first_image->ID;
+				} else {
+					/**
+					 * Handle scenario 3.
+					 * We want the second attachment in that post.
+					 * We don't want to make it a featured image.
+					 */
+					// Shift the first element off our array of attachments.
+					array_shift( $images );
+
+					// Do we have a post object left, meaning our upload above worked? Let's take that post's ID.
+					$post_image_id = $images[0]->ID;
 				}
 
+				/**
+				 * Finally, let's populate the $post_image we'll return.
+				 */
 				// Store the attachment ID.
-				$post_image['id'] = (int) $first_image->ID;
+				$post_image['id'] = (int) $post_image_id;
 
 				// Create a div containing a large version of the image, to be added to the post if needed.
 				$post_image['tag'] = sprintf(
 					'<div class="poster-image">%s</div>',
-					wp_get_attachment_image( $first_image->ID, 'large' )
+					wp_get_attachment_image( $post_image_id, 'large' )
 				);
 			}
 		}
