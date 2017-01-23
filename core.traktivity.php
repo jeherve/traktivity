@@ -359,7 +359,7 @@ class Traktivity_Calls {
 				// Let's start with movies.
 				if ( 'movie' === $event->type ) {
 
-					$taxonomies['trakt_type']  = esc_html__( 'movie', 'traktivity' );
+					$taxonomies['trakt_type']  = esc_html__( 'Movie', 'traktivity' );
 					// Let's capitalize genres.
 					$taxonomies['trakt_genre'] = array_map( 'ucwords', $event->movie->genres );
 					$taxonomies['trakt_year']  = intval( $event->year );
