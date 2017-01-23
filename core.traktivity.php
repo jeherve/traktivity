@@ -307,7 +307,7 @@ class Traktivity_Calls {
 	}
 
 	/**
-	 * Publish GitHub Event.
+	 * Publish Trakt.tv Event.
 	 *
 	 * @since 1.0.0
 	 */
