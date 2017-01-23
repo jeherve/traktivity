@@ -520,7 +520,7 @@ class Traktivity_Calls {
 								if ( is_array( $show_image ) && ! empty( $show_image ) ) {
 									$local_image = $this->sideload_image( $show_image['url'], $post_id, $taxonomies['trakt_show'], false );
 
-									update_term_meta( $term_id, 'trakt_show_poster', $local_image );
+									update_term_meta( $term_id, 'show_poster', $local_image );
 								}
 
 								/**

@@ -403,7 +403,7 @@ class Traktivity_Data_Storage {
 	 * @param array $columns Array of columns on the screen we hook into.
 	 */
 	public function show_poster_column( $columns ) {
-		$columns['trakt_show_poster'] = esc_html__( 'Poster', 'traktivity' );
+		$columns['show_poster'] = esc_html__( 'Poster', 'traktivity' );
 
 		return $columns;
 	}
@@ -420,12 +420,12 @@ class Traktivity_Data_Storage {
 	public function show_poster_display_in_column( $content, $column_name, $term_id ) {
 		global $feature_groups;
 
-		if ( 'trakt_show_poster' != $column_name ) {
+		if ( 'show_poster' != $column_name ) {
 			return $content;
 		}
 
 		$term_id = absint( $term_id );
-		$show_poster = get_term_meta( $term_id, 'trakt_show_poster', true );
+		$show_poster = get_term_meta( $term_id, 'show_poster', true );
 
 		if ( is_array( $show_poster ) && ! empty( $show_poster ) ) {
 			$content = sprintf(
