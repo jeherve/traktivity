@@ -28,6 +28,10 @@ class Traktivity_Data_Storage {
 		add_action( 'init', array( $this, 'register_show_taxonomy' ), 0 );
 		add_action( 'init', array( $this, 'register_season_taxonomy' ), 0 );
 		add_action( 'init', array( $this, 'register_episode_taxonomy' ), 0 );
+
+		// Term Meta display.
+		add_filter( 'manage_edit-trakt_show_columns', array( $this, 'show_poster_column' ) );
+		add_filter( 'manage_trakt_show_custom_column', array( $this, 'show_poster_display_in_column' ), 10, 3 );
 	}
 
 	/**
@@ -389,6 +393,50 @@ class Traktivity_Data_Storage {
 		);
 		register_taxonomy( 'trakt_episode', array( 'traktivity_event' ), $args );
 
+	}
+
+	/**
+	 * Add a new "Poster" column to the show list in wp-admin.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $columns Array of columns on the screen we hook into.
+	 */
+	public function show_poster_column( $columns ) {
+		$columns['trakt_show_poster'] = esc_html__( 'Poster', 'traktivity' );
+
+		return $columns;
+	}
+
+	/**
+	 * Display the Show Poster on the show list.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $content     Column content.
+	 * @param string $column_name Column name.
+	 * @param int    $term_id     Term ID.
+	 */
+	public function show_poster_display_in_column( $content, $column_name, $term_id ) {
+		global $feature_groups;
+
+		if ( 'trakt_show_poster' != $column_name ) {
+			return $content;
+		}
+
+		$term_id = absint( $term_id );
+		$show_poster = get_term_meta( $term_id, 'trakt_show_poster', true );
+
+		if ( is_array( $show_poster ) && ! empty( $show_poster ) ) {
+			$content = sprintf(
+				'%1$s<img %2$s src="%3$s" />',
+				$content,
+				'style="max-width:100%;"',
+				wp_get_attachment_thumb_url( $show_poster['id'] )
+			);
+		}
+
+		return $content;
 	}
 } // End class.
 new Traktivity_Data_Storage();
