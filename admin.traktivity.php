@@ -16,7 +16,7 @@ function traktivity_menu() {
 	global $traktivity_settings_page;
 	$traktivity_settings_page = add_options_page(
 		esc_html__( 'Trakt.tv', 'traktivity' ),
-		esc_html__( 'Trakt.tv Activity Settings', 'traktivity' ),
+		esc_html__( 'Trakt.tv Activity', 'traktivity' ),
 		'manage_options',
 		'traktivity',
 		'traktivity_do_settings'
@@ -146,7 +146,7 @@ function traktivity_settings_validate( $input ) {
 function traktivity_do_settings() {
 	?>
 	<div id="traktivity_settings" class="wrap">
-		<h1><?php esc_html_e( 'Trakt.tv Activity Settings', 'traktivity' ); ?></h1>
+		<h1><?php esc_html_e( 'Trakt.tv Activity', 'traktivity' ); ?></h1>
 			<form method="post" action="options.php">
 				<?php
 					settings_fields( 'traktivity_settings' );
