@@ -359,39 +359,39 @@ class Traktivity_Calls {
 				// Let's start with movies.
 				if ( 'movie' === $event->type ) {
 
-					$taxonomies['trakt_type'] = esc_html__( 'movie', 'traktivity' );
+					$taxonomies['trakt_type']  = esc_html__( 'movie', 'traktivity' );
 					// Let's capitalize genres.
 					$taxonomies['trakt_genre'] = array_map( 'ucwords', $event->movie->genres );
-					$taxonomies['trakt_year'] = intval( $event->year );
+					$taxonomies['trakt_year']  = intval( $event->year );
 
-					$meta['trakt_movie_id'] = intval( $event->movie->ids->trakt );
-					$meta['imdb_movie_id'] = esc_html( $event->movie->ids->imdb );
-					$meta['tmdb_movie_id'] = esc_html( $event->movie->ids->tmdb );
-					$meta['trakt_runtime'] = intval( $event->movie->runtime );
+					$meta['trakt_movie_id']    = intval( $event->movie->ids->trakt );
+					$meta['imdb_movie_id']     = esc_html( $event->movie->ids->imdb );
+					$meta['tmdb_movie_id']     = esc_html( $event->movie->ids->tmdb );
+					$meta['trakt_runtime']     = intval( $event->movie->runtime );
 
-					$post_excerpt = $event->movie->tagline;
-					$post_content = $event->movie->overview;
+					$post_excerpt              = $event->movie->tagline;
+					$post_content              = $event->movie->overview;
 
 				} elseif ( 'episode' === $event->type ) { // Then let's gather info about series.
 
-					$taxonomies['trakt_type'] = esc_html__( 'TV Series', 'traktivity' );
+					$taxonomies['trakt_type']    = esc_html__( 'TV Series', 'traktivity' );
 					// Let's capitalize genres.
-					$taxonomies['trakt_genre'] = array_map( 'ucwords', $event->show->genres );
-					$taxonomies['trakt_year'] = intval( $event->show->year );
-					$taxonomies['trakt_show'] = esc_html( $event->show->title );
-					$taxonomies['trakt_season'] = intval( $event->episode->season );
+					$taxonomies['trakt_genre']   = array_map( 'ucwords', $event->show->genres );
+					$taxonomies['trakt_year']    = intval( $event->show->year );
+					$taxonomies['trakt_show']    = esc_html( $event->show->title );
+					$taxonomies['trakt_season']  = intval( $event->episode->season );
 					$taxonomies['trakt_episode'] = intval( $event->episode->number );
 
-					$meta['trakt_episode_id'] = intval( $event->episode->ids->trakt );
-					$meta['trakt_show_id'] = intval( $event->show->ids->trakt );
-					$meta['imdb_episode_id'] = esc_html( $event->episode->ids->imdb );
-					$meta['imdb_show_id'] = esc_html( $event->show->ids->imdb );
-					$meta['tmdb_episode_id'] = esc_html( $event->episode->ids->tmdb );
-					$meta['tmdb_show_id'] = esc_html( $event->show->ids->tmdb );
-					$meta['trakt_runtime'] = intval( $event->show->runtime );
+					$meta['trakt_episode_id']    = intval( $event->episode->ids->trakt );
+					$meta['trakt_show_id']       = intval( $event->show->ids->trakt );
+					$meta['imdb_episode_id']     = esc_html( $event->episode->ids->imdb );
+					$meta['imdb_show_id']        = esc_html( $event->show->ids->imdb );
+					$meta['tmdb_episode_id']     = esc_html( $event->episode->ids->tmdb );
+					$meta['tmdb_show_id']        = esc_html( $event->show->ids->tmdb );
+					$meta['trakt_runtime']       = intval( $event->show->runtime );
 
-					$post_excerpt = $event->episode->overview;
-					$post_content = $event->episode->overview;
+					$post_excerpt                = $event->episode->overview;
+					$post_content                = $event->episode->overview;
 
 				} else { // If it's neither a movie nor a tv show, we don't need to log it.
 					continue;
