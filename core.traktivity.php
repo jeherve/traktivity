@@ -496,7 +496,7 @@ class Traktivity_Calls {
 							/**
 							 * Let's search for show taxonomies with empty descriptions.
 							 * This means these shows weren't existing before. We just created them.
-							 * We will consequently give them a description and a show poster.
+							 * We will consequently give them a description, a show poster, and attach a list of IDs that can be used to retrieve more data later.
 							 */
 							if (
 								is_array( $term_id_object )
@@ -522,6 +522,17 @@ class Traktivity_Calls {
 
 									update_term_meta( $term_id, 'trakt_show_poster', $local_image );
 								}
+
+								/**
+								 * Add an array containing the IDs of the show on Trakt, IMDb, and TMDB.
+								 */
+								$show_ids = array(
+									'trakt' => $meta['trakt_show_id'],
+									'imdb'  => $meta['imdb_show_id'],
+									'tmdb'  => $meta['tmdb_show_id'],
+								);
+								update_term_meta( $term_id, 'show_external_ids', $show_ids );
+
 							} // End adding extra info to new shows.
 						}
 					}
