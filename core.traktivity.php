@@ -20,13 +20,11 @@ class Traktivity_Calls {
 	 * Constructor
 	 */
 	function __construct() {
-/*
+		// Check for new events and publish them every hour.
 		add_action( 'traktivity_publish', array( $this, 'publish_event' ) );
 		if ( ! wp_next_scheduled( 'traktivity_publish' ) ) {
 			wp_schedule_event( time(), 'hourly', 'traktivity_publish' );
 		}
-*/
-		add_action( 'wp_head', array( $this, 'publish_event' ) );
 	}
 
 	/**
@@ -133,15 +131,7 @@ class Traktivity_Calls {
 	 */
 	private function get_item_poster( $type, $id, $season_num, $episode_num ) {
 
-		/**
-		 * For testing we will bypass all TMDB calls and return something I got when testing the function below.
-		 */
-		return array(
-			'url' => 'https://image.tmdb.org/t/p/original/tqRO7eGEYZRvupWAVpBAhMqkzEl.jpg',
-			'width' => 1920,
-			'height' => 1080,
-		);
-
+		// Build route.
 		if ( 'movie' === $type ) {
 			$endpoint = sprintf(
 				'movie/%s/images',
@@ -319,7 +309,7 @@ class Traktivity_Calls {
 	/**
 	 * Publish GitHub Event.
 	 *
-	 * @since 1.0
+	 * @since 1.0.0
 	 */
 	public function publish_event() {
 		$trakt_events = $this->get_trakt_activity();
