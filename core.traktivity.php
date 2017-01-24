@@ -444,7 +444,8 @@ class Traktivity_Calls {
 				 * Grab the event image, add it to the post content.
 				 * We can only do this if the user specified a TMDB API Key.
 				 */
-				if ( ! empty( $this->get_option( 'tmdb_api_key' ) ) ) {
+				$tmdb_api_key = $this->get_option( 'tmdb_api_key' );
+				if ( ! empty( $tmdb_api_key ) ) {
 					if ( 'episode' === $event->type ) {
 						$tmdb_id = $meta['tmdb_show_id'];
 						$season_num = $taxonomies['trakt_season'];
