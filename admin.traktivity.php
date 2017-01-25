@@ -14,15 +14,36 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
  */
 function traktivity_menu() {
 	global $traktivity_settings_page;
-	$traktivity_settings_page = add_options_page(
-		esc_html__( 'Trakt.tv', 'traktivity' ),
-		esc_html__( 'Trakt.tv Activity', 'traktivity' ),
+	$traktivity_settings_page = add_submenu_page(
+		'edit.php?post_type=traktivity_event',
+		esc_html__( 'Trakt.tv Activity Settings', 'traktivity' ),
+		esc_html__( 'Settings', 'traktivity' ),
 		'manage_options',
-		'traktivity',
+		'traktivity_settings',
 		'traktivity_do_settings'
 	);
 }
 add_action( 'admin_menu', 'traktivity_menu' );
+
+/**
+ * Add link to the Settings page to the plugin menu.
+ *
+ * @since 1.1.0
+ *
+ * @param array $links Array of links appearing in the Plugins menu for our plugin.
+ */
+function traktivity_plugin_settings_link( $links ) {
+	if ( current_user_can( 'manage_options' ) ) {
+		return array_merge(
+			array( 'settings' => sprintf( '<a href="%s">%s</a>', esc_url( get_admin_url( null, 'edit.php?post_type=traktivity_event&page=traktivity_settings' ) ), __( 'Settings', 'traktivity' ) ) ),
+			array( 'support' => sprintf( '<a href="%s">%s</a>', 'https://wordpress.org/support/plugin/traktivity', __( 'Help', 'traktivity' ) ) ),
+			$links
+		);
+	}
+
+	return $links;
+}
+add_filter( 'plugin_action_links_' . plugin_basename( TRAKTIVITY__PLUGIN_DIR . 'traktivity.php' ), 'traktivity_plugin_settings_link' );
 
 /**
  * Enqueue scripts on Traktivity admin page.
