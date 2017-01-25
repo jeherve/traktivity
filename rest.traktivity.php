@@ -119,9 +119,37 @@ class Traktivity_Api {
 			esc_url_raw( $query_url ),
 			array( 'headers' => $headers )
 		);
-		$response_code = $data['response']['code'];
 
-		return new WP_REST_Response( $response_code, 200 );
+		$code = $data['response']['code'];
+
+		/**
+		 * Tweak our endpoint response message based on the response from Trakt.tv API.
+		 *
+		 * @see http://docs.trakt.apiary.io/#introduction/status-codes
+		 */
+		if ( 403 === $code ) {
+			$message = __( 'Invalid API key or unapproved app.' , 'traktivity' );
+		} elseif ( 429 === $code ) {
+			$message = __( 'Rate Limit Exceeded.', 'traktivity' );
+		} elseif ( '2' === substr( $code, 0, 1 ) ) {
+			$message = __( 'Your API key is working.', 'traktivity' );
+		} elseif ( '5' === substr( $code, 0, 1 ) ) {
+			$message = __( 'Trakt.tv is unavailable right now. Try again later.', 'traktivity' );
+		} else {
+			$message = sprintf(
+				__( 'Something is not working as it should. Please let me know, I\'ll see what I can do to help!
+				<a href="%s">Send me an email</a> and give me as many details as possible about your setup.
+				It would also help if you could let me know your Trakt.tv API key so I can run some tests.
+				Thank you!', 'traktivity' ),
+				'https://jeremy.hu/contact/'
+			);
+		}
+
+		$response = array(
+			'message' => $message,
+			'code'    => (int) $code,
+		);
+		return new WP_REST_Response( $response, 200 );
 	}
 } // End class.
 new Traktivity_Api();
