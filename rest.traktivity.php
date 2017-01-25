@@ -133,6 +133,8 @@ class Traktivity_Api {
 			$message = __( 'Rate Limit Exceeded.', 'traktivity' );
 		} elseif ( '2' === substr( $code, 0, 1 ) ) {
 			$message = __( 'Your API key is working.', 'traktivity' );
+			// Let's overwrite the response code. If it's a success, we don't care what success response code, 200 is good enough.
+			$code = 200;
 		} elseif ( '5' === substr( $code, 0, 1 ) ) {
 			$message = __( 'Trakt.tv is unavailable right now. Try again later.', 'traktivity' );
 		} else {
