@@ -25,6 +25,33 @@ function traktivity_menu() {
 add_action( 'admin_menu', 'traktivity_menu' );
 
 /**
+ * Enqueue scripts on Traktivity admin page.
+ *
+ * @since 1.1.0
+ *
+ * @param int $hook Hook suffix for the current admin page.
+ */
+function traktivity_enqueue_admin_scripts( $hook ) {
+
+	global $traktivity_settings_page;
+
+	// Only add our script to our admin page.
+	if ( $traktivity_settings_page != $hook ) {
+		return;
+	}
+
+	wp_register_script( 'traktivity-settings', plugins_url( 'js/admin-settings.js' , __FILE__ ), array( 'jquery' ), TRAKTIVITY__VERSION );
+	$traktivity_settings = array(
+		'api_url' => esc_url_raw( rest_url() ),
+		'api_nonce' => wp_create_nonce( 'wp_rest' ),
+	);
+	wp_localize_script( 'traktivity-settings', 'traktivity_settings', $traktivity_settings );
+
+	wp_enqueue_script( 'traktivity-settings' );
+}
+add_action( 'admin_enqueue_scripts', 'traktivity_enqueue_admin_scripts' );
+
+/**
  * Create new set of options.
  *
  * @since 1.0.0
