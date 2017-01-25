@@ -95,7 +95,7 @@ function traktivity_app_settings_callback() {
 function traktivity_app_settings_username_callback() {
 	$options = (array) get_option( 'traktivity' );
 	printf(
-		'<input type="text" name="traktivity[username]" value="%s" />',
+		'<input id="username" type="text" name="traktivity[username]" value="%s" />',
 		isset( $options['username'] ) ? esc_attr( $options['username'] ) : ''
 	);
 }
@@ -106,7 +106,7 @@ function traktivity_app_settings_username_callback() {
 function traktivity_app_settings_apikey_callback() {
 	$options = (array) get_option( 'traktivity' );
 	printf(
-		'<input type="text" name="traktivity[api_key]" value="%s" class="regular-text" />',
+		'<input id="trakt_api_key" type="text" name="traktivity[api_key]" value="%s" class="regular-text" />',
 		isset( $options['api_key'] ) ? esc_attr( $options['api_key'] ) : ''
 	);
 }
@@ -117,7 +117,7 @@ function traktivity_app_settings_apikey_callback() {
 function traktivity_app_settings_tmdb_api_key_callback() {
 	$options = (array) get_option( 'traktivity' );
 	printf(
-		'<input type="text" name="traktivity[tmdb_api_key]" value="%s" class="regular-text" />',
+		'<input id="tmdb_api_key" type="text" name="traktivity[tmdb_api_key]" value="%s" class="regular-text" />',
 		isset( $options['tmdb_api_key'] ) ? esc_attr( $options['tmdb_api_key'] ) : ''
 	);
 }
@@ -147,7 +147,7 @@ function traktivity_do_settings() {
 	?>
 	<div id="traktivity_settings" class="wrap">
 		<h1><?php esc_html_e( 'Trakt.tv Activity', 'traktivity' ); ?></h1>
-			<form method="post" action="options.php">
+			<form id="traktivity_settings" method="post" action="options.php">
 				<?php
 					settings_fields( 'traktivity_settings' );
 					/**
