@@ -34,14 +34,18 @@ class Traktivity_Api {
 		 *
 		 * @since 1.1.0
 		 */
-		register_rest_route( 'traktivity/v1', '/connection/(?P<api>[a-z\-]+)', array(
+		register_rest_route( 'traktivity/v1', '/connection/(?P<user>[a-z\-]+)/(?P<trakt>[a-zA-Z0-9-]+)', array(
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'test_trakt_api_connection' ),
 			'permission_callback' => array( $this, 'permissions_check' ),
 			'args'                => array(
-				'api' => array(
+				'user'  => array(
 					'required'          => true,
-					'validate_callback' => array( $this, 'validate_api_key' ),
+					'validate_callback' => array( $this, 'validate_string' ),
+				),
+				'trakt' => array(
+					'required'          => true,
+					'validate_callback' => array( $this, 'validate_string' ),
 				),
 			),
 		) );
@@ -72,7 +76,7 @@ class Traktivity_Api {
 	 *
 	 * @return bool $validated Is the API key in a valid format.
 	 */
-	public function validate_api_key( $param, $request, $key ) {
+	public function validate_string( $param, $request, $key ) {
 		return is_string( $param );
 	}
 
@@ -87,8 +91,9 @@ class Traktivity_Api {
 	 */
 	public function test_trakt_api_connection( $request ) {
 		// Get parameter from request.
-		if ( isset( $data['api'] ) ) {
-			$param = $request['api'];
+		if ( isset( $request['user'], $request['trakt'] ) ) {
+			$user  = $request['user'];
+			$trakt = $request['trakt'];
 		} else {
 			return new WP_Error(
 				'not_found',
@@ -103,11 +108,12 @@ class Traktivity_Api {
 		$headers = array(
 			'Content-Type'      => 'application/json',
 			'trakt-api-version' => TRAKTIVITY__API_VERSION,
-			'trakt-api-key'     => $param,
+			'trakt-api-key'     => esc_html( $trakt ),
 		);
 		$query_url = sprintf(
-			'%1$s/movies/popular',
-			TRAKTIVITY__API_URL
+			'%1$s/users/%2$s/history?limit=1',
+			TRAKTIVITY__API_URL,
+			esc_html( $user )
 		);
 		$data = wp_remote_get(
 			esc_url_raw( $query_url ),
@@ -115,7 +121,7 @@ class Traktivity_Api {
 		);
 		$response_code = $data['response']['code'];
 
-		return new WP_REST_Response( (int) $response_code, 200 );
+		return new WP_REST_Response( $response_code, 200 );
 	}
 } // End class.
 new Traktivity_Api();
