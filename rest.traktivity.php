@@ -97,7 +97,7 @@ class Traktivity_Api {
 		} else {
 			return new WP_Error(
 				'not_found',
-				esc_html__( 'You did not specify a Trakt.tv API key.', 'traktivity' ),
+				esc_html__( 'You did not specify your username or a Trakt.tv API key.', 'traktivity' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -137,7 +137,8 @@ class Traktivity_Api {
 			$message = __( 'Trakt.tv is unavailable right now. Try again later.', 'traktivity' );
 		} else {
 			$message = sprintf(
-				__( 'Something is not working as it should. Please let me know, I\'ll see what I can do to help!
+				__( 'Something is not working as it should. Please double check that both your username and your API keys are correct.
+				If everything looks good, but you still see this message, please let me know, I\'ll see what I can do to help.
 				<a href="%s">Send me an email</a> and give me as many details as possible about your setup.
 				It would also help if you could let me know your Trakt.tv API key so I can run some tests.
 				Thank you!', 'traktivity' ),
