@@ -184,6 +184,9 @@ function traktivity_do_settings() {
 					 */
 					do_action( 'traktivity_start_settings' );
 					do_settings_sections( 'traktivity' );
+				?>
+				<div id="api_test_results" class="notice" style="display:none;"></div>
+				<?php
 					submit_button();
 					/**
 					 * Fires at the bottom of the Settings page.
