@@ -171,6 +171,10 @@ function traktivity_settings_validate( $input ) {
  * @since 1.0.0
  */
 function traktivity_do_settings() {
+	// Is the user allowed to see this page.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
 	?>
 	<div id="traktivity_settings" class="wrap">
 		<h1><?php esc_html_e( 'Trakt.tv Activity', 'traktivity' ); ?></h1>
