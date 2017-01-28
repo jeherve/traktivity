@@ -199,6 +199,14 @@ function traktivity_do_settings() {
 	?>
 	<div id="traktivity_settings" class="wrap">
 		<h1><?php esc_html_e( 'Trakt.tv Activity', 'traktivity' ); ?></h1>
+			<?php
+				/**
+				 * Test connection notice.
+				 *
+				 * @since 1.1.0
+				 */
+				 echo '<div id="api_test_results" class="notice" style="display:none;"></div>';
+			?>
 			<form id="traktivity_settings" method="post" action="options.php">
 				<?php
 					settings_fields( 'traktivity_settings' );
@@ -209,9 +217,6 @@ function traktivity_do_settings() {
 					 */
 					do_action( 'traktivity_start_settings' );
 					do_settings_sections( 'traktivity' );
-				?>
-				<div id="api_test_results" class="notice" style="display:none;"></div>
-				<?php
 					submit_button();
 					/**
 					 * Fires at the bottom of the Settings page.
