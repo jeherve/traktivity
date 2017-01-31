@@ -63,12 +63,16 @@ function traktivity_enqueue_admin_scripts( $hook ) {
 
 	wp_register_script( 'traktivity-settings', plugins_url( 'js/admin-settings.js' , __FILE__ ), array( 'jquery' ), TRAKTIVITY__VERSION );
 	$traktivity_settings = array(
-		'api_url' => esc_url_raw( rest_url() ),
-		'api_nonce' => wp_create_nonce( 'wp_rest' ),
+		'api_url'       => esc_url_raw( rest_url() ),
+		'api_nonce'     => wp_create_nonce( 'wp_rest' ),
+		'empty_message' => esc_html__( 'Please fill in the Trakt.tv Username and Trakt.tv API Key fields first.', 'traktivity' ),
 	);
 	wp_localize_script( 'traktivity-settings', 'traktivity_settings', $traktivity_settings );
 
+	wp_register_style( 'traktivity-admin', plugins_url( 'css/admin-settings.css', __FILE__ ), array(), TRAKTIVITY__VERSION );
+
 	wp_enqueue_script( 'traktivity-settings' );
+	wp_enqueue_style( 'traktivity-admin' );
 }
 add_action( 'admin_enqueue_scripts', 'traktivity_enqueue_admin_scripts' );
 

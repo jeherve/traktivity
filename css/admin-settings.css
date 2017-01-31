@@ -1,0 +1,19 @@
+/*
+ CSS for the Traktivity Admin Settings.
+****************************************/
+
+/* API Connection Test notice. */
+#api_test_results {
+	overflow: auto;
+}
+#api_test_results #submit_connection_test {
+	float: left;
+	margin: 12px 0;
+}
+#api_test_results #test_message {
+	float: left;
+	height: auto;
+	line-height: 28px;
+	margin: 12px;
+	padding: 0 12px 2px;
+}
