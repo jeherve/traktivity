@@ -47,7 +47,7 @@ class Traktivity_Data_Storage {
 		$labels = array(
 			'name'                  => _x( 'Trakt.tv Events', 'Post Type General Name', 'traktivity' ),
 			'singular_name'         => _x( 'Trakt.tv Event', 'Post Type Singular Name', 'traktivity' ),
-			'menu_name'             => __( 'Trakt.tv Events', 'traktivity' ),
+			'menu_name'             => __( 'Traktivity', 'traktivity' ),
 			'name_admin_bar'        => __( 'Trakt.tv Event', 'traktivity' ),
 			'archives'              => __( 'Event Archives', 'traktivity' ),
 			'all_items'             => __( 'All Trakt.tv Events', 'traktivity' ),
