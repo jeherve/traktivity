@@ -85,28 +85,34 @@ function traktivity_options_init() {
 		'traktivity_app_settings',
 		__( 'Trakt.tv Settings', 'traktivity' ),
 		'traktivity_app_settings_callback',
-		'traktivity'
+		'traktivity_settings'
 	);
 	add_settings_field(
 		'username',
-		__( 'Trakt.tv Username.', 'traktivity' ),
+		__( 'Trakt.tv Username', 'traktivity' ),
 		'traktivity_app_settings_username_callback',
-		'traktivity',
+		'traktivity_settings',
 		'traktivity_app_settings'
 	);
 	add_settings_field(
 		'api_key',
 		__( 'Trakt.tv API Key', 'traktivity' ),
 		'traktivity_app_settings_apikey_callback',
-		'traktivity',
+		'traktivity_settings',
 		'traktivity_app_settings'
+	);
+	add_settings_section(
+		'traktivity_tmdb_settings',
+		__( 'The Movie Database Settings', 'traktivity' ),
+		'traktivity_tmdb_settings_callback',
+		'traktivity_settings'
 	);
 	add_settings_field(
 		'tmdb_api_key',
 		__( 'TMDB API Key', 'traktivity' ),
 		'traktivity_app_settings_tmdb_api_key_callback',
-		'traktivity',
-		'traktivity_app_settings'
+		'traktivity_settings',
+		'traktivity_tmdb_settings'
 	);
 }
 add_action( 'admin_init', 'traktivity_options_init' );
@@ -126,7 +132,16 @@ function traktivity_app_settings_callback() {
 	esc_html_e( 'In the Redirect uri field, you can enter your site URL. You can give it both checkin and scrobble permissions.', 'traktivity' );
 	echo '<br/>';
 	esc_html_e( 'Once you created your app, copy the "Client ID" value below. You will also want to enter your Trakt.tv username.', 'traktivity' );
-	echo '<br/>';
+	echo '</p>';
+}
+
+/**
+ * The Movie Database Settings Section.
+ *
+ * @since 1.1.0
+ */
+function traktivity_tmdb_settings_callback() {
+	echo '<p>';
 	esc_html_e( 'To get images for each TV show, episode, and movie, we will also need to use another service, The Movie Database API.', 'traktivity' );
 	echo '</p>';
 }
@@ -201,23 +216,31 @@ function traktivity_do_settings() {
 		<h1><?php esc_html_e( 'Trakt.tv Activity', 'traktivity' ); ?></h1>
 			<?php
 				/**
-				 * Test connection notice.
+				 * Display a connection test button when the username and API key fields are not empty.
 				 *
 				 * @since 1.1.0
 				 */
-				 echo '<div id="api_test_results" class="notice" style="display:none;"></div>';
+				printf(
+					'<div id="api_test_results" class="notice">
+						<button type="button" id="submit_connection_test" class="button button-large">%1$s</button>
+						<p id="test_message" style="display:none;"></p>
+					</div>',
+					esc_html__( 'Test your connection to the Trakt.tv API.', 'traktivity' )
+				);
 			?>
 			<form id="traktivity_settings" method="post" action="options.php">
 				<?php
-					settings_fields( 'traktivity_settings' );
 					/**
 					 * Fires at the top of the Settings page.
 					 *
 					 * @since 1.0.0
 					 */
 					do_action( 'traktivity_start_settings' );
-					do_settings_sections( 'traktivity' );
+
+					settings_fields( 'traktivity_settings' );
+					do_settings_sections( 'traktivity_settings' );
 					submit_button();
+
 					/**
 					 * Fires at the bottom of the Settings page.
 					 *
