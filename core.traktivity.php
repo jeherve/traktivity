@@ -526,12 +526,15 @@ class Traktivity_Calls {
 
 								/**
 								 * Get a poster image for that new show.
+								 * We can only do this if the user specified a TMDB API Key.
 								 */
-								$show_image = $this->get_item_poster( 'show', $meta['tmdb_show_id'], false, false );
-								if ( is_array( $show_image ) && ! empty( $show_image ) ) {
-									$local_image = $this->sideload_image( $show_image['url'], $post_id, $taxonomies['trakt_show'], false );
+								if ( ! empty( $tmdb_api_key ) ) {
+									$show_image = $this->get_item_poster( 'show', $meta['tmdb_show_id'], false, false );
+									if ( is_array( $show_image ) && ! empty( $show_image ) ) {
+										$local_image = $this->sideload_image( $show_image['url'], $post_id, $taxonomies['trakt_show'], false );
 
-									update_term_meta( $term_id, 'show_poster', $local_image );
+										update_term_meta( $term_id, 'show_poster', $local_image );
+									}
 								}
 
 								/**
