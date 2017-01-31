@@ -295,11 +295,28 @@ class Traktivity_Calls {
 				// Store the attachment ID.
 				$post_image['id'] = (int) $post_image_id;
 
+				/**
+				 * If you use the Jetpack plugin and its Photon module,
+				 * the image strings returned will use the Photon URL.
+				 * We don't want that.
+				 * The Photon URL will be added later on on the front end.
+				 *
+				 * @see https://ethitter.com/p/897/
+				 */
+				if ( class_exists( 'Jetpack_Photon' ) ) {
+					remove_filter( 'image_downsize', array( Jetpack_Photon::instance(), 'filter_image_downsize' ) );
+				}
+
 				// Create a div containing a large version of the image, to be added to the post if needed.
 				$post_image['tag'] = sprintf(
 					'<div class="poster-image">%s</div>',
 					wp_get_attachment_image( $post_image_id, 'large' )
 				);
+
+				// Re-enable Photon now that the image URL has been built.
+				if ( class_exists( 'Jetpack_Photon' ) ) {
+					add_filter( 'image_downsize', array( Jetpack_Photon::instance(), 'filter_image_downsize' ), 10, 3 );
+				}
 			}
 		}
 
