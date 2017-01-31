@@ -312,6 +312,9 @@ class Traktivity_Calls {
 	 * @since 1.0.0
 	 */
 	public function publish_event() {
+		// Avoid timeouts during the data import process.
+		set_time_limit( 0 );
+
 		$trakt_events = $this->get_trakt_activity();
 
 		/**
