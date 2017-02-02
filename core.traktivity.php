@@ -382,7 +382,7 @@ class Traktivity_Calls {
 					$taxonomies['trakt_type']  = esc_html__( 'Movie', 'traktivity' );
 					// Let's capitalize genres.
 					$taxonomies['trakt_genre'] = array_map( 'ucwords', $event->movie->genres );
-					$taxonomies['trakt_year']  = intval( $event->year );
+					$taxonomies['trakt_year']  = esc_html( $event->year );
 
 					$meta['trakt_movie_id']    = intval( $event->movie->ids->trakt );
 					$meta['imdb_movie_id']     = esc_html( $event->movie->ids->imdb );
@@ -397,10 +397,10 @@ class Traktivity_Calls {
 					$taxonomies['trakt_type']    = esc_html__( 'TV Series', 'traktivity' );
 					// Let's capitalize genres.
 					$taxonomies['trakt_genre']   = array_map( 'ucwords', $event->show->genres );
-					$taxonomies['trakt_year']    = intval( $event->show->year );
+					$taxonomies['trakt_year']    = esc_html( $event->show->year );
 					$taxonomies['trakt_show']    = esc_html( $event->show->title );
-					$taxonomies['trakt_season']  = intval( $event->episode->season );
-					$taxonomies['trakt_episode'] = intval( $event->episode->number );
+					$taxonomies['trakt_season']  = esc_html( $event->episode->season );
+					$taxonomies['trakt_episode'] = esc_html( $event->episode->number );
 
 					$meta['trakt_episode_id']    = intval( $event->episode->ids->trakt );
 					$meta['trakt_show_id']       = intval( $event->show->ids->trakt );
