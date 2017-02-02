@@ -28,6 +28,7 @@ jQuery( document ).ready( function( $ ) {
 				$( '#test_message' ).show();
 				$( '#test_message' ).html( '<strong>' + response.message + '</strong>' ).show();
 				$( '#api_test_results' ).removeClass( 'notice-error' );
+				$( '#api_test_results' ).removeClass( 'notice-success' );
 				if ( response.code === 200 ) {
 					// Style the notice message box according to the response code.
 					$( '#api_test_results' ).addClass( 'notice-success' );
