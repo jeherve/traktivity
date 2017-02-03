@@ -37,7 +37,7 @@ class Traktivity_Content {
 		}
 
 		// If we have an image in that post, we'll add credits.
-		if ( false !== strpos( $a, '<img' ) ) {
+		if ( false !== strpos( $content, '<img' ) ) {
 			$credits = sprintf(
 				__( 'Image source: <a href="%s">themoviedb.org</a>', 'traktivity' ),
 				esc_url( 'https://www.themoviedb.org/' )
