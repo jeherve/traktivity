@@ -84,6 +84,8 @@ class Traktivity_Data_Storage {
 			'exclude_from_search'   => false,
 			'publicly_queryable'    => true,
 			'capability_type'       => 'page',
+			'map_meta_cap'          => true,
+			'capabilities'          => array( 'create_posts' => 'do_not_allow' ),
 			'menu_icon'             => 'dashicons-format-video',
 			'show_in_rest'          => true,
 		);
