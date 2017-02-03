@@ -38,12 +38,12 @@ class Traktivity_Content {
 
 		// If we have an image in that post, we'll add credits.
 		if ( false !== strpos( $content, '<img' ) ) {
-			$credits = '<div class="tmdb_credits"><p>';
+			$credits = '<div class="tmdb_credits"><p><small>';
 			$credits .= sprintf(
 				__( 'Image source: <a href="%s">themoviedb.org</a>', 'traktivity' ),
 				esc_url( 'https://www.themoviedb.org/' )
 			);
-			$credits .= '</p></div>';
+			$credits .= '</small></p></div>';
 
 			/**
 			 * Filter the sentence used in the credits.
