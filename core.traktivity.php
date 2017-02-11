@@ -618,7 +618,7 @@ class Traktivity_Calls {
 		if ( empty( $status ) ) {
 			$status = array(
 				'status' => 'in_progress',
-				'pages'  => $this->get_trakt_activity( array(), true ),
+				'pages'  => (int) $this->get_trakt_activity( array(), true ),
 			);
 			// Update our option.
 			$this->update_option( 'full_sync', $status );
