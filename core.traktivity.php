@@ -47,6 +47,23 @@ class Traktivity_Calls {
 	}
 
 	/**
+	 * Save option in our array of 'traktivity' options.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string       $name  Option name.
+	 * @param string|array $value Option value.
+	 */
+	private function update_option( $name, $value ) {
+		$options = get_option( 'traktivity' );
+
+		if ( isset( $value ) && ! empty( $value ) ) {
+			$options[ $name ] = $value;
+			update_option( 'traktivity', $options );
+		}
+	}
+
+	/**
 	 * Remote call to get data from Trakt's API.
 	 *
 	 * @since 1.0.0
@@ -57,10 +74,10 @@ class Traktivity_Calls {
 	 *	@int int page  Number of page of results to be returned. Accepts integers.
 	 *	@int int limit Number of results to return per page. Accepts integers.
 	 * }
-	 *
-	 * @return null|array
+	 * @param bool $test Optional. Pass true to only make a test request, and return the number of event pages.
+	 * @return null|array|int
 	 */
-	private function get_trakt_activity( $args = array() ) {
+	private function get_trakt_activity( $args = array(), $test = false ) {
 
 		// Start with an empty response.
 		$response_body = array();
@@ -105,6 +122,10 @@ class Traktivity_Calls {
 			|| empty( $data['body'] )
 		) {
 			return;
+		}
+
+		if ( isset( $test ) && true === $test ) {
+			return (int) wp_remote_retrieve_header( $data, 'X-Pagination-Page-Count' );
 		}
 
 		$response_body = json_decode( $data['body'] );
@@ -327,12 +348,19 @@ class Traktivity_Calls {
 	 * Publish Trakt.tv Event.
 	 *
 	 * @since 1.0.0
+	 *
+	 * @param array $args {
+	 * 	Optional. Array of possible query args for the call to Trakt.tv API.
+	 *
+	 *	@int int page  Number of page of results to be returned. Accepts integers.
+	 *	@int int limit Number of results to return per page. Accepts integers.
+	 * }
 	 */
-	public function publish_event() {
+	public function publish_event( $args ) {
 		// Avoid timeouts during the data import process.
 		set_time_limit( 0 );
 
-		$trakt_events = $this->get_trakt_activity();
+		$trakt_events = $this->get_trakt_activity( $args, false );
 
 		/**
 		 * Only go through the event list if we have valid event array.
@@ -558,5 +586,67 @@ class Traktivity_Calls {
 
 	} // End publish_event().
 
+	/**
+	 * Get all past Trakt.tv events from all Trakt.tv pages.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return bool $done Returns true when done.
+	 */
+	public function full_sync() {
+		/**
+		 * First, let's get info about the sync.
+		 *
+		 * The 'full_sync' option can be one of 2 things:
+		 * 1. Empty string -> Option doesn't exist, Sync was never run before. Sync will start and an option will be set.
+		 * 2. Array $args {
+		 * 		@string string status Sync Status. Can be 'in_progress' or 'done'.
+		 *		@int    int    pages  Number of pages left to sync.
+		 * }
+		 */
+		$status = $this->get_option( 'full_sync' );
+
+		// If sync already ran successfully, we can stop here.
+		if ( ! empty( $status ) && isset( $status['status'] ) && 'done' === $status['status'] ) {
+			return true;
+		}
+
+		/**
+		 * If the option doesn't exist, that means we never ran sync before.
+		 * Let's get started by changing the status to 'in_progress', and get some data.
+		 */
+		if ( empty( $status ) ) {
+			$status = array(
+				'status' => 'in_progress',
+				'pages'  => $this->get_trakt_activity( array(), true ),
+			);
+			// Update our option.
+			$this->update_option( 'full_sync', $status );
+		}
+
+		// Set WP_IMPORTING to avoid triggering things like subscription emails.
+		defined( 'WP_IMPORTING' ) or define( 'WP_IMPORTING', true );
+
+		// let's start looping.
+		do {
+			$args = array(
+				'page'  => $status['pages'],
+				'limit' => 10,
+			);
+			$trakt_events = $this->publish_event( $args );
+
+			// One page less to go.
+			$status['pages']--;
+		} while ( 'in_progress' === $status['status'] && 0 != $status['pages'] );
+
+		// We're done. Save options.
+		$status = array(
+			'status' => 'done',
+			'pages'  => 0,
+		);
+		$this->update_option( 'full_sync', $status );
+
+		return true;
+	}
 } // End class.
 new Traktivity_Calls();
