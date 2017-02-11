@@ -127,9 +127,21 @@ add_action( 'admin_init', 'traktivity_options_init' );
  * @since 1.0.0
  */
 function traktivity_app_settings_callback() {
+	/**
+	 * Display a connection test button when the username and API key fields are not empty.
+	 *
+	 * @since 1.1.0
+	 */
+	printf(
+		'<div id="api_test_results">
+			<button type="button" id="submit_connection_test" class="button button-large">%1$s</button>
+			<p id="test_message" style="display:none;"></p>
+		</div>',
+		esc_html__( 'Test your connection to the Trakt.tv API.', 'traktivity' )
+	);
 	echo '<p>';
 	printf(
-		__( 'To use the plugin, you will need to create an API application on Trakt.tv first. <a href="%1$s">click here</a> to create that app.', 'traktivity' ),
+		__( 'To use the plugin, you will need to create an API application on Trakt.tv first. <a href="%1$s">Click here</a> to create that app.', 'traktivity' ),
 		esc_url( 'https://trakt.tv/oauth/applications/new' )
 	);
 	echo '<br/>';
@@ -146,7 +158,17 @@ function traktivity_app_settings_callback() {
  */
 function traktivity_tmdb_settings_callback() {
 	echo '<p>';
-	esc_html_e( 'To get images for each TV show, episode, and movie, we will also need to use another service, The Movie Database API.', 'traktivity' );
+	printf(
+		__( 'To get images for each TV show, episode, and movie, we will also need to use another service, <a href="%s">The Movie DB API</a>.', 'traktivity'),
+		esc_url( 'https://www.themoviedb.org/' )
+	);
+	echo '</p><p>';
+	esc_html_e( 'This is optional. If you do not want to store and display images about the things you watch on your site, you can ignore this.', 'traktivity' );
+	echo '</p><p>';
+	printf(
+		__( 'To register for an API key, <a href="%s">sign up and/or login to your account page on TMDb</a> and click the "API" link in the left hand sidebar. Once your application is approved, copy the contents of the "API Key (v3 auth)" field, and paste it below.', 'traktivity' ),
+		esc_url( 'https://www.themoviedb.org/login' )
+	);
 	echo '</p>';
 }
 
@@ -219,17 +241,15 @@ function traktivity_do_settings() {
 	<div id="traktivity_settings" class="wrap">
 		<h1><?php esc_html_e( 'Trakt.tv Activity', 'traktivity' ); ?></h1>
 			<?php
-				/**
-				 * Display a connection test button when the username and API key fields are not empty.
-				 *
-				 * @since 1.1.0
-				 */
 				printf(
-					'<div id="api_test_results" class="notice">
-						<button type="button" id="submit_connection_test" class="button button-large">%1$s</button>
-						<p id="test_message" style="display:none;"></p>
-					</div>',
-					esc_html__( 'Test your connection to the Trakt.tv API.', 'traktivity' )
+					'
+					<div class="tagline"><span>%1$s</span></div>
+					<p><strong>%2$s</strong></p>
+					<p>%3$s</p>
+					',
+					esc_html__( 'Log your activity in front of the screen.', 'traktivity' ),
+					esc_html__( "Do you like to go to the movies and would like to remember what movies you saw, and when? Traktivity is for you! Are you a TV addict, and want to keep track of all the shows you've binge-watched? Traktivity is for you!", 'traktivity' ),
+					esc_html__( "This plugin relies on 2 external services to gather information about the things you watch: Trakt.tv is where you'll be marking shows or movies as watched, and The Movie DB is where the plugin will go grab images for each one of those shows or movies.", 'traktivity' )
 				);
 			?>
 			<form id="traktivity_settings" method="post" action="options.php">
@@ -253,7 +273,39 @@ function traktivity_do_settings() {
 					do_action( 'traktivity_end_settings' );
 				?>
 			</form>
+			<?php
+				printf(
+					'<h2>%s</h2>',
+					esc_html__( 'FAQ', 'traktivity' )
+				);
 
+				printf(
+					'<p><strong>%s</strong></p>',
+					esc_html__( 'I am all set! What now?', 'traktivity' )
+				);
+				printf(
+					'<p>%s</p>',
+					esc_html__( 'Now that you have added an API from each service, Traktivity will start monitoring your Trakt.tv account. Every hour, it will check your profile to see if you have watched something new. If you have, it will be added to your WordPress site. You will see a new entry under "Trakt.tv Events" in this menu, with tons of details about what you have watched.', 'traktivity' )
+				);
+
+				printf(
+					'<p><strong>%s</strong></p>',
+					esc_html__( 'Can I support Trakt.tv? That service is awesome!', 'traktivity' )
+				);
+				printf(
+					__( '<p>It is! If you\'d like to support the Trakt.tv service, you can sign up for a VIP account <a href="%s">here</a>. By doing so you will get rid of the ads and unlock lots of VIP features!</p>', 'traktivity' ),
+					esc_url( 'https://trakt.tv/vip' )
+				);
+
+				printf(
+					'<h2>%s</h2>',
+					esc_html__( 'Credits', 'traktivity' )
+				);
+				printf(
+					__( 'Traktivity is not endorsed or certified by TMDb or Trakt.tv. It is just a little plugin developed by <a href="">a TV addict</a>, just like you. :)', 'traktivity' ),
+					esc_url( 'https://jeremy.hu' )
+				);
+			?>
 		<?php
 		/**
 		 * Fires at the bottom of the Settings page, after the form.

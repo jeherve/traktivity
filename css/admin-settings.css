@@ -2,18 +2,65 @@
  CSS for the Traktivity Admin Settings.
 ****************************************/
 
-/* API Connection Test notice. */
-#api_test_results {
-	overflow: auto;
+/* Page */
+
+.wrap {
+	max-width: 800px;
 }
+
+/* Header */
+
+.tagline {
+	background-image: url('../img/watching.jpg');
+	margin: 0.8em 0;
+	position: relative;
+	width: 800px;
+	height: 192px;
+}
+
+.tagline span {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	background: rgba(0, 0, 0, 0.75);
+	color: #fff;
+	font-size: 1.5em;
+	margin: 0;
+	padding: 0.4em 0.5em;
+}
+
+/* API Connection Test notice. */
+
+#api_test_results {
+	background: #fff;
+	border-left: 4px solid #fff;
+	-webkit-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .1);
+	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .1);
+	margin: 5px 0 15px;
+	overflow: auto;
+	padding: 1px 12px;
+}
+
 #api_test_results #submit_connection_test {
 	float: left;
 	margin: 12px 0;
 }
+
 #api_test_results #test_message {
 	float: left;
 	height: auto;
 	line-height: 28px;
 	margin: 12px;
 	padding: 0 12px 2px;
+}
+
+
+/* Message colors */
+
+.notice-success {
+	border-left-color: #46b450 !important;
+}
+
+.notice-error {
+	border-left-color: #dc3232 !important;
 }
