@@ -179,10 +179,9 @@ class Traktivity_Api {
 
 		// Return an error if we have no API Keys to run an import.
 		if ( ! isset( $options['username'], $options['api_key'] ) ) {
-			return new WP_Error(
-				'not_found',
+			return new WP_REST_Response(
 				esc_html__( 'You did not specify your username or a Trakt.tv API key.', 'traktivity' ),
-				array( 'status' => 404 )
+				200
 			);
 		}
 
@@ -191,10 +190,9 @@ class Traktivity_Api {
 			isset( $options['full_sync'], $options['full_sync']['status'] )
 			&& 'done' === $options['full_sync']['status']
 		) {
-			return new WP_Error(
-				'done',
-				esc_html__( 'Synchronization is already complete.', 'traktivity' ),
-				array( 'status' => 404 )
+			return new WP_REST_Response(
+				esc_html__( 'Synchronization is complete.', 'traktivity' ),
+				200
 			);
 		}
 
@@ -203,10 +201,9 @@ class Traktivity_Api {
 			isset( $options['full_sync'], $options['full_sync']['status'] )
 			&& 'in_progress' === $options['full_sync']['status']
 		) {
-			return new WP_Error(
-				'in_progress',
-				esc_html__( 'Synchronization is already in progress. Give it some time!', 'traktivity' ),
-				array( 'status' => 404 )
+			return new WP_REST_Response(
+				esc_html__( 'Synchronization is in progress. Give it some time!', 'traktivity' ),
+				200
 			);
 		}
 
