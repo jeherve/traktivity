@@ -25,6 +25,9 @@ class Traktivity_Calls {
 		if ( ! wp_next_scheduled( 'traktivity_publish' ) ) {
 			wp_schedule_event( time(), 'hourly', 'traktivity_publish' );
 		}
+
+		// Trigger a single event to launch the full sync loop.
+		add_action( 'traktivity_full_sync', array( $this, 'full_sync' ) );
 	}
 
 	/**

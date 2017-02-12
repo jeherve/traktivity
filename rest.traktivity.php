@@ -210,9 +210,10 @@ class Traktivity_Api {
 			);
 		}
 
-		// No errors? Trigger sync.
-		$trakt_calls = new Traktivity_Calls;
-		$trakt_calls->full_sync();
+		// No errors? Schedule a single event that will start in 2 seconds and trigger the full sync.
+		if ( ! wp_next_scheduled( 'traktivity_full_sync' ) ) {
+			wp_schedule_single_event( time(), 'traktivity_full_sync' );
+		}
 
 		return new WP_REST_Response(
 			sprintf(
