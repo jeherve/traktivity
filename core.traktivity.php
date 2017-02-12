@@ -307,7 +307,11 @@ class Traktivity_Calls {
 					array_shift( $images );
 
 					// Do we have a post object left, meaning our upload above worked? Let's take that post's ID.
-					$post_image_id = $images[0]->ID;
+					if ( isset( $images[0] ) ) {
+						$post_image_id = $images[0]->ID;
+					} else {
+						return $post_image;
+					}
 				}
 
 				/**
