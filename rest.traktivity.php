@@ -213,7 +213,6 @@ class Traktivity_Api {
 		// No errors? Trigger sync.
 		$trakt_calls = new Traktivity_Calls;
 		$trakt_calls->full_sync();
-		//Traktivity_Calls::full_sync();
 
 		return new WP_REST_Response(
 			sprintf(
