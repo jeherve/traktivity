@@ -49,6 +49,17 @@ class Traktivity_Api {
 				),
 			),
 		) );
+
+		/**
+		 * Check Sync status for Traktivity.
+		 *
+		 * @since 1.1.0
+		 */
+		register_rest_route( 'traktivity/v1', '/sync', array(
+			'methods'             => WP_REST_Server::EDITABLE,
+			'callback'            => array( $this, 'trigger_sync' ),
+			'permission_callback' => array( $this, 'permissions_check' ),
+		) );
 	}
 
 	/**
@@ -152,6 +163,63 @@ class Traktivity_Api {
 			'code'    => (int) $code,
 		);
 		return new WP_REST_Response( $response, 200 );
+	}
+
+	/**
+	 * Trigger a full synchronization of all past events.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return WP_REST_Response $response Response from the Sync function.
+	 */
+	public function trigger_sync( $request ) {
+		$options = (array) get_option( 'traktivity' );
+
+		// Return an error if we have no API Keys to run an import.
+		if ( ! isset( $options['username'], $options['api_key'] ) ) {
+			return new WP_Error(
+				'not_found',
+				esc_html__( 'You did not specify your username or a Trakt.tv API key.', 'traktivity' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// Return an error if Synchronization is already complete. No need to run it again.
+		if (
+			isset( $options['full_sync'], $options['full_sync']['status'] )
+			&& 'done' === $options['full_sync']['status']
+		) {
+			return new WP_Error(
+				'done',
+				esc_html__( 'Synchronization is already complete.', 'traktivity' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// Return an error if Synchronization is currently in progress. Let's let it finish.
+		if (
+			isset( $options['full_sync'], $options['full_sync']['status'] )
+			&& 'in_progress' === $options['full_sync']['status']
+		) {
+			return new WP_Error(
+				'in_progress',
+				esc_html__( 'Synchronization is already in progress. Give it some time!', 'traktivity' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// No errors? Trigger sync.
+		Traktivity_Calls::full_sync();
+
+		return new WP_REST_Response(
+			sprintf(
+				__( 'Synchronization has started. Give it a bit of time now. You can monitor progress <a href="%s">here</a>.', 'traktivity' ),
+				esc_url( get_admin_url( null, 'edit.php?post_type=traktivity_event' ) )
+			),
+			200
+		);
 	}
 } // End class.
 new Traktivity_Api();
