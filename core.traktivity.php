@@ -356,7 +356,7 @@ class Traktivity_Calls {
 	 *	@int int limit Number of results to return per page. Accepts integers.
 	 * }
 	 */
-	public function publish_event( $args ) {
+	public function publish_event( $args = array() ) {
 		// Avoid timeouts during the data import process.
 		set_time_limit( 0 );
 
