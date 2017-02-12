@@ -51,7 +51,8 @@ jQuery( document ).ready( function( $ ) {
 			}
 		}).done( function ( response ) {
 			$( '#full_sync' ).attr( 'value', traktivity_settings.progress_message );
-			console.log( response );
+			$( '#full_sync' ).addClass( 'disabled' );
+			$( '#full_sync_details' ).html( response ).show();
 		});
 	});
 });

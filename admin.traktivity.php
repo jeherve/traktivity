@@ -259,6 +259,8 @@ function traktivity_sync_settings_full_sync_callback() {
 			'<input id="full_sync" type="button" name="traktivity[full_sync]" value="%s" class="button button-secondary" />',
 			esc_html__( 'Start synchronization', 'traktivity' )
 		);
+		// Hidden paragraph where we will add the Sync status via JS, depending on the response from the sync endpoint.
+		echo '<p id="full_sync_details" style="display:none;"></p>';
 	}
 }
 
