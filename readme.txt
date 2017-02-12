@@ -41,6 +41,16 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 
 == Changelog ==
 
+= 1.1.0 =
+Release Date:
+
+* Add more information to our Settings page.
+* Implement system to check API credentials from the Settings page.
+* Add Image Credits to the bottom of our posts.
+* Style the settings page, and add more helpful information to get started.
+* Move the Settings page under the Traktivity menu.
+* Add system to synchronize all past events logged on Trakt.tv.
+
 = 1.0.0 =
 Release Date: January 23, 2017
 
