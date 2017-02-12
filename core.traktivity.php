@@ -600,8 +600,8 @@ class Traktivity_Calls {
 		 * The 'full_sync' option can be one of 2 things:
 		 * 1. Empty string -> Option doesn't exist, Sync was never run before. Sync will start and an option will be set.
 		 * 2. Array $args {
-		 * 		@string string status Sync Status. Can be 'in_progress' or 'done'.
-		 *		@int    int    pages  Number of pages left to sync.
+		 * 		string status Sync Status. Can be 'in_progress' or 'done'.
+		 *		int    pages  Number of pages left to sync.
 		 * }
 		 */
 		$status = $this->get_option( 'full_sync' );
