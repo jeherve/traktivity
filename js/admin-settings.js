@@ -39,4 +39,19 @@ jQuery( document ).ready( function( $ ) {
 			}
 		});
 	});
+
+	// When clicking on the Full sync button, start sync.
+	$( '#full_sync' ).on( 'click', function( e ) {
+		// Make a query to our custom endpoint to launch sync.
+		$.ajax({
+			url: traktivity_settings.api_url + 'traktivity/v1/sync',
+			method: 'POST',
+			beforeSend : function( xhr ) {
+				xhr.setRequestHeader( 'X-WP-Nonce', traktivity_settings.api_nonce );
+			}
+		}).done( function ( response ) {
+			$( '#full_sync' ).attr( 'value', traktivity_settings.progress_message );
+			console.log( response );
+		});
+	});
 });

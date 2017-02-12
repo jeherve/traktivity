@@ -63,9 +63,10 @@ function traktivity_enqueue_admin_scripts( $hook ) {
 
 	wp_register_script( 'traktivity-settings', plugins_url( 'js/admin-settings.js' , __FILE__ ), array( 'jquery' ), TRAKTIVITY__VERSION );
 	$traktivity_settings = array(
-		'api_url'       => esc_url_raw( rest_url() ),
-		'api_nonce'     => wp_create_nonce( 'wp_rest' ),
-		'empty_message' => esc_html__( 'Please fill in the Trakt.tv Username and Trakt.tv API Key fields first.', 'traktivity' ),
+		'api_url'          => esc_url_raw( rest_url() ),
+		'api_nonce'        => wp_create_nonce( 'wp_rest' ),
+		'empty_message'    => esc_html__( 'Please fill in the Trakt.tv Username and Trakt.tv API Key fields first.', 'traktivity' ),
+		'progress_message' => esc_html__( 'In Progress', 'traktivity' ),
 	);
 	wp_localize_script( 'traktivity-settings', 'traktivity_settings', $traktivity_settings );
 
@@ -117,6 +118,19 @@ function traktivity_options_init() {
 		'traktivity_app_settings_tmdb_api_key_callback',
 		'traktivity_settings',
 		'traktivity_tmdb_settings'
+	);
+	add_settings_section(
+		'traktivity_sync_settings',
+		__( 'Full Sync', 'traktivity' ),
+		'traktivity_sync_settings_callback',
+		'traktivity_settings'
+	);
+	add_settings_field(
+		'full_sync',
+		__( 'Sync status', 'traktivity' ),
+		'traktivity_sync_settings_full_sync_callback',
+		'traktivity_settings',
+		'traktivity_sync_settings'
 	);
 }
 add_action( 'admin_init', 'traktivity_options_init' );
@@ -173,6 +187,17 @@ function traktivity_tmdb_settings_callback() {
 }
 
 /**
+ * Full Sync Settings Section.
+ *
+ * @since 1.1.0
+ */
+function traktivity_sync_settings_callback() {
+	echo '<p>';
+	esc_html_e( "By default, Traktivity only gathers data about the last 10 things you've watched, and then automatically logs all future things you'll watch. This section will allow you to perform a full synchronization of all the things you've ever watched.", 'traktivity' );
+	echo '</p>';
+}
+
+/**
  * Trakt.tv App Settings option callbacks.
  *
  * @since 1.0.0
@@ -209,6 +234,32 @@ function traktivity_app_settings_tmdb_api_key_callback() {
 		'<input id="tmdb_api_key" type="text" name="traktivity[tmdb_api_key]" value="%s" class="regular-text" />',
 		isset( $options['tmdb_api_key'] ) ? esc_attr( $options['tmdb_api_key'] ) : ''
 	);
+}
+
+/**
+ * Full Sync callback.
+ */
+function traktivity_sync_settings_full_sync_callback() {
+	$options = (array) get_option( 'traktivity' );
+	if ( isset( $options['full_sync'], $options['full_sync']['status'] ) ) {
+		if ( 'done' === $options['full_sync']['status'] ) {
+			printf(
+				__( 'All events have already been synchronized. Check them <a href="%s">here</a>.', 'traktivity' ),
+				esc_url( get_admin_url( null, 'edit.php?post_type=traktivity_event' ) )
+			);
+		} else {
+			printf(
+				__( 'Synchronization in progress. There are still %d pages to process.', 'traktivity' ),
+				absint( $options['full_sync']['pages'] )
+			);
+		}
+	} else {
+		// we push to start the sync here.
+		printf(
+			'<input id="full_sync" type="button" name="traktivity[full_sync]" value="%s" class="button button-secondary" />',
+			esc_html__( 'Start synchronization', 'traktivity' )
+		);
+	}
 }
 
 /**
