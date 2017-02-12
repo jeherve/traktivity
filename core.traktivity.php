@@ -77,7 +77,8 @@ class Traktivity_Calls {
 	 *	@int int page  Number of page of results to be returned. Accepts integers.
 	 *	@int int limit Number of results to return per page. Accepts integers.
 	 * }
-	 * @param bool $test Optional. Pass true to only make a test request, and return the number of event pages.
+	 * @param bool  $test Optional. Pass true to only make a test request, and return the number of event pages.
+	 *
 	 * @return null|array|int
 	 */
 	private function get_trakt_activity( $args = array(), $test = false ) {
