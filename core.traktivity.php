@@ -583,6 +583,10 @@ class Traktivity_Calls {
 								);
 								update_term_meta( $term_id, 'show_external_ids', $show_ids );
 
+								/**
+								 * Add the network of that show.
+								 */
+								update_term_meta( $term_id, 'show_network', esc_html( $event->show->network ) );
 							} // End adding extra info to new shows.
 						}
 					}
