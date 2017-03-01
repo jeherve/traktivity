@@ -491,6 +491,9 @@ class Traktivity_Calls {
 				// Create our post.
 				$post_id = wp_insert_post( $event_args );
 
+				// Record stats.
+				$this->record_stats( $post_id, $meta, $event->watched_at );
+
 				/**
 				 * Grab the event image, add it to the post content.
 				 * We can only do this if the user specified a TMDB API Key.
@@ -707,6 +710,45 @@ class Traktivity_Calls {
 		$this->update_option( 'full_sync', $status );
 
 		return true;
+	}
+
+	/**
+	 * Record Stats.
+	 *
+	 * While all data is attached to each individual post and can then easily be queried,
+	 * We also store some overall data for easy access later on, that won't need us running complicated queries.
+	 *
+	 * @since 2.2.0
+	 *
+	 * @param string $post_id  Post ID.
+	 * @param array  $meta     Array of Meta data added to the post.
+	 * @param string $date     Event date.
+	 */
+	private function record_stats( $post_id, $meta, $date ) {
+		$stats = get_option( 'traktivity_stats' );
+
+		// If that's the first time we're running this function, let's start with an empty object of stats.
+		if ( ! is_object( $stats ) ) {
+			$stats = new stdClass();
+		}
+
+	   // What do I need to store?
+	   /*
+	   Some ideas:
+	   http://docs.trakt.apiary.io/#reference/users/stats/get-stats
+	   https://developer.wordpress.com/docs/api/1.1/get/sites/%24site/stats/
+	   http://wpengineer.com/968/wordpress-working-with-options/
+	   - stats.
+		   time
+			   total
+			   year
+				   2016
+					   total
+					   01
+
+	   */
+
+		update_option( 'traktivity_stats', $stats );
 	}
 } // End class.
 new Traktivity_Calls();

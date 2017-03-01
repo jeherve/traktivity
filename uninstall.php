@@ -15,6 +15,7 @@ if (
 
 // Delete option.
 delete_option( 'traktivity' );
+delete_option( 'traktivity_stats' );
 
 // Remove scheduled API calls.
 wp_clear_scheduled_hook( 'traktivity_publish' );

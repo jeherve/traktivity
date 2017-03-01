@@ -99,6 +99,16 @@ class Traktivity_Api {
 			'callback'            => array( $this, 'trigger_sync' ),
 			'permission_callback' => array( $this, 'permissions_check' ),
 		) );
+
+		/**
+		 * Traktivity Dashboard.
+		 *
+		 * @since 1.1.0
+		 */
+		register_rest_route( 'traktivity/v1', '/stats', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'dashboard' ),
+		) );
 	}
 
 	/**
@@ -412,6 +422,24 @@ class Traktivity_Api {
 			array(
 				'status' => 500,
 			)
+		);
+	}
+
+	/**
+	 * Get stats from the Stats option.
+	 *
+	 * @since 2.2.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return WP_REST_Response $response Response with all stats.
+	 */
+	public function stats( $request ) {
+		$stats = get_option( 'traktivity_stats' );
+
+		return new WP_REST_Response(
+			$stats,
+			200
 		);
 	}
 } // End class.
