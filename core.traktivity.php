@@ -457,16 +457,7 @@ class Traktivity_Calls {
 				if ( 'movie' === $event->type ) {
 					$title = $event->movie->title;
 				} elseif ( 'episode' === $event->type ) {
-					/**
-					 * For TV Shows, it might be best to append the show's name to the episode name.
-					 * This way, slugs won't conflict when 2 shows have an episode that has the same name.
-					 * (think common episode names like "Pilot" for example.)
-					 */
-					$title = sprintf(
-						'%1$s -- %2$s',
-						$event->episode->title,
-						$event->show->title
-					);
+					$title = $event->episode->title;
 				} else {
 					continue;
 				}
