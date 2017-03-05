@@ -355,7 +355,7 @@ function traktivity_do_settings() {
 					esc_html__( 'Credits', 'traktivity' )
 				);
 				printf(
-					__( 'Traktivity is not endorsed or certified by TMDb or Trakt.tv. It is just a little plugin developed by <a href="">a TV addict</a>, just like you. :)', 'traktivity' ),
+					__( 'Traktivity is not endorsed or certified by TMDb or Trakt.tv. It is just a little plugin developed by <a href="%s">a TV addict</a>, just like you. :)', 'traktivity' ),
 					esc_url( 'https://jeremy.hu' )
 				);
 			?>
