@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 Requires at least: 4.7
 Tested up to: 4.7
 License: GPLv2
@@ -41,6 +41,11 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 == Frequently Asked Questions ==
 
 == Changelog ==
+
+= 1.1.3 =
+Release Date: March 5, 2017
+
+* Make sure Year is properly recorded for movies.
 
 = 1.1.2 =
 Release Date: March 5, 2017

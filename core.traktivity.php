@@ -418,7 +418,7 @@ class Traktivity_Calls {
 					$taxonomies['trakt_type']  = esc_html__( 'Movie', 'traktivity' );
 					// Let's capitalize genres.
 					$taxonomies['trakt_genre'] = array_map( 'ucwords', $event->movie->genres );
-					$taxonomies['trakt_year']  = esc_html( $event->year );
+					$taxonomies['trakt_year']  = esc_html( $event->movie->year );
 
 					$meta['trakt_movie_id']    = intval( $event->movie->ids->trakt );
 					$meta['imdb_movie_id']     = esc_html( $event->movie->ids->imdb );
