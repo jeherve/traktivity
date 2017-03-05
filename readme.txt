@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 Requires at least: 4.7
 Tested up to: 4.7
 
@@ -42,7 +42,7 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 == Changelog ==
 
 = 1.1.0 =
-Release Date:
+Release Date: March 5, 2017
 
 * Add more information to our Settings page.
 * Implement system to check API credentials from the Settings page.
