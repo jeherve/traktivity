@@ -4,7 +4,7 @@ Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
 Stable tag: 1.1.3
 Requires at least: 4.7
 Tested up to: 4.7
-License: GPLv2
+License: GPLv2+
 
 Are you a TV addict, and want to keep track of all the shows you've binge-watched and movies you saw? Traktivity is for you!
 

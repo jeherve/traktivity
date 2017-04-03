@@ -66,10 +66,14 @@ class Traktivity {
 		require_once( TRAKTIVITY__PLUGIN_DIR . 'cpt.traktivity.php' );
 		require_once( TRAKTIVITY__PLUGIN_DIR . 'rest.traktivity.php' );
 		require_once( TRAKTIVITY__PLUGIN_DIR . 'content.traktivity.php' );
+
 		// Settings panel.
 		if ( is_admin() ) {
 			require_once( TRAKTIVITY__PLUGIN_DIR . 'admin.traktivity.php' );
 		}
+
+		// Widgets.
+		require_once( TRAKTIVITY__PLUGIN_DIR . 'widgets/list-events.php' );
 	}
 
 	/**
