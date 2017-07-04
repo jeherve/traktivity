@@ -310,8 +310,8 @@ class Traktivity_List_Widget extends WP_Widget {
 
 	/**
 	 * Custom event title for TV episodes.
-	 * Episode titles often aren't really well know. When the event type is TV series,
-	 * we'll prepend the show title.
+	 * Episode titles often aren't really well known. When the event type is TV series,
+	 * we'll add a new div including the show title, as well as the season and episode numbers.
 	 *
 	 * @since 1.2.0
 	 *
@@ -320,9 +320,87 @@ class Traktivity_List_Widget extends WP_Widget {
 	 */
 	function custom_tv_event_title( $event_title, $post_id ) {
 		if ( has_term( 'TV Series', 'trakt_type', $post_id ) ) {
-			return 'bla';
+			// Show title.
+			$show_title_terms = get_the_terms( $post_id , 'trakt_show' );
+			if ( $show_title_terms && ! is_wp_error( $show_title_terms ) ) {
+				// We only want to keep one element.
+				$first_show = true;
+				foreach ( $show_title_terms as $term ) {
+					if ( $first_show ) {
+						$show_title = sprintf(
+							'<a href="%1$s">%2$s</a>',
+							esc_url( get_term_link( $term->term_id, 'trakt_show' ) ),
+							esc_html( $term->name )
+						);
+						// Other shows won't be the first ones, we won't need them.
+						$first_show = false;
+					}
+				}
+			} else {
+				$show_title = '';
+			}
+
+			// Season number.
+			$show_season_terms = get_the_terms( $post_id , 'trakt_season' );
+			if ( $show_season_terms && ! is_wp_error( $show_season_terms ) ) {
+				// We only want to keep one element.
+				$first_season_num = true;
+				foreach ( $show_season_terms as $term ) {
+					if ( $first_season_num ) {
+						$season_number = $term->name;
+						// Other shows won't be the first ones, we won't need them.
+						$first_season_num = false;
+					}
+				}
+			} else {
+				$season_number = '';
+			}
+
+			// Episode number.
+			$show_episode_terms = get_the_terms( $post_id , 'trakt_episode' );
+			if ( $show_episode_terms && ! is_wp_error( $show_episode_terms ) ) {
+				// We only want to keep one element.
+				$first_episode_num = true;
+				foreach ( $show_episode_terms as $term ) {
+					if ( $first_episode_num ) {
+						$episode_number = $term->name;
+						// Other shows won't be the first ones, we won't need them.
+						$first_episode_num = false;
+					}
+				}
+			} else {
+				$episode_number = '';
+			}
+
+			// If we don't have extra info, don't display it.
+			if (
+				empty( $show_title )
+				|| empty( $season_number )
+				|| empty( $episode_number )
+			) {
+				return $event_title;
+			}
+
+			// Build our new event title, including extra info.
+			$event_title .= '<div class="episode-details">';
+
+			$event_title .= sprintf(
+				/* translators: additional informaton about each episode displayed in the widget listing recent watched TV shows. */
+				_x(
+					'%1$s, season %2$d, episode %3$d',
+					'1: Episode title. 2. Show title. 3. Season number. 4. Episode number.',
+					'traktivity'
+				),
+				$show_title,
+				absint( $season_number ),
+				absint( $episode_number )
+			);
+
+			$event_title .= '</div>';
+
+			return $event_title;
 		} else {
-		return $event_title;
-		}
+			return $event_title;
+		} // End if().
 	}
 }
