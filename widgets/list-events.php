@@ -7,7 +7,7 @@
  * @package Traktivity
  */
 
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
 /**
  * Register List Events widget.
@@ -231,7 +231,7 @@ class Traktivity_List_Widget extends WP_Widget {
 						<?php echo esc_html( $type ); ?>
 					</label></li>
 
-				<?php } // End foreach ?>
+				<?php } // End foreach(). ?>
 			</ul>
 		</p>
 
@@ -270,7 +270,9 @@ class Traktivity_List_Widget extends WP_Widget {
 		$event_title = sprintf(
 			'<h3 class="traktivity-event-title"><a href="%1$s" title="%2$s">%3$s</a></h3>',
 			get_the_permalink(),
-			the_title_attribute( array( 'echo' => false ) ),
+			the_title_attribute( array(
+				'echo' => false,
+			) ),
 			get_the_title()
 		);
 

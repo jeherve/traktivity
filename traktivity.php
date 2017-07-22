@@ -13,7 +13,7 @@
  * @package Traktivity
  */
 
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
 define( 'TRAKTIVITY__VERSION',          '1.1.3' );
 define( 'TRAKTIVITY__API_URL',          'https://api.trakt.tv' );
@@ -26,8 +26,16 @@ define( 'TRAKTIVITY__PLUGIN_DIR',       plugin_dir_path( __FILE__ ) );
  * Create our main plugin class.
  */
 class Traktivity {
+	/**
+	 * Instance.
+	 *
+	 * @var $instance
+	 */
 	private static $instance;
 
+	/**
+	 * Get things started.
+	 */
 	static function get_instance() {
 		if ( ! self::$instance ) {
 			self::$instance = new Traktivity;
@@ -36,6 +44,9 @@ class Traktivity {
 		return self::$instance;
 	}
 
+	/**
+	 * Constructor.
+	 */
 	private function __construct() {
 		// Load translations.
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );

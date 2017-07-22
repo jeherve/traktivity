@@ -5,7 +5,7 @@
  * @package Traktivity
  */
 
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
 /**
  * Define post type, taxonomies, and other term meta where our movie / show / episode data will be stored.
@@ -85,7 +85,9 @@ class Traktivity_Data_Storage {
 			'publicly_queryable'    => true,
 			'capability_type'       => 'page',
 			'map_meta_cap'          => true,
-			'capabilities'          => array( 'create_posts' => 'do_not_allow' ),
+			'capabilities'          => array(
+				'create_posts' => 'do_not_allow',
+			),
 			'menu_icon'             => 'dashicons-format-video',
 			'show_in_rest'          => true,
 		);

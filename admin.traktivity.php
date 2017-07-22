@@ -5,7 +5,7 @@
  * @package Traktivity
  */
 
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
 /**
  * Create Menu page.
@@ -35,8 +35,20 @@ add_action( 'admin_menu', 'traktivity_menu' );
 function traktivity_plugin_settings_link( $links ) {
 	if ( current_user_can( 'manage_options' ) ) {
 		return array_merge(
-			array( 'settings' => sprintf( '<a href="%s">%s</a>', esc_url( get_admin_url( null, 'edit.php?post_type=traktivity_event&page=traktivity_settings' ) ), __( 'Settings', 'traktivity' ) ) ),
-			array( 'support' => sprintf( '<a href="%s">%s</a>', 'https://wordpress.org/support/plugin/traktivity', __( 'Help', 'traktivity' ) ) ),
+			array(
+				'settings' => sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( get_admin_url( null, 'edit.php?post_type=traktivity_event&page=traktivity_settings' ) ),
+					__( 'Settings', 'traktivity' )
+				),
+			),
+			array(
+				'support' => sprintf(
+					'<a href="%s">%s</a>',
+					'https://wordpress.org/support/plugin/traktivity',
+					__( 'Help', 'traktivity' )
+				),
+			),
 			$links
 		);
 	}

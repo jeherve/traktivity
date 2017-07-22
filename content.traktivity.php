@@ -5,7 +5,7 @@
  * @package Traktivity
  */
 
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
 
 /**
@@ -40,6 +40,7 @@ class Traktivity_Content {
 		if ( false !== strpos( $content, '<img' ) ) {
 			$credits = '<div class="tmdb_credits"><p><small>';
 			$credits .= sprintf(
+				/* Translators: URL to THMDB website. */
 				__( 'Image source: <a href="%s">themoviedb.org</a>', 'traktivity' ),
 				esc_url( 'https://www.themoviedb.org/' )
 			);

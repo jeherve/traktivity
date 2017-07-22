@@ -5,7 +5,7 @@
  * @package Traktivity
  */
 
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
 
 /**
@@ -108,7 +108,9 @@ class Traktivity_Api {
 			return new WP_Error(
 				'not_found',
 				esc_html__( 'You did not specify your username or a Trakt.tv API key.', 'traktivity' ),
-				array( 'status' => 404 )
+				array(
+					'status' => 404,
+				)
 			);
 		}
 
@@ -127,7 +129,9 @@ class Traktivity_Api {
 		);
 		$data = wp_remote_get(
 			esc_url_raw( $query_url ),
-			array( 'headers' => $headers )
+			array(
+				'headers' => $headers,
+			)
 		);
 
 		$code = $data['response']['code'];
@@ -149,6 +153,7 @@ class Traktivity_Api {
 			$message = __( 'Trakt.tv is unavailable right now. Try again later.', 'traktivity' );
 		} else {
 			$message = sprintf(
+				/* Translators: link to support contact form. */
 				__( 'Something is not working as it should. Please double check that both your username and your API keys are correct.
 				If everything looks good, but you still see this message, please let me know, I\'ll see what I can do to help.
 				<a href="%s">Send me an email</a> and give me as many details as possible about your setup.
@@ -214,6 +219,7 @@ class Traktivity_Api {
 
 		return new WP_REST_Response(
 			sprintf(
+				/* Translators: link to list of existing events in the dashboard. */
 				__( 'Synchronization has started. Give it a bit of time now. You can monitor progress <a href="%s">here</a>.', 'traktivity' ),
 				esc_url( get_admin_url( null, 'edit.php?post_type=traktivity_event' ) )
 			),

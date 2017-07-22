@@ -5,7 +5,7 @@
  * @package Traktivity
  */
 
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
 
 /**
@@ -117,7 +117,9 @@ class Traktivity_Calls {
 
 		$data = wp_remote_get(
 			esc_url_raw( $query_url ),
-			array( 'headers' => $headers )
+			array(
+				'headers' => $headers,
+			)
 		);
 
 		if (
@@ -346,8 +348,8 @@ class Traktivity_Calls {
 				if ( class_exists( 'Jetpack_Photon' ) ) {
 					add_filter( 'image_downsize', array( Jetpack_Photon::instance(), 'filter_image_downsize' ), 10, 3 );
 				}
-			}
-		}
+			} // End if().
+		} // End if().
 
 		return $post_image;
 	}
@@ -404,7 +406,9 @@ class Traktivity_Calls {
 				 * We'll keep adding to that $meta array to form an array of
 				 * all the meta data to add to each post.
 				 */
-				$meta = array( 'trakt_event_id' => intval( $event->id ) );
+				$meta = array(
+					'trakt_event_id' => intval( $event->id ),
+				);
 
 				/**
 				 * Gather data about what we're watching.
@@ -451,7 +455,7 @@ class Traktivity_Calls {
 
 				} else { // If it's neither a movie nor a tv show, we don't need to log it.
 					continue;
-				}
+				} // End if().
 
 				// Grab the event title.
 				if ( 'movie' === $event->type ) {
@@ -579,14 +583,11 @@ class Traktivity_Calls {
 								 */
 								update_term_meta( $term_id, 'show_network', esc_html( $event->show->network ) );
 							} // End adding extra info to new shows.
-						}
-					}
+						} // End foreach().
+					} // End if().
 				} // End loop for each taxonomy that was created.
-
 			} // End loop for each event.
-
 		} // End check for valid array of events.
-
 	} // End publish_event().
 
 	/**
@@ -628,7 +629,7 @@ class Traktivity_Calls {
 		}
 
 		// Set WP_IMPORTING to avoid triggering things like subscription emails.
-		defined( 'WP_IMPORTING' ) or define( 'WP_IMPORTING', true );
+		defined( 'WP_IMPORTING' ) || define( 'WP_IMPORTING', true );
 
 		// let's start looping.
 		do {
