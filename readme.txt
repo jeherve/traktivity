@@ -3,7 +3,7 @@ Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
 Stable tag: 1.1.3
 Requires at least: 4.7
-Tested up to: 4.7
+Tested up to: 4.8
 License: GPLv2+
 
 Are you a TV addict, and want to keep track of all the shows you've binge-watched and movies you saw? Traktivity is for you!
@@ -41,6 +41,11 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 == Frequently Asked Questions ==
 
 == Changelog ==
+
+= 2.0.0 =
+Release Date:
+
+* New Widget to list recent events recorded by our plugin.
 
 = 1.1.3 =
 Release Date: March 5, 2017
