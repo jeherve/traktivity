@@ -63,6 +63,44 @@ function traktivity_do_dashboard() {
 }
 
 /**
+ * Enqueue Dashboard scripts.
+ *
+ * @since 2.0.0
+ *
+ * @param int $hook Hook suffix for the current admin page.
+ */
+function traktivity_dashboard_scripts( $hook ) {
+	global $traktivity_dashboard_page;
+
+	// Only add our script to our Dashboard page.
+	if ( $traktivity_dashboard_page != $hook ) {
+		return;
+	}
+
+	$version = defined( 'WP_DEBUG' ) && true === WP_DEBUG ? time() : TRAKTIVITY__VERSION;
+
+	wp_register_script( 'traktivity-dashboard', plugins_url( '_build/admin.js' , __FILE__ ), array(), $version, true );
+	$traktivity_dash_args = array(
+		'api_url'          => esc_url_raw( rest_url() ),
+		'api_nonce'        => wp_create_nonce( 'wp_rest' ),
+		'title'            => esc_html__( 'Traktivity Dashboard', 'traktivity' ),
+		'tagline'          => esc_html__( 'Log your activity in front of the screen.', 'traktivity' ),
+		'intro'            => esc_html__( "Do you like to go to the movies and would like to remember what movies you saw, and when? Traktivity is for you! Are you a TV addict, and want to keep track of all the shows you've binge-watched? Traktivity is for you!", 'traktivity' ),
+		'description'      => esc_html__( "This plugin relies on 2 external services to gather information about the things you watch: Trakt.tv is where you'll be marking shows or movies as watched, and The Movie DB is where the plugin will go grab images for each one of those shows or movies.", 'traktivity' ),
+		'nav_dash'         => esc_html__( 'Dashboard', 'traktivity' ),
+		'nav_params'       => esc_html__( 'Settings', 'traktivity' ),
+		'nav_faq'          => esc_html__( 'FAQ', 'traktivity' ),
+	);
+	wp_localize_script( 'traktivity-dashboard', 'traktivity_dash', $traktivity_dash_args );
+
+	wp_register_style( 'traktivity-dashboard-styles', plugins_url( 'admin/css/dashboard.css', __FILE__ ), array(), TRAKTIVITY__VERSION );
+
+	wp_enqueue_script( 'traktivity-dashboard' );
+	wp_enqueue_style( 'traktivity-dashboard-styles' );
+}
+add_action( 'admin_enqueue_scripts', 'traktivity_dashboard_scripts' );
+
+/**
  * Create Menu page.
  *
  * @since 1.0.0
