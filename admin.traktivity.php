@@ -8,6 +8,61 @@
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
 /**
+ * Create Dashboard Page.
+ */
+function traktivity_dashboard_menu() {
+	global $traktivity_dashboard_page;
+	$traktivity_dashboard_page = add_submenu_page(
+		'edit.php?post_type=traktivity_event',
+		esc_html__( 'Trakt.tv Activity Dashboard', 'traktivity' ),
+		esc_html__( 'Dashboard', 'traktivity' ),
+		'manage_options',
+		'traktivity_dashboard',
+		'traktivity_do_dashboard'
+	);
+}
+add_action( 'admin_menu', 'traktivity_dashboard_menu', 1 );
+
+/**
+ * Dashboard should be at the top.
+ *
+ * @since 2.0.0
+ *
+ * @param array $menu_ord Array of items in our Traktivity menu.
+ */
+function traktivity_submenu_order( $menu_ord ) {
+	global $submenu;
+
+	// Get the original key of the dashboard submenu item.
+	foreach ( $submenu['edit.php?post_type=traktivity_event'] as $key => $details ) {
+		if ( 'traktivity_dashboard' == $details[2] ) {
+			$index = $key;
+		}
+	}
+
+	// Set the 'Dashboard' submenu as item with key '4'.
+	$submenu['edit.php?post_type=traktivity_event'][4] = $submenu['edit.php?post_type=traktivity_event'][ $index ];
+
+	// Remove the original dashboard submenu.
+	unset( $submenu['edit.php?post_type=traktivity_event'][ $index ] );
+
+	// Reorder the submenu so our new item, with key 4, is the first to appear.
+	ksort( $submenu['edit.php?post_type=traktivity_event'] );
+
+	return $menu_ord;
+}
+add_filter( 'custom_menu_order', 'traktivity_submenu_order' );
+
+/**
+ * Dashboard placeholder div.
+ *
+ * @since 2.0.0
+ */
+function traktivity_do_dashboard() {
+	echo '<div id="main" class="wrap"></div>';
+}
+
+/**
  * Create Menu page.
  *
  * @since 1.0.0
