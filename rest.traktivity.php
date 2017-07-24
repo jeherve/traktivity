@@ -41,6 +41,17 @@ class Traktivity_Api {
 		) );
 
 		/**
+		 * Edit Settings.
+		 *
+		 * @since 2.0.0
+		 */
+		register_rest_route( 'traktivity/v1', '/settings/edit', array(
+			'methods'             => WP_REST_Server::EDITABLE,
+			'callback'            => array( $this, 'post_settings' ),
+			'permission_callback' => array( $this, 'permissions_check' ),
+		) );
+
+		/**
 		 * Check the validity of our Trakt.tv credentials.
 		 *
 		 * @since 1.1.0
@@ -265,6 +276,44 @@ class Traktivity_Api {
 		}
 
 		return new WP_REST_Response( $settings, 200 );
+	}
+
+	/**
+	 * Edit settings.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return WP_REST_Response $response Response from the Sync function.
+	 */
+	public function post_settings( $request ) {
+		$options = (array) get_option( 'traktivity' );
+
+		if ( isset( $request ) ) {
+			if ( isset( $request['trakt']['username'] ) && ! empty( $request['trakt']['username'] ) ) {
+				$options['username'] = esc_attr( $request['trakt']['username'] );
+			}
+
+			if ( isset( $request['trakt']['key'] ) && ! empty( $request['trakt']['key'] ) ) {
+				$options['api_key'] = esc_attr( $request['trakt']['key'] );
+			}
+
+			if ( isset( $request['tmdb']['key'] ) && ! empty( $request['tmdb']['key'] ) ) {
+				$options['tmdb_api_key'] = esc_attr( $request['tmdb']['key'] );
+			}
+
+			update_option( 'traktivity', $options );
+			return new WP_REST_Response( $request, 200 );
+		}
+
+		return new WP_Error(
+			'cant-update',
+			esc_html__( 'Could not update your settings.', 'traktivity' ),
+			array(
+				'status' => 500,
+			)
+		);
 	}
 } // End class.
 new Traktivity_Api();
