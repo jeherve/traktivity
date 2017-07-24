@@ -30,6 +30,17 @@ class Traktivity_Api {
 	 */
 	public function register_endpoints() {
 		/**
+		 * Get existing credentials.
+		 *
+		 * @since 2.0.0
+		 */
+		register_rest_route( 'traktivity/v1', '/settings', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_settings' ),
+			'permission_callback' => array( $this, 'permissions_check' ),
+		) );
+
+		/**
 		 * Check the validity of our Trakt.tv credentials.
 		 *
 		 * @since 1.1.0
@@ -225,6 +236,35 @@ class Traktivity_Api {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Get existing credentials in an object.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return WP_REST_Response $response Response from the Sync function.
+	 */
+	public function get_settings( $request ) {
+		$options = (array) get_option( 'traktivity' );
+
+		$settings = new stdClass();
+
+		if (
+			isset( $options['username'], $options['api_key'] )
+			&& ( ! empty( $options['username'] ) && ! empty( $options['api_key'] ) )
+		) {
+			$settings->trakt->username = $options['username'];
+			$settings->trakt->key = $options['api_key'];
+		}
+
+		if ( isset( $options['tmdb_api_key'] ) && ! empty( $options['tmdb_api_key'] ) ) {
+			$settings->tmdb->key = $options['tmdb_api_key'];
+		}
+
+		return new WP_REST_Response( $settings, 200 );
 	}
 } // End class.
 new Traktivity_Api();
