@@ -1,0 +1,126 @@
+/***********************
+Page layout
+************************/
+
+.traktivity_event_page_traktivity_dashboard #wpcontent {
+	padding-left: 0;
+}
+
+.traktivity_event_page_traktivity_dashboard .wrap {
+	margin: 0;
+}
+
+.card_list,
+.traktivity_dashboard header.top p {
+	margin: 0 auto;
+	text-align: left;
+	max-width: 45rem;
+	padding: 1.5rem;
+}
+
+/***********************
+Card Design
+************************/
+
+.card {
+	max-width: 100%;
+	display: block;
+	position: relative;
+	margin: 0 auto 10px auto;
+	padding: 16px;
+	box-sizing: border-box;
+	background: #fff;
+	box-shadow: 0 0 0 1px rgba(200, 215, 225, 0.5), 0 1px 2px #e9eff3;
+}
+
+.card p {
+	font-size: .875rem;
+}
+
+/* Card header */
+
+.card h2.card_title {
+	background: #fff;
+	border-bottom: 1px #d9e3ea solid;
+	padding: 0 0.5em 1em  0.5em;
+	margin-top: 0.5em;
+}
+
+/***********************
+Header
+************************/
+
+.top {
+	background-color: #fff;
+	text-align: center;
+	box-shadow: 0 1px 0 rgba(200,215,225,0.5), 0 1px 2px #e9eff3;
+}
+
+.top h1 {
+	padding: 1.5rem;
+}
+
+.tagline {
+	background-image: url('../../img/watching.jpg');
+	margin: 0 auto;
+	position: relative;
+	width: 800px;
+	height: 192px;
+}
+
+.tagline span {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	background: rgba(0, 0, 0, 0.75);
+	color: #fff;
+	font-size: 1.5em;
+	margin: 0;
+	padding: 0.4em 0.5em;
+}
+
+/***********************
+Inputs
+************************/
+
+.card label {
+	border: 1px solid #a8bece;
+	display: block;
+	max-width: 100%;
+	font-size: 16px;
+	line-height: 1.5;
+}
+
+.card label span {
+	background: #f3f6f8;
+	color: #4f748e;
+	display: inline-block;
+	padding: 1em 2em;
+	text-align: center;
+}
+
+.card input[type="text"] {
+	background-color: #fff;
+	border-top: 0 none;
+	border-bottom: 0 none;
+	color: #2e4453;
+	display: inline-block;
+	padding: 1.23em 2em;
+	font-family: Consolas,Monaco,monospace;
+	margin: 0;
+	transition: all .15s ease-in-out;
+	width: 70%;
+	float: right;
+}
+
+/***********************
+Footer
+************************/
+
+.footer {
+	background-color: #fff;
+	text-align: center;
+	border-top: 1px #d9e3ea solid;
+	border-bottom: 1px #d9e3ea solid;
+	padding: 1.5rem;
+}
