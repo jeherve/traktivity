@@ -78,22 +78,41 @@ function traktivity_dashboard_scripts( $hook ) {
 	}
 
 	$version = defined( 'WP_DEBUG' ) && true === WP_DEBUG ? time() : TRAKTIVITY__VERSION;
-
 	wp_register_script( 'traktivity-dashboard', plugins_url( '_build/admin.js' , __FILE__ ), array(), $version, true );
+
+	$options = (array) get_option( 'traktivity' );
 	$traktivity_dash_args = array(
-		'api_url'          => esc_url_raw( rest_url() ),
-		'api_nonce'        => wp_create_nonce( 'wp_rest' ),
-		'title'            => esc_html__( 'Traktivity Dashboard', 'traktivity' ),
-		'tagline'          => esc_html__( 'Log your activity in front of the screen.', 'traktivity' ),
-		'intro'            => esc_html__( "Do you like to go to the movies and would like to remember what movies you saw, and when? Traktivity is for you! Are you a TV addict, and want to keep track of all the shows you've binge-watched? Traktivity is for you!", 'traktivity' ),
-		'description'      => esc_html__( "This plugin relies on 2 external services to gather information about the things you watch: Trakt.tv is where you'll be marking shows or movies as watched, and The Movie DB is where the plugin will go grab images for each one of those shows or movies.", 'traktivity' ),
-		'nav_dash'         => esc_html__( 'Dashboard', 'traktivity' ),
-		'nav_params'       => esc_html__( 'Settings', 'traktivity' ),
-		'nav_faq'          => esc_html__( 'FAQ', 'traktivity' ),
+		'api_url'                => esc_url_raw( rest_url() ),
+		'site_url'               => esc_url_raw( home_url() ),
+		'api_nonce'              => wp_create_nonce( 'wp_rest' ),
+		'trakt_username'         => isset( $options['username'] ) ? esc_attr( $options['username'] ) : '',
+		'trakt_key'              => isset( $options['api_key'] ) ? esc_attr( $options['api_key'] ) : '',
+		'tmdb_key'               => isset( $options['tmdb_api_key'] ) ? esc_attr( $options['tmdb_api_key'] ) : '',
+		'title'                  => esc_html__( 'Traktivity Dashboard', 'traktivity' ),
+		'tagline'                => esc_html__( 'Log your activity in front of the screen.', 'traktivity' ),
+		'intro'                  => esc_html__( "Do you like to go to the movies and would like to remember what movies you saw, and when? Traktivity is for you! Are you a TV addict, and want to keep track of all the shows you've binge-watched? Traktivity is for you!", 'traktivity' ),
+		'description'            => esc_html__( "This plugin relies on 2 external services to gather information about the things you watch: Trakt.tv is where you'll be marking shows or movies as watched, and The Movie DB is where the plugin will go grab images for each one of those shows or movies.", 'traktivity' ),
+		'nav_dash'               => esc_html__( 'Dashboard', 'traktivity' ),
+		'nav_params'             => esc_html__( 'Settings', 'traktivity' ),
+		'nav_faq'                => esc_html__( 'FAQ', 'traktivity' ),
+		'form_trakt_title'       => esc_html__( 'Trakt.tv Settings', 'traktivity' ),
+		'form_trakt_username'    => esc_html__( 'Trakt.tv Username', 'traktivity' ),
+		'form_trakt_key'         => esc_html__( 'Trakt.tv API Key', 'traktivity' ),
+		'form_trakt_intro'       => esc_html__( 'To use the plugin, you will need to create an API application on Trakt.tv first.', 'traktivity' ),
+		'form_trakt_create_app'  => esc_html__( 'Click here to create that app.', 'traktivity' ),
+		'form_trakt_api_url'     => esc_url( 'https://trakt.tv/oauth/applications/new' ),
+		'form_trakt_api_options' => esc_html__( 'In the Redirect uri field, you can enter your site URL. You can give it both checkin and scrobble permissions.', 'traktivity' ),
+		'form_trakt_api_fields'  => esc_html__( 'Once you created your app, copy the "Client ID" value below. You will also want to enter your Trakt.tv username.', 'traktivity' ),
+		'form_tmdb_title'        => esc_html__( 'The Movie Database Settings', 'traktivity' ),
+		'form_tmdb_key'          => esc_html__( 'TMDB API Key', 'traktivity' ),
+		'form_tmdb_intro'        => esc_html__( 'To get images for each TV show, episode, and movie, we will also need to use another service, The Movie DB API.', 'traktivity' ),
+		'form_tmdb_intro_opt'    => esc_html__( 'This is optional. If you do not want to store and display images about the things you watch on your site, you can ignore this.', 'traktivity' ),
+		'form_tmdb_api_url'      => esc_url( 'https://www.themoviedb.org/login' ),
+		'form_tmdb_create_app'   => esc_html__( 'To register for an API key, sign up and/or login to your account page on TMDb and click the "API" link in the left hand sidebar. Once your application is approved, copy the contents of the "API Key (v3 auth)" field, and paste it below.', 'traktivity' ),
 	);
 	wp_localize_script( 'traktivity-dashboard', 'traktivity_dash', $traktivity_dash_args );
 
-	wp_register_style( 'traktivity-dashboard-styles', plugins_url( 'admin/css/dashboard.css', __FILE__ ), array(), TRAKTIVITY__VERSION );
+	wp_register_style( 'traktivity-dashboard-styles', plugins_url( 'admin/css/dashboard.css', __FILE__ ), array(), $version );
 
 	wp_enqueue_script( 'traktivity-dashboard' );
 	wp_enqueue_style( 'traktivity-dashboard-styles' );
