@@ -11,9 +11,9 @@ import Faq from './components/Faq';
 render((
 	<BrowserRouter>
 		<Switch>
-			<Route exact path='/' component={ Dashboard }/>
-			<Route path='/parameters' component={ Parameters }/>
-			<Route path='/faq' component={ Faq }/>
+			// <Route exact path='/' component={ Dashboard }/>
+			// <Route path='/parameters' component={ Parameters }/>
+			// <Route path='/faq' component={ Faq }/>
 			<Route path="*" component={ Dashboard } />
 		</Switch>
 	</BrowserRouter>
