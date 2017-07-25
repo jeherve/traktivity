@@ -73,6 +73,23 @@ class Traktivity_Api {
 		) );
 
 		/**
+		 * Check the validity of our TMDb credentials.
+		 *
+		 * @since 2.0.0
+		 */
+		register_rest_route( 'traktivity/v1', '/tmdb/(?P<tmdb>[a-zA-Z0-9-]+)', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'test_tmdb_api_connection' ),
+			'permission_callback' => array( $this, 'permissions_check' ),
+			'args'                => array(
+				'tmdb' => array(
+					'required'          => true,
+					'validate_callback' => array( $this, 'validate_string' ),
+				),
+			),
+		) );
+
+		/**
 		 * Check Sync status for Traktivity.
 		 *
 		 * @since 1.1.0
@@ -166,28 +183,109 @@ class Traktivity_Api {
 		if ( 403 === $code ) {
 			$message = __( 'Invalid API key or unapproved app.' , 'traktivity' );
 		} elseif ( 429 === $code ) {
-			$message = __( 'Rate Limit Exceeded.', 'traktivity' );
+			$message = __( 'Rate Limit Exceeded with your Trakt.tv App.', 'traktivity' );
+		} elseif ( 404 === $code ) {
+			$message = __( 'This Trakt.tv username does not exist.', 'traktivity' );
 		} elseif ( '2' === substr( $code, 0, 1 ) ) {
-			$message = __( 'Your API key is working.', 'traktivity' );
+			$message = __( 'Your Trakt.tv API key is working.', 'traktivity' );
 			// Let's overwrite the response code. If it's a success, we don't care what success response code, 200 is good enough.
 			$code = 200;
 		} elseif ( '5' === substr( $code, 0, 1 ) ) {
 			$message = __( 'Trakt.tv is unavailable right now. Try again later.', 'traktivity' );
 		} else {
-			$message = sprintf(
-				/* Translators: link to support contact form. */
-				__( 'Something is not working as it should. Please double check that both your username and your API keys are correct.
+			$message = __( 'Something is not working as it should. Please double check that both your username and your API keys are correct.
 				If everything looks good, but you still see this message, please let me know, I\'ll see what I can do to help.
-				<a href="%s">Send me an email</a> and give me as many details as possible about your setup.
-				It would also help if you could let me know your Trakt.tv API key so I can run some tests.
-				Thank you!', 'traktivity' ),
-				'https://jeremy.hu/contact/'
-			);
+				Post in the WordPress.org support forums and give me as many details as possible about your setup.
+				Thank you!', 'traktivity' );
 		}
 
 		$response = array(
-			'message' => $message,
+			'message' => esc_html( $message ),
 			'code'    => (int) $code,
+		);
+		return new WP_REST_Response( $response, 200 );
+	}
+
+	/**
+	 * Check the status of our TMDb connection.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return WP_REST_Response $response Status of our TMDb connection. Response code matches the response from the API.
+	 */
+	public function test_tmdb_api_connection( $request ) {
+		// Get parameter from request.
+		if ( ! isset( $request['tmdb'] ) ) {
+			return new WP_Error(
+				'not_found',
+				esc_html__( 'You did not specify your TMDb API key.', 'traktivity' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		/**
+		 * Query the API using the API key provided in the API request.
+		 * We'll query a random endpoint, discover/movie.
+		 *
+		 * @see https://developers.themoviedb.org/3/discover
+		 */
+		$query_url = sprintf(
+			'%1$s/%2$s/%3$s?api_key=%4$s',
+			TRAKTIVITY__TMDB_API_URL,
+			TRAKTIVITY__TMDB_API_VERSION,
+			'discover/movie',
+			esc_attr( $request['tmdb'] )
+		);
+		$data = wp_remote_get( esc_url_raw( $query_url ) );
+
+		$code = $data['response']['code'];
+
+		/**
+		 * Tweak our endpoint response message based on the response from TMDb API.
+		 *
+		 * @see https://www.themoviedb.org/documentation/api/status-codes
+		 */
+		if ( 429 === $code ) {
+			$message = __( 'Rate Limit Exceeded with your TMDb App. Try again later, but give it some time!', 'traktivity' );
+		} elseif ( '4' === substr( $code, 0, 1 ) ) {
+			$message = __( 'Your TMDb API key does not exist, or is not valid.', 'traktivity' );
+		} elseif ( '2' === substr( $code, 0, 1 ) ) {
+			$message = __( 'Your TMDb API key is working.', 'traktivity' );
+			// Let's overwrite the response code. If it's a success, we don't care what success response code, 200 is good enough.
+			$code = 200;
+		} elseif ( '5' === substr( $code, 0, 1 ) ) {
+			$message = __( 'TMDb is unavailable right now. Try again later.', 'traktivity' );
+		} else {
+			$message = __( 'Something is not working as it should. Please double check that both your username and your API keys are correct.
+				If everything looks good, but you still see this message, please let me know, I\'ll see what I can do to help.
+				Post in the WordPress.org support forums and give me as many details as possible about your setup.
+				Thank you!', 'traktivity' );
+		}
+
+		/**
+		 * If our response was successful, let's grab the images to use as samples.
+		 *
+		 * @see https://developers.themoviedb.org/3/getting-started/images
+		 */
+		$samples = array();
+		if ( 200 === $code ) {
+			$movies = json_decode( $data['body'] );
+			foreach ( $movies->results as $movie ) {
+				$samples[] = sprintf(
+					'https://image.tmdb.org/t/p/w780/%s',
+					$movie->poster_path
+				);
+			}
+		}
+
+		$response = array(
+			'message' => esc_html( $message ),
+			'code'    => (int) $code,
+			'samples' => (array) $samples,
 		);
 		return new WP_REST_Response( $response, 200 );
 	}
