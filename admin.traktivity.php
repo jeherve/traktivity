@@ -109,6 +109,8 @@ function traktivity_dashboard_scripts( $hook ) {
 		'form_tmdb_intro_opt'    => esc_html__( 'This is optional. If you do not want to store and display images about the things you watch on your site, you can ignore this.', 'traktivity' ),
 		'form_tmdb_api_url'      => esc_url( 'https://www.themoviedb.org/login' ),
 		'form_tmdb_create_app'   => esc_html__( 'To register for an API key, sign up and/or login to your account page on TMDb and click the "API" link in the left hand sidebar. Once your application is approved, copy the contents of the "API Key (v3 auth)" field, and paste it below.', 'traktivity' ),
+		'notice_saved'           => esc_html__( 'Changes have been saved.', 'traktivity' ),
+		'notice_error'           => esc_html__( 'Changes could not be saved.', 'traktivity' ),
 	);
 	wp_localize_script( 'traktivity-dashboard', 'traktivity_dash', $traktivity_dash_args );
 

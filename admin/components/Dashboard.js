@@ -69,12 +69,12 @@ class Dashboard extends React.Component {
 			.then((response) => {
 				if (response.status === 200 ) {
 					this.setState({ notice: {
-						message: 'Changes have been saved.',
+						message: traktivity_dash.notice_saved,
 						type: 'success',
 					}});
 				} else {
 					this.setState({ notice: {
-						message: 'Changes could not be saved.',
+						message: traktivity_dash.notice_error,
 						type: 'error',
 					}});
 				}
