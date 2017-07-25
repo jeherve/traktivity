@@ -7,12 +7,16 @@ import Nav from './Nav.js';
 import Footer from './Footer';
 import TraktForm from './TraktForm';
 import TmdbForm from './TmdbForm';
+import Notice from './Notice';
 
 class Dashboard extends React.Component {
 	constructor() {
 		super();
 
 		this.updateSettings = this.updateSettings.bind(this);
+		this.removeNotice = this.removeNotice.bind(this);
+		this.checkTraktCreds = this.checkTraktCreds.bind(this);
+		this.checkTmdbCreds = this.checkTmdbCreds.bind(this);
 
 		// Initial state.
 		this.state = {
@@ -23,6 +27,8 @@ class Dashboard extends React.Component {
 			tmdb: {
 				key: `${traktivity_dash.tmdb_key}`,
 			},
+			notice: null,
+			samples: {},
 		}
 	}
 
@@ -45,8 +51,7 @@ class Dashboard extends React.Component {
 			tmdb: settings.tmdb
 		});
 
-		// Save in options as well.
-		let postResults = {}; // I don't do anything with this yet, but it would be nice to output it upon save.
+		// Save in db as well.
 		const postOptions = {
 			credentials: 'same-origin',
 			method: 'POST',
@@ -63,16 +68,94 @@ class Dashboard extends React.Component {
 		return settingsPromise
 			.then((response) => {
 				if (response.status === 200 ) {
-					return Promise.resolve(response);
+					this.setState({ notice: {
+						message: 'Changes have been saved.',
+						type: 'success',
+					}});
 				} else {
-					return Promise.reject(new Error(response.statusText));
+					this.setState({ notice: {
+						message: 'Changes could not be saved.',
+						type: 'error',
+					}});
 				}
 			})
-			// .then((response) => response.json())
-			// .then((response) => {
-			// 	console.log(response);
-			// })
-			.catch((err) => console.error(err));
+			.then((response) => {
+				if ( settings.trakt.username && settings.trakt.key ) {
+					this.checkTraktCreds(settings.trakt.username, settings.trakt.key);
+				}
+			})
+			.then((response) => {
+				if ( settings.tmdb.key ) {
+					this.checkTmdbCreds(settings.tmdb.key);
+				}
+			})
+			.catch((err) => {
+				this.setState({ notice: {
+					message: `${err}`,
+					type: 'error',
+				}});
+			});
+	}
+
+	checkTraktCreds( username, key ) {
+		const fetchOptions = {
+			credentials: 'same-origin',
+			method: 'GET',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': traktivity_dash.api_nonce
+			},
+		};
+		const checkCredsPromise = fetch( `${traktivity_dash.api_url}/traktivity/v1/connection/${username}/${key}`, fetchOptions );
+		return checkCredsPromise
+			.then((response) => response.json())
+			.then((body) => {
+				this.setState({ notice: {
+					message: body.message,
+					type: `${body.code === 200 ? 'success' : 'error'}`,
+				}});
+			})
+			.catch((err) => {
+				this.setState({ notice: {
+					message: `${err}`,
+					type: 'error',
+				}});
+			});
+	}
+
+	checkTmdbCreds( key ) {
+		const fetchOptions = {
+			credentials: 'same-origin',
+			method: 'GET',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': traktivity_dash.api_nonce
+			},
+		};
+		const checkCredsPromise = fetch( `${traktivity_dash.api_url}/traktivity/v1/tmdb/${key}`, fetchOptions );
+		return checkCredsPromise
+			.then((response) => response.json())
+			.then((body) => {
+				this.setState({
+					notice: {
+						message: body.message,
+						type: `${body.code === 200 ? 'success' : 'error'}`,
+					},
+					samples: {...body.samples}
+				});
+			})
+			.catch((err) => {
+				this.setState({ notice: {
+					message: `${err}`,
+					type: 'error',
+				}});
+			});
+	}
+
+	removeNotice() {
+		this.setState({ notice: null });
 	}
 
 	render() {
@@ -80,6 +163,10 @@ class Dashboard extends React.Component {
 			<div className="traktivity_dashboard">
 				<Header />
 				<Nav />
+				<Notice
+					notice={this.state.notice}
+					removeNotice={this.removeNotice}
+				/>
 				<div className="card_list">
 					<TraktForm
 						trakt={this.state.trakt}

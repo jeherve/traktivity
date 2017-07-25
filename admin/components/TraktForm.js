@@ -14,7 +14,6 @@ class TraktForm extends React.Component {
 
 		// Send that data back so it can be tested and saved.
 		this.props.updateSettings(event.target.name, event.target.value);
-
 	}
 
 	render() {

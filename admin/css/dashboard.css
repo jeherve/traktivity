@@ -114,6 +114,51 @@ Inputs
 }
 
 /***********************
+Notices
+************************/
+
+.message {
+	margin: 0 auto;
+	max-width: 45rem;
+	color: #fff;
+	display: block;
+	transition: background-color 1s ease;
+}
+
+.message .notice_icon,
+.message .dismiss_icon {
+	fill: #fff;
+}
+
+.message .dismiss {
+	float: right;
+}
+
+.message.empty {
+	padding: 1.5em;
+}
+.message.traktivity__success {
+	background-color: #4ab866;
+}
+.message.traktivity__progress {
+	background-color: #f0b849;
+}
+.message.traktivity__error {
+	background-color: #d94f4f;
+}
+
+.message .message_content {
+	padding: 1.5em;
+}
+
+.message .notice_text {
+	font-size: 18px;
+	padding: 0 0 0 .5em;
+	position: relative;
+	bottom: 4px;
+}
+
+/***********************
 Footer
 ************************/
 
