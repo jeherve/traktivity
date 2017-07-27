@@ -173,6 +173,14 @@ class Traktivity_Api {
 			)
 		);
 
+		if ( is_wp_error( $data ) ) {
+			$response = array(
+				'message' => esc_html__( 'Trakt.tv is unavailable right now. Try again later.', 'traktivity' ),
+				'code'    => (int) 500,
+			);
+			return new WP_REST_Response( $response, 500 );
+		}
+
 		$code = $data['response']['code'];
 
 		/**
