@@ -274,26 +274,9 @@ class Traktivity_Api {
 				Thank you!', 'traktivity' );
 		}
 
-		/**
-		 * If our response was successful, let's grab the images to use as samples.
-		 *
-		 * @see https://developers.themoviedb.org/3/getting-started/images
-		 */
-		$samples = array();
-		if ( 200 === $code ) {
-			$movies = json_decode( $data['body'] );
-			foreach ( $movies->results as $movie ) {
-				$samples[] = sprintf(
-					'https://image.tmdb.org/t/p/w780/%s',
-					$movie->poster_path
-				);
-			}
-		}
-
 		$response = array(
 			'message' => esc_html( $message ),
 			'code'    => (int) $code,
-			'samples' => (array) $samples,
 		);
 		return new WP_REST_Response( $response, 200 );
 	}
@@ -334,6 +317,12 @@ class Traktivity_Api {
 			isset( $options['full_sync'], $options['full_sync']['status'] )
 			&& 'in_progress' === $options['full_sync']['status']
 		) {
+			// Relaunch full sync if it was running before but was stopped.
+			if ( ! wp_next_scheduled( 'traktivity_full_sync' ) ) {
+				wp_schedule_single_event( time(), 'traktivity_full_sync' );
+			}
+
+			// Return a response to let the user know about the sync progress so far.
 			return new WP_REST_Response(
 				esc_html__( 'Synchronization is in progress. Give it some time!', 'traktivity' ),
 				200
@@ -356,7 +345,7 @@ class Traktivity_Api {
 	}
 
 	/**
-	 * Get existing credentials in an object.
+	 * Get existing settings in an object.
 	 *
 	 * @since 2.0.0
 	 *
@@ -379,6 +368,10 @@ class Traktivity_Api {
 
 		if ( isset( $options['tmdb_api_key'] ) && ! empty( $options['tmdb_api_key'] ) ) {
 			$settings->tmdb->key = $options['tmdb_api_key'];
+		}
+
+		if ( isset( $options['step'] ) && ! empty( $options['step'] ) ) {
+			$settings->tmdb->step = $options['step'];
 		}
 
 		return new WP_REST_Response( $settings, 200 );
@@ -407,6 +400,10 @@ class Traktivity_Api {
 
 			if ( isset( $request['tmdb']['key'] ) && ! empty( $request['tmdb']['key'] ) ) {
 				$options['tmdb_api_key'] = esc_attr( $request['tmdb']['key'] );
+			}
+
+			if ( isset( $request['step'] ) && ! empty( $request['step'] ) ) {
+				$options['step'] = absint( $request['step'] );
 			}
 
 			update_option( 'traktivity', $options );
