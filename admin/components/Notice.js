@@ -9,6 +9,11 @@ class Notice extends React.Component {
 		this.icon = this.icon.bind(this);
 	}
 
+	componentWillUnmount() {
+		// Make sure notices are cleared from the state when the component is removed from the DOM.
+		this.props.removeNotice();
+	}
+
 	icon(type) {
 		let iconType;
 
@@ -28,11 +33,6 @@ class Notice extends React.Component {
 		}
 
 		return iconType;
-	}
-
-	componentWillUnmount() {
-		// Make sure notices are cleared from the state when the component is removed from the DOM.
-		this.props.removeNotice();
 	}
 
 	render() {

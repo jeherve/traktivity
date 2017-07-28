@@ -51,32 +51,55 @@ Header
 ************************/
 
 .top {
-	background-color: #fff;
-	text-align: center;
+	background:
+		linear-gradient(
+			rgba(0, 0, 0, 0),
+			rgba(0, 0, 0, 0.65)
+		),
+		url('../../img/watching.jpg');
+	background-position: no-repeat;
+	background-position: top center;
+	margin: 0 auto;
+	position: relative;
+	height: 192px;
+	width: 800px;
 	box-shadow: 0 1px 0 rgba(200,215,225,0.5), 0 1px 2px #e9eff3;
+	border-bottom: 1px #d9e3ea solid;
+}
+
+.top .header_items {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
 }
 
 .top h1 {
-	padding: 1.5rem;
-}
-
-.tagline {
-	background-image: url('../../img/watching.jpg');
-	margin: 0 auto;
-	position: relative;
-	width: 800px;
-	height: 192px;
-}
-
-.tagline span {
-	position: absolute;
-	bottom: 10px;
-	left: 10px;
 	background: rgba(0, 0, 0, 0.75);
 	color: #fff;
 	font-size: 1.5em;
 	margin: 0;
 	padding: 0.4em 0.5em;
+	display: inline-block;
+}
+.top nav {
+	display: inline-block;
+}
+
+.top nav ul {
+	display: inline-flex;
+}
+
+.top nav ul li {
+	margin: 0 1em;
+}
+
+.top nav ul li a {
+	color: #fff;
+}
+
+.top nav ul li a:hover {
+	color: #c4c4c4;
 }
 
 /***********************
@@ -158,6 +181,82 @@ Notices
 	bottom: 4px;
 }
 
+/* Add a bit of margin when we are in the wizard. */
+.card .message {
+	margin: 2em auto;
+}
+
+/***********************
+Buttons
+************************/
+
+.action {
+	text-align: right;
+}
+
+.intro .action,
+.sync_settings .action {
+	text-align: center;
+}
+
+.nav-button {
+	background: #00aadc;
+	border-style: solid;
+	border-color: #0087be;
+	border-width: 2px 1px 1px;
+	border-radius: 4px;
+	color: #fff;
+	cursor: pointer;
+	display: inline-block;
+	display: inline-block;
+	margin: 0 0 0 2em;
+	outline: 0;
+	overflow: hidden;
+	font-size: 14px;
+	font-weight: 500;
+	text-overflow: ellipsis;
+	text-decoration: none;
+	vertical-align: top;
+	box-sizing: border-box;
+	line-height: 21px;
+	padding: 7px 14px 9px;
+	text-transform: uppercase;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	-webkit-transition: background 2s, border-color 2s;
+	-o-transition: background 2s, border-color 2s;
+	transition: background 2s, border-color 2s;
+}
+
+.nav-button:hover,
+.nav-button:focus {
+	border-color: #005082;
+}
+
+.nav-button:focus {
+	outline: 0;
+	border-color: #00aadc;
+	box-shadow: 0 0 0 2px #78dcfa;
+}
+
+.nav-button:visited {
+	color: #2e4453;
+}
+.nav-button:disabled,
+.nav-button[disabled] {
+	background: #bceefd;
+	border-color: #8cc9e2;
+	cursor: default;
+}
+
+.nav-button.secondary {
+	background: white;
+	border-color: #c8d7e1;
+	border-width: 1px 1px 2px;
+	color: #2e4453;
+}
+
 /***********************
 Footer
 ************************/
@@ -168,4 +267,13 @@ Footer
 	border-top: 1px #d9e3ea solid;
 	border-bottom: 1px #d9e3ea solid;
 	padding: 1.5rem;
+}
+
+/***********************
+Events
+************************/
+
+.event-list img {
+	width: 20%;
+	height: auto;
 }

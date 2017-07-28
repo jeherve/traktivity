@@ -2,6 +2,9 @@
 import React from 'react';
 import Gridicon from 'gridicons';
 
+/* Internal dependencies */
+import Notice from './Notice';
+
 class TraktForm extends React.Component {
 	constructor() {
 		super();
@@ -13,11 +16,12 @@ class TraktForm extends React.Component {
 		event.preventDefault();
 
 		// Send that data back so it can be tested and saved.
-		this.props.updateSettings(event.target.name, event.target.value);
+		this.props.saveCreds(event.target.name, event.target.value);
 	}
 
 	render() {
 		const traktInfo = this.props.trakt;
+		const canContinue = traktInfo.valid === true;
 		return (
 			<div className="trakt_settings card">
 				<h2 className="card_title">{traktivity_dash.form_trakt_title}</h2>
@@ -53,6 +57,13 @@ class TraktForm extends React.Component {
 						onChange={(event) => this.saveTraktCreds(event)}
 					/>
 				</label>
+				<Notice
+					notice={this.props.notice}
+					removeNotice={this.props.removeNotice}
+				/>
+				<div className="action">
+					<button className="nav-button" disabled={!canContinue} onClick={this.props.nextStep}>{traktivity_dash.button_next}</button>
+				</div>
 			</div>
 		)
 	}

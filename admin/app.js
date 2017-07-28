@@ -4,7 +4,7 @@ import { render } from 'react-dom';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
 /* Internal dependencies */
-import Dashboard from './components/Dashboard';
+import Setup from './components/Setup';
 import Parameters from './components/Parameters';
 import Faq from './components/Faq';
 
@@ -14,7 +14,7 @@ render((
 			// <Route exact path='/' component={ Dashboard }/>
 			// <Route path='/parameters' component={ Parameters }/>
 			// <Route path='/faq' component={ Faq }/>
-			<Route path="*" component={ Dashboard } />
+			<Route path="*" component={ Setup } />
 		</Switch>
 	</BrowserRouter>
 ), document.querySelector( '#main' ) );

@@ -2,6 +2,9 @@
 import React from 'react';
 import Gridicon from 'gridicons';
 
+/* Internal dependencies */
+import Notice from './Notice';
+
 class TmdbForm extends React.Component {
 	constructor() {
 		super();
@@ -13,11 +16,12 @@ class TmdbForm extends React.Component {
 		event.preventDefault();
 
 		// Send that data back so it can be tested and saved.
-		this.props.updateSettings(event.target.name, event.target.value);
+		this.props.saveCreds(event.target.name, event.target.value);
 	}
 
 	render() {
 		const TmdbInfo = this.props.tmdb;
+		const canContinue = TmdbInfo.valid === true;
 		return (
 			<div className="tmdb_settings card">
 				<h2 className="card_title">{traktivity_dash.form_tmdb_title}</h2>
@@ -39,6 +43,14 @@ class TmdbForm extends React.Component {
 						onChange={(event) => this.saveTmdbCreds(event)}
 					/>
 				</label>
+				<Notice
+					notice={this.props.notice}
+					removeNotice={this.props.removeNotice}
+				/>
+				<div className="action">
+					<button className="nav-button secondary" onClick={this.props.nextStep}>{traktivity_dash.button_skip}</button>
+					<button className="nav-button" disabled={!canContinue} onClick={this.props.nextStep}>{traktivity_dash.button_next}</button>
+				</div>
 			</div>
 		)
 	}

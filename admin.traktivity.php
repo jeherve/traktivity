@@ -88,6 +88,9 @@ function traktivity_dashboard_scripts( $hook ) {
 		'trakt_username'         => isset( $options['username'] ) ? esc_attr( $options['username'] ) : '',
 		'trakt_key'              => isset( $options['api_key'] ) ? esc_attr( $options['api_key'] ) : '',
 		'tmdb_key'               => isset( $options['tmdb_api_key'] ) ? esc_attr( $options['tmdb_api_key'] ) : '',
+		'traktivity_step'        => isset( $options['step'] ) ? absint( $options['step'] ) : 1,
+		'sync_status'            => isset( $options['full_sync'], $options['full_sync']['status'] ) ? esc_attr( $options['full_sync']['status'] ) : '',
+		'sync_pages'             => isset( $options['full_sync'], $options['full_sync']['pages'] ) ? intval( $options['full_sync']['pages'] ) : null,
 		'title'                  => esc_html__( 'Traktivity Dashboard', 'traktivity' ),
 		'tagline'                => esc_html__( 'Log your activity in front of the screen.', 'traktivity' ),
 		'intro'                  => esc_html__( "Do you like to go to the movies and would like to remember what movies you saw, and when? Traktivity is for you! Are you a TV addict, and want to keep track of all the shows you've binge-watched? Traktivity is for you!", 'traktivity' ),
@@ -111,6 +114,13 @@ function traktivity_dashboard_scripts( $hook ) {
 		'form_tmdb_create_app'   => esc_html__( 'To register for an API key, sign up and/or login to your account page on TMDb and click the "API" link in the left hand sidebar. Once your application is approved, copy the contents of the "API Key (v3 auth)" field, and paste it below.', 'traktivity' ),
 		'notice_saved'           => esc_html__( 'Changes have been saved.', 'traktivity' ),
 		'notice_error'           => esc_html__( 'Changes could not be saved.', 'traktivity' ),
+		'intro_next'             => esc_html__( 'Let\'s get started!', 'traktivity' ),
+		'button_next'            => esc_html__( 'Next', 'traktivity' ),
+		'button_skip'            => esc_html__( 'Skip', 'traktivity' ),
+		'sync_title'             => esc_html__( 'You did it! Traktivity will now start logging all the movies and TV shows you watch.', 'traktivity' ),
+		'sync_description'       => esc_html__( "One more thing: by default, Traktivity only gathers data about the last 10 things you've watched, and then automatically logs all future things you'll watch. Thanks to the button below, you can launch a full synchronization of all the things you've ever watched. It can take a while, though!", 'traktivity' ),
+		'launch_sync'            => esc_html__( 'Start synchronization', 'traktivity' ),
+		'recent_list_title'      => esc_html__( 'Recent Events', 'traktivity' ),
 	);
 	wp_localize_script( 'traktivity-dashboard', 'traktivity_dash', $traktivity_dash_args );
 

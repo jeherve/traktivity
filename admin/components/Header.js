@@ -1,14 +1,18 @@
 /* External dependencies */
 import React from 'react';
 
+/* Internal dependencies */
+import Nav from './Nav.js';
+
 class Header extends React.Component {
 	render() {
+		const displayMenu = this.props.step === 5;
 		return (
 			<header className="top">
-				<h1>{traktivity_dash.title}</h1>
-					<div className="tagline"><span>{traktivity_dash.tagline}</span></div>
-					<p><strong>{traktivity_dash.intro}</strong></p>
-					<p>{traktivity_dash.description}</p>
+				<div className="header_items">
+					<h1>{traktivity_dash.title}</h1>
+					{ displayMenu ? <Nav /> : null }
+				</div>
 			</header>
 		)
 	}
