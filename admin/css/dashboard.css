@@ -269,11 +269,34 @@ Footer
 	padding: 1.5rem;
 }
 
+.footer nav ul li {
+	display: inline;
+	padding: 0 1em;
+}
+
 /***********************
 Events
 ************************/
 
-.event-list img {
-	width: 20%;
-	height: auto;
+.event-list .event-link {
+	position: relative;
+	width: 100%; /* for IE 6 */
+	opacity: 0.8;
+}
+
+.event-list .event-link:hover {
+	opacity: 1;
+}
+
+.event-list .event-image {
+	vertical-align: middle;
+}
+
+.event-list .event-link .event-title {
+	position: absolute;
+	top: 40px;
+	left: 0;
+	padding: .25em 1em;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.75);
 }

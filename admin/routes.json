@@ -1,0 +1,584 @@
+{
+	"/": {
+		"namespace": "",
+		"methods": ["GET"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"context": {}
+			}
+		}]
+	},
+	"/traktivity/v1": {
+		"namespace": "traktivity/v1",
+		"methods": ["GET"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"namespace": {},
+				"context": {}
+			}
+		}]
+	},
+	"/traktivity/v1/connection/(?P<user>[a-z\\-]+)/(?P<trakt>[a-zA-Z0-9-]+)": {
+		"namespace": "traktivity/v1",
+		"methods": ["GET"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"user": {},
+				"trakt": {}
+			}
+		}]
+	},
+	"/traktivity/v1/sync": {
+		"namespace": "traktivity/v1",
+		"methods": ["POST", "PUT", "PATCH"],
+		"endpoints": [{
+			"methods": ["POST", "PUT", "PATCH"],
+			"args": {}
+		}]
+	},
+	"/wp/v2": {
+		"namespace": "wp/v2",
+		"methods": ["GET"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"namespace": {},
+				"context": {}
+			}
+		}]
+	},
+	"/wp/v2/media": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"context": {},
+				"page": {},
+				"per_page": {},
+				"search": {},
+				"after": {},
+				"author": {},
+				"author_exclude": {},
+				"before": {},
+				"exclude": {},
+				"include": {},
+				"offset": {},
+				"order": {},
+				"orderby": {},
+				"parent": {},
+				"parent_exclude": {},
+				"slug": {},
+				"status": {},
+				"media_type": {},
+				"mime_type": {}
+			}
+		}, {
+			"methods": ["POST"],
+			"args": {
+				"date": {},
+				"date_gmt": {},
+				"slug": {},
+				"status": {},
+				"title": {},
+				"author": {},
+				"comment_status": {},
+				"ping_status": {},
+				"meta": {},
+				"template": {},
+				"alt_text": {},
+				"caption": {},
+				"description": {},
+				"post": {}
+			}
+		}]
+	},
+	"/wp/v2/media/(?P<id>[\\d]+)": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"id": {},
+				"context": {}
+			}
+		}, {
+			"methods": ["POST", "PUT", "PATCH"],
+			"args": {
+				"id": {},
+				"date": {},
+				"date_gmt": {},
+				"slug": {},
+				"status": {},
+				"title": {},
+				"author": {},
+				"comment_status": {},
+				"ping_status": {},
+				"meta": {},
+				"template": {},
+				"alt_text": {},
+				"caption": {},
+				"description": {},
+				"post": {}
+			}
+		}, {
+			"methods": ["DELETE"],
+			"args": {
+				"id": {},
+				"force": {}
+			}
+		}]
+	},
+	"/wp/v2/traktivity_event": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"context": {},
+				"page": {},
+				"per_page": {},
+				"search": {},
+				"after": {},
+				"before": {},
+				"exclude": {},
+				"include": {},
+				"offset": {},
+				"order": {},
+				"orderby": {},
+				"slug": {},
+				"status": {},
+				"trakt_type": {},
+				"trakt_type_exclude": {},
+				"trakt_genre": {},
+				"trakt_genre_exclude": {},
+				"trakt_year": {},
+				"trakt_year_exclude": {},
+				"trakt_show": {},
+				"trakt_show_exclude": {},
+				"trakt_season": {},
+				"trakt_season_exclude": {},
+				"trakt_episode": {},
+				"trakt_episode_exclude": {}
+			}
+		}, {
+			"methods": ["POST"],
+			"args": {
+				"date": {},
+				"date_gmt": {},
+				"slug": {},
+				"status": {},
+				"password": {},
+				"title": {},
+				"content": {},
+				"excerpt": {},
+				"featured_media": {},
+				"comment_status": {},
+				"ping_status": {},
+				"template": {},
+				"trakt_type": {},
+				"trakt_genre": {},
+				"trakt_year": {},
+				"trakt_show": {},
+				"trakt_season": {},
+				"trakt_episode": {}
+			}
+		}]
+	},
+	"/wp/v2/traktivity_event/(?P<id>[\\d]+)": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"id": {},
+				"context": {},
+				"password": {}
+			}
+		}, {
+			"methods": ["POST", "PUT", "PATCH"],
+			"args": {
+				"id": {},
+				"date": {},
+				"date_gmt": {},
+				"slug": {},
+				"status": {},
+				"password": {},
+				"title": {},
+				"content": {},
+				"excerpt": {},
+				"featured_media": {},
+				"comment_status": {},
+				"ping_status": {},
+				"template": {},
+				"trakt_type": {},
+				"trakt_genre": {},
+				"trakt_year": {},
+				"trakt_show": {},
+				"trakt_season": {},
+				"trakt_episode": {}
+			}
+		}, {
+			"methods": ["DELETE"],
+			"args": {
+				"id": {},
+				"force": {}
+			}
+		}]
+	},
+	"/wp/v2/taxonomies": {
+		"namespace": "wp/v2",
+		"methods": ["GET"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"context": {},
+				"type": {}
+			}
+		}]
+	},
+	"/wp/v2/taxonomies/(?P<taxonomy>[\\w-]+)": {
+		"namespace": "wp/v2",
+		"methods": ["GET"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"taxonomy": {},
+				"context": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_type": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"context": {},
+				"page": {},
+				"per_page": {},
+				"search": {},
+				"exclude": {},
+				"include": {},
+				"offset": {},
+				"order": {},
+				"orderby": {},
+				"hide_empty": {},
+				"post": {},
+				"slug": {}
+			}
+		}, {
+			"methods": ["POST"],
+			"args": {
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_type/(?P<id>[\\d]+)": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"id": {},
+				"context": {}
+			}
+		}, {
+			"methods": ["POST", "PUT", "PATCH"],
+			"args": {
+				"id": {},
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}, {
+			"methods": ["DELETE"],
+			"args": {
+				"id": {},
+				"force": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_genre": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"context": {},
+				"page": {},
+				"per_page": {},
+				"search": {},
+				"exclude": {},
+				"include": {},
+				"offset": {},
+				"order": {},
+				"orderby": {},
+				"hide_empty": {},
+				"post": {},
+				"slug": {}
+			}
+		}, {
+			"methods": ["POST"],
+			"args": {
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_genre/(?P<id>[\\d]+)": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"id": {},
+				"context": {}
+			}
+		}, {
+			"methods": ["POST", "PUT", "PATCH"],
+			"args": {
+				"id": {},
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}, {
+			"methods": ["DELETE"],
+			"args": {
+				"id": {},
+				"force": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_year": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"context": {},
+				"page": {},
+				"per_page": {},
+				"search": {},
+				"exclude": {},
+				"include": {},
+				"offset": {},
+				"order": {},
+				"orderby": {},
+				"hide_empty": {},
+				"post": {},
+				"slug": {}
+			}
+		}, {
+			"methods": ["POST"],
+			"args": {
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_year/(?P<id>[\\d]+)": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"id": {},
+				"context": {}
+			}
+		}, {
+			"methods": ["POST", "PUT", "PATCH"],
+			"args": {
+				"id": {},
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}, {
+			"methods": ["DELETE"],
+			"args": {
+				"id": {},
+				"force": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_show": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"context": {},
+				"page": {},
+				"per_page": {},
+				"search": {},
+				"exclude": {},
+				"include": {},
+				"offset": {},
+				"order": {},
+				"orderby": {},
+				"hide_empty": {},
+				"post": {},
+				"slug": {}
+			}
+		}, {
+			"methods": ["POST"],
+			"args": {
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_show/(?P<id>[\\d]+)": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"id": {},
+				"context": {}
+			}
+		}, {
+			"methods": ["POST", "PUT", "PATCH"],
+			"args": {
+				"id": {},
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}, {
+			"methods": ["DELETE"],
+			"args": {
+				"id": {},
+				"force": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_season": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"context": {},
+				"page": {},
+				"per_page": {},
+				"search": {},
+				"exclude": {},
+				"include": {},
+				"offset": {},
+				"order": {},
+				"orderby": {},
+				"hide_empty": {},
+				"post": {},
+				"slug": {}
+			}
+		}, {
+			"methods": ["POST"],
+			"args": {
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_season/(?P<id>[\\d]+)": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"id": {},
+				"context": {}
+			}
+		}, {
+			"methods": ["POST", "PUT", "PATCH"],
+			"args": {
+				"id": {},
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}, {
+			"methods": ["DELETE"],
+			"args": {
+				"id": {},
+				"force": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_episode": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"context": {},
+				"page": {},
+				"per_page": {},
+				"search": {},
+				"exclude": {},
+				"include": {},
+				"offset": {},
+				"order": {},
+				"orderby": {},
+				"hide_empty": {},
+				"post": {},
+				"slug": {}
+			}
+		}, {
+			"methods": ["POST"],
+			"args": {
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}]
+	},
+	"/wp/v2/trakt_episode/(?P<id>[\\d]+)": {
+		"namespace": "wp/v2",
+		"methods": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		"endpoints": [{
+			"methods": ["GET"],
+			"args": {
+				"id": {},
+				"context": {}
+			}
+		}, {
+			"methods": ["POST", "PUT", "PATCH"],
+			"args": {
+				"id": {},
+				"description": {},
+				"name": {},
+				"slug": {},
+				"meta": {}
+			}
+		}, {
+			"methods": ["DELETE"],
+			"args": {
+				"id": {},
+				"force": {}
+			}
+		}]
+	}
+}
