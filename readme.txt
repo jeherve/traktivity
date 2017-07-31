@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 1.1.3
+Stable tag: 2.0.0
 Requires at least: 4.7
 Tested up to: 4.8
 License: GPLv2+
@@ -46,6 +46,7 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 Release Date:
 
 * New Widget to list recent events recorded by our plugin.
+* New Dashboard Interface.
 
 = 1.1.3 =
 Release Date: March 5, 2017
