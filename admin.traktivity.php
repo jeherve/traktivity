@@ -33,6 +33,16 @@ add_action( 'admin_menu', 'traktivity_dashboard_menu', 1 );
 function traktivity_submenu_order( $menu_ord ) {
 	global $submenu;
 
+	// Stop right here if we are looking at a Network Admin screen.
+	if ( is_network_admin() ) {
+		return $menu_ord;
+	}
+
+	// Stop if the user is not an admin.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return $menu_ord;
+	}
+
 	// Get the original key of the dashboard submenu item.
 	foreach ( $submenu['edit.php?post_type=traktivity_event'] as $key => $details ) {
 		if ( 'traktivity_dashboard' == $details[2] ) {
