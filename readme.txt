@@ -42,6 +42,11 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 
 == Changelog ==
 
+= 2.0.1 =
+Release Date: July 31, 2017
+
+* Avoid PHP warnings on network admin pages.
+
 = 2.0.0 =
 Release Date: July 31, 2017
 
