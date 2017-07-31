@@ -7,9 +7,11 @@ class Nav extends React.Component {
 		return (
 			<nav>
 				<ul>
-					<li><Link to={{ pathname: '/' }}>{traktivity_dash.nav_dash}</Link></li>
-					<li><Link to='/parameters'>{traktivity_dash.nav_params}</Link></li>
-					<li><Link to='/faq'>{traktivity_dash.nav_faq}</Link></li>
+					{ /*
+					<li><Link to={{ pathname: traktivity_dash.dash_url }}>{traktivity_dash.nav_dash}</Link></li>
+					<li><Link to={`${traktivity_dash.dash_url}/parameters`}>{traktivity_dash.nav_params}</Link></li>
+					<li><Link to={`${traktivity_dash.dash_url}/faq`}>{traktivity_dash.nav_faq}</Link></li>
+					*/ }
 				</ul>
 			</nav>
 		)
