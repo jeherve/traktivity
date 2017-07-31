@@ -40,6 +40,15 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 
 == Frequently Asked Questions ==
 
+== Screenshots ==
+
+1. Dashboard: Discover the plugin and how to set it up.
+2. Configuration: Link the plugin to your Trakt.tv account to get started.
+3. Events: Everything you watch gets logged, right in your dashboard.
+4. Sort: you can then search and sort everything.
+5. Genres: Multiple details are logged for each event, like the movie or show's genre.
+6. Movie: example of a movie and some of the details logged for that movie.
+
 == Changelog ==
 
 = 2.0.1 =
