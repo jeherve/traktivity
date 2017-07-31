@@ -8,3 +8,6 @@ npm-debug.log
 *.unison.tmp
 .babelrc
 webpack.config.js
+_build/*.map
+admin/components
+admin/app.js
