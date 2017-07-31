@@ -46,6 +46,7 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 Release Date: July 31, 2017
 
 * Avoid PHP warnings on network admin pages.
+* Avoid encoded HTML in notices.
 
 = 2.0.0 =
 Release Date: July 31, 2017

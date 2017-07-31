@@ -335,7 +335,7 @@ class Traktivity_Api {
 		}
 
 		return new WP_REST_Response(
-			esc_html__( 'Synchronization has started. Give it a bit of time now. You can monitor progress in the "All Trakt.tv Events" menu.', 'traktivity' ),
+			esc_html__( 'Synchronization has started. Give it a bit of time now. You can monitor progress in the All Trakt.tv Events menu.', 'traktivity' ),
 			200
 		);
 	}
