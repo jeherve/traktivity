@@ -335,11 +335,7 @@ class Traktivity_Api {
 		}
 
 		return new WP_REST_Response(
-			sprintf(
-				/* Translators: link to list of existing events in the dashboard. */
-				__( 'Synchronization has started. Give it a bit of time now. You can monitor progress <a href="%s">here</a>.', 'traktivity' ),
-				esc_url( get_admin_url( null, 'edit.php?post_type=traktivity_event' ) )
-			),
+			esc_html__( 'Synchronization has started. Give it a bit of time now. You can monitor progress in the "All Trakt.tv Events" menu.', 'traktivity' ),
 			200
 		);
 	}
