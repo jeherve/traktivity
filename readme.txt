@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 Requires at least: 4.7
 Tested up to: 4.8
 License: GPLv2+
