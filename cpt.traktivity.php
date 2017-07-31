@@ -32,6 +32,8 @@ class Traktivity_Data_Storage {
 		// Term Meta display.
 		add_filter( 'manage_edit-trakt_show_columns', array( $this, 'show_poster_column' ) );
 		add_filter( 'manage_trakt_show_custom_column', array( $this, 'show_poster_display_in_column' ), 10, 3 );
+		add_filter( 'manage_trakt_show_custom_column', array( $this, 'show_network_display_in_column' ), 11, 3 );
+		add_filter( 'manage_trakt_show_custom_column', array( $this, 'show_imdb_display_in_column' ), 12, 3 );
 	}
 
 	/**
@@ -400,14 +402,16 @@ class Traktivity_Data_Storage {
 	}
 
 	/**
-	 * Add a new "Poster" column to the show list in wp-admin.
+	 * Add new columns to the show list in wp-admin, using Term meta.
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param array $columns Array of columns on the screen we hook into.
 	 */
 	public function show_poster_column( $columns ) {
-		$columns['show_poster'] = esc_html__( 'Poster', 'traktivity' );
+		$columns['show_poster']  = esc_html__( 'Poster', 'traktivity' );
+		$columns['show_network'] = esc_html__( 'Network', 'traktivity' );
+		$columns['show_imdb']    = esc_html__( 'On IMDb', 'traktivity' );
 
 		return $columns;
 	}
@@ -437,6 +441,75 @@ class Traktivity_Data_Storage {
 				$content,
 				'style="max-width:100%;"',
 				wp_get_attachment_thumb_url( $show_poster['id'] )
+			);
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Display the Show Network on the show list.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $content     Column content.
+	 * @param string $column_name Column name.
+	 * @param int    $term_id     Term ID.
+	 */
+	public function show_network_display_in_column( $content, $column_name, $term_id ) {
+		global $feature_groups;
+
+		if ( 'show_network' != $column_name ) {
+			return $content;
+		}
+
+		$term_id = absint( $term_id );
+		$show_network = get_term_meta( $term_id, 'show_network', true );
+
+		if ( ! empty( $show_network ) ) {
+			$content = sprintf(
+				'%1$s%2$s',
+				$content,
+				esc_html( $show_network )
+			);
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Display the Show IMDb link on the show list.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $content     Column content.
+	 * @param string $column_name Column name.
+	 * @param int    $term_id     Term ID.
+	 */
+	public function show_imdb_display_in_column( $content, $column_name, $term_id ) {
+		global $feature_groups;
+
+		if ( 'show_imdb' != $column_name ) {
+			return $content;
+		}
+
+		$term_id = absint( $term_id );
+		$show_ids = get_term_meta( $term_id, 'show_external_ids', true );
+
+		if (
+			is_array( $show_ids )
+			&& isset( $show_ids['imdb'] )
+			&& ! empty( $show_ids['imdb'] )
+		) {
+			$link = sprintf(
+				'http://www.imdb.com/title/%1$s/',
+				esc_attr( $show_ids['imdb'] )
+			);
+			$content = sprintf(
+				'%1$s<a href="%2$s">%3$s</a>',
+				$content,
+				esc_url( $link ),
+				esc_html__( 'View On IMDb', 'traktivity' )
 			);
 		}
 
