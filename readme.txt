@@ -43,7 +43,7 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 == Changelog ==
 
 = 2.0.0 =
-Release Date:
+Release Date: July 31, 2017
 
 * New Widget to list recent events recorded by our plugin.
 * New Dashboard Interface.
