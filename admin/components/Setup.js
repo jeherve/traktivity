@@ -71,7 +71,7 @@ class Setup extends React.Component {
 			},
 			body: JSON.stringify(settings),
 		};
-		const settingsPromise = fetch( `${traktivity_dash.api_url}/traktivity/v1/settings/edit`, postOptions );
+		const settingsPromise = fetch( `${traktivity_dash.api_url}traktivity/v1/settings/edit`, postOptions );
 		return settingsPromise
 			.then((response) => {
 				if (response.status === 200 ) {
@@ -170,7 +170,7 @@ class Setup extends React.Component {
 				settings
 			),
 		};
-		const settingsPromise = fetch( `${traktivity_dash.api_url}/traktivity/v1/settings/edit`, postOptions );
+		const settingsPromise = fetch( `${traktivity_dash.api_url}traktivity/v1/settings/edit`, postOptions );
 		return settingsPromise
 			.then((response) => {
 				if (response.status === 200 ) {
@@ -220,7 +220,7 @@ class Setup extends React.Component {
 				'X-WP-Nonce': traktivity_dash.api_nonce
 			},
 		};
-		const checkCredsPromise = fetch( `${traktivity_dash.api_url}/traktivity/v1/connection/${username}/${key}`, fetchOptions );
+		const checkCredsPromise = fetch( `${traktivity_dash.api_url}traktivity/v1/connection/${username}/${key}`, fetchOptions );
 		return checkCredsPromise
 			.then((response) => response.json())
 			.then((body) => {
@@ -258,7 +258,7 @@ class Setup extends React.Component {
 				'X-WP-Nonce': traktivity_dash.api_nonce
 			},
 		};
-		const checkCredsPromise = fetch( `${traktivity_dash.api_url}/traktivity/v1/tmdb/${key}`, fetchOptions );
+		const checkCredsPromise = fetch( `${traktivity_dash.api_url}traktivity/v1/tmdb/${key}`, fetchOptions );
 		return checkCredsPromise
 			.then((response) => response.json())
 			.then((body) => {
@@ -295,7 +295,7 @@ class Setup extends React.Component {
 				'X-WP-Nonce': traktivity_dash.api_nonce
 			}
 		};
-		const syncPromise = fetch( `${traktivity_dash.api_url}/traktivity/v1/sync`, postOptions );
+		const syncPromise = fetch( `${traktivity_dash.api_url}traktivity/v1/sync`, postOptions );
 		return syncPromise
 			.then((response) => response.json())
 			.then((body) => {
