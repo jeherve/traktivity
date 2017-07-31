@@ -1,10 +1,15 @@
 /* External dependencies */
 import React from 'react';
 
+/* Internal dependencies */
+import Nav from './Nav';
+
 class Footer extends React.Component {
 	render() {
 		return (
-			<div className="footer">Our footer.</div>
+			<div className="footer">
+				<Nav />
+			</div>
 		)
 	}
 }
