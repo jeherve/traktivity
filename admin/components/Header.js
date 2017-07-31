@@ -1,5 +1,6 @@
 /* External dependencies */
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /* Internal dependencies */
 import Nav from './Nav.js';
@@ -17,5 +18,9 @@ class Header extends React.Component {
 		)
 	}
 }
+
+Header.propTypes = {
+	step: PropTypes.number.isRequired,
+};
 
 export default Header;

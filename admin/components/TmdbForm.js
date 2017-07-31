@@ -1,6 +1,7 @@
 /* External dependencies */
 import React from 'react';
 import Gridicon from 'gridicons';
+import PropTypes from 'prop-types';
 
 /* Internal dependencies */
 import Notice from './Notice';
@@ -55,5 +56,13 @@ class TmdbForm extends React.Component {
 		)
 	}
 }
+
+TmdbForm.propTypes = {
+	tmdb: PropTypes.object.isRequired,
+	saveCreds: PropTypes.func.isRequired,
+	notice: PropTypes.object.isRequired,
+	removeNotice: PropTypes.func.isRequired,
+	nextStep: PropTypes.func.isRequired,
+};
 
 export default TmdbForm;

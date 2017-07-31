@@ -1,6 +1,7 @@
 /* External dependencies */
 import React from 'react';
 import Gridicon from 'gridicons';
+import PropTypes from 'prop-types';
 
 class Notice extends React.Component {
 	constructor() {
@@ -60,5 +61,10 @@ class Notice extends React.Component {
 		)
 	}
 }
+
+Notice.propTypes = {
+	notice: PropTypes.object,
+	removeNotice: PropTypes.func.isRequired,
+};
 
 export default Notice;

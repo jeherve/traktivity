@@ -1,5 +1,6 @@
 /* External dependencies */
 import React from 'react';
+import PropTypes from 'prop-types';
 
 class Intro extends React.Component {
 	render() {
@@ -14,5 +15,9 @@ class Intro extends React.Component {
 		)
 	}
 }
+
+Intro.propTypes = {
+	nextStep: PropTypes.func.isRequired,
+};
 
 export default Intro;

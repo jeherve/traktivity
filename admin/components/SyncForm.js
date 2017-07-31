@@ -1,5 +1,6 @@
 /* External dependencies */
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /* Internal dependencies */
 
@@ -17,5 +18,10 @@ class SyncForm extends React.Component {
 		)
 	}
 }
+
+SyncForm.propTypes = {
+	sync: PropTypes.object.isRequired,
+	nextStep: PropTypes.func.isRequired,
+};
 
 export default SyncForm;
