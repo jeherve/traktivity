@@ -536,6 +536,27 @@ class Traktivity_Calls {
 						foreach ( $term_taxonomy_ids as $term_taxonomy_id ) {
 							$term_id_object = get_term_by( 'term_taxonomy_id', $term_taxonomy_id, 'trakt_show', ARRAY_A );
 							/**
+							 * Let's increment our total runtime counter for that show.
+							 */
+							if (
+								is_array( $term_id_object )
+								&& 'trakt_show' === $term_id_object['taxonomy']
+								&& ! empty( $meta['trakt_runtime'] )
+							) {
+								$term_id = (int) $term_id_object['term_id'];
+
+								$runtime = get_term_meta( $term_id, 'show_runtime', true );
+								// If we don't have data yet, run a sync for all existing episodes of that show.
+								if ( empty( $runtime ) ) {
+									$runtime = $this->series_total_runtime_sync( $term_id );
+								} elseif ( is_numeric( $runtime ) ) {
+									$runtime = $runtime + $meta['trakt_runtime'];
+								}
+
+								update_term_meta( $term_id, 'show_runtime', $runtime );
+							}
+
+							/**
 							 * Let's search for show taxonomies with empty descriptions.
 							 * This means these shows weren't existing before. We just created them.
 							 * We will consequently give them a description, a show poster, and attach a list of IDs that can be used to retrieve more data later.
@@ -589,6 +610,41 @@ class Traktivity_Calls {
 			} // End loop for each event.
 		} // End check for valid array of events.
 	} // End publish_event().
+
+	/**
+	 * Add up runtime from all recorded events for a specific series.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param int $term_id Series' term ID.
+	 *
+	 * @return string $runtime Total runtime for this series.
+	 */
+	private function series_total_runtime_sync( $term_id ) {
+		$runtime = '';
+
+		$query_args = array(
+			'post_type'      => 'traktivity_event',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'tax_query'      => array(
+				array(
+					'taxonomy' => 'trakt_show',
+					'field'    => 'term_id',
+					'terms'    => $term_id,
+				),
+			),
+		);
+		$all_episodes = new WP_Query( $query_args );
+		while ( $all_episodes->have_posts() ) {
+			$all_episodes->the_post();
+
+			$runtime = $runtime + get_post_meta( $all_episodes->post->ID, 'trakt_runtime', true );
+		} // End while().
+		wp_reset_postdata();
+
+		return $runtime;
+	}
 
 	/**
 	 * Get all past Trakt.tv events from all Trakt.tv pages.

@@ -34,6 +34,7 @@ class Traktivity_Data_Storage {
 		add_filter( 'manage_trakt_show_custom_column', array( $this, 'show_poster_display_in_column' ), 10, 3 );
 		add_filter( 'manage_trakt_show_custom_column', array( $this, 'show_network_display_in_column' ), 11, 3 );
 		add_filter( 'manage_trakt_show_custom_column', array( $this, 'show_imdb_display_in_column' ), 12, 3 );
+		add_filter( 'manage_trakt_show_custom_column', array( $this, 'show_runtime_display_in_column' ), 13, 3 );
 	}
 
 	/**
@@ -412,6 +413,7 @@ class Traktivity_Data_Storage {
 		$columns['show_poster']  = esc_html__( 'Poster', 'traktivity' );
 		$columns['show_network'] = esc_html__( 'Network', 'traktivity' );
 		$columns['show_imdb']    = esc_html__( 'On IMDb', 'traktivity' );
+		$columns['show_runtime'] = esc_html__( 'Runtime', 'traktivity' );
 
 		return $columns;
 	}
@@ -510,6 +512,47 @@ class Traktivity_Data_Storage {
 				$content,
 				esc_url( $link ),
 				esc_html__( 'View On IMDb', 'traktivity' )
+			);
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Display the Show's total runtime on the show list.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $content     Column content.
+	 * @param string $column_name Column name.
+	 * @param int    $term_id     Term ID.
+	 */
+	public function show_runtime_display_in_column( $content, $column_name, $term_id ) {
+		global $feature_groups;
+
+		if ( 'show_runtime' != $column_name ) {
+			return $content;
+		}
+
+		$term_id = absint( $term_id );
+		$show_runtime = get_term_meta( $term_id, 'show_runtime', true );
+
+		if ( ! empty( $show_runtime ) ) {
+			$days = floor( $show_runtime / (24 * 60) );
+			$hours = floor( $show_runtime / 60 );
+			$mins = $show_runtime % 60;
+			$duration = sprintf(
+				/* Translators: %1$s and %2$s are either nothing, either a number of days / hours followed by "days" or "hours". %3$s is a number of minutes. */
+				esc_html__( '%1$s%2$s%3$s minutes', 'traktivity' ),
+				$days ? $days . ' days ' : '',
+				$hours ? $hours . ' hours ' : '',
+				$mins
+			);
+
+			$content = sprintf(
+				'%1$s%2$s',
+				$content,
+				esc_html( $duration )
 			);
 		}
 

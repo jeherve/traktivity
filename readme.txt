@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 2.0.1
+Stable tag: 2.1.0
 Requires at least: 4.7
 Tested up to: 4.8
 License: GPLv2+
@@ -50,6 +50,11 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 6. Movie: example of a movie and some of the details logged for that movie.
 
 == Changelog ==
+
+= 2.1.0 =
+Release Date: August 1, 2017
+
+* Start recording total runtime for each TV show, saved in term meta.
 
 = 2.0.1 =
 Release Date: July 31, 2017
