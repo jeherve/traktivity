@@ -311,6 +311,21 @@ class Traktivity_Api {
 			);
 		}
 
+		// If the 'total_runtime' argument was sent with the request, only recalculate total runtime for each series.
+		if (
+			isset( $request['type'] )
+			&& 'total_runtime' === $request['type']
+		) {
+			if ( ! wp_next_scheduled( 'traktivity_total_runtime_sync' ) ) {
+				wp_schedule_single_event( time(), 'traktivity_total_runtime_sync' );
+			}
+
+			return new WP_REST_Response(
+				esc_html__( 'We are now recalcutating total runtime for each one of the shows you have watched. Give it a bit of time.', 'traktivity' ),
+				200
+			);
+		}
+
 		// Return an error if Synchronization is already complete. No need to run it again.
 		if (
 			isset( $options['full_sync'], $options['full_sync']['status'] )

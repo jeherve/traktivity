@@ -6,13 +6,14 @@ import PropTypes from 'prop-types';
 /* Internal dependencies */
 import Notice from './Notice';
 import routes from '../routes.json';
+import SyncShowTime from './SyncShowTime';
 
 class Dashboard extends React.Component {
 	constructor() {
 		super();
 
 		this.renderRecentEvents = this.renderRecentEvents.bind(this);
-		this.renderImage = this.renderImage.bind(this);
+		this.launchRuntimeSync = this.launchRuntimeSync.bind(this);
 
 		/* API Data */
 		this.site = new WPAPI({
@@ -84,8 +85,8 @@ class Dashboard extends React.Component {
 		)
 	}
 
-	renderImage(event) {
-		return null;
+	launchRuntimeSync() {
+		this.props.launchSync('total_runtime');
 	}
 
 	render() {
@@ -105,6 +106,10 @@ class Dashboard extends React.Component {
 						<p>{traktivity_dash.trakt_dash_credits}</p>
 					</div>
 					{this.renderRecentEvents()}
+					<SyncShowTime
+						launchRuntimeSync={this.launchRuntimeSync}
+						sync={this.props.sync}
+					/>
 				</div>
 			</div>
 		)

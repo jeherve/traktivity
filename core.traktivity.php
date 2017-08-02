@@ -28,6 +28,9 @@ class Traktivity_Calls {
 
 		// Trigger a single event to launch the full sync loop.
 		add_action( 'traktivity_full_sync', array( $this, 'full_sync' ) );
+
+		// Trigger a single event to launch the full sync loop.
+		add_action( 'traktivity_total_runtime_sync', array( $this, 'total_runtime_sync' ) );
 	}
 
 	/**
@@ -492,7 +495,7 @@ class Traktivity_Calls {
 				$post_id = wp_insert_post( $event_args );
 
 				// Record stats.
-				$this->record_stats( $post_id, $meta, $event->watched_at );
+				//$this->record_stats( $post_id, $meta, $event->watched_at );
 
 				/**
 				 * Grab the event image, add it to the post content.
@@ -650,6 +653,64 @@ class Traktivity_Calls {
 	}
 
 	/**
+	 * Recalculate total runtime for each series.
+	 *
+	 * @since 2.2.0
+	 *
+	 * @return bool $done Returns true when done.
+	 */
+	public function total_runtime_sync() {
+		// Get sync status.
+		$status = $this->get_option( 'full_sync' );
+
+		// Let's not start sync if it's already running.
+		if (
+			! empty( $status['runtime'] )
+			&& 'in_progress' === $status['runtime']['status']
+		) {
+			return true;
+		}
+
+		/**
+		 * First let's get a list of term IDs for each one of the shows currently recorded.
+		 */
+		$shows = get_terms( array(
+			'taxonomy'   => 'trakt_show',
+			'hide_empty' => false,
+			'fields'     => 'tt_ids',
+		) );
+
+		// Stop right here if we have no shows.
+		if ( ! is_array( $shows ) || empty( $shows ) ) {
+			return false;
+		}
+
+		// Set it to in progress.
+		if ( ! isset( $status['runtime'] ) ) {
+			$status['runtime'] = array(
+				'status' => 'in_progress',
+				'items'  => count( $shows ),
+			);
+		}
+
+		// Then loop through each show and calculate total runtime.
+		foreach ( $shows as $show ) {
+			error_log('recalcutating runtime for ' . $show);
+			$runtime = $this->series_total_runtime_sync( $show );
+			update_term_meta( $show, 'show_runtime', $runtime );
+		}
+
+		// We're done. Save options.
+		$status['runtime'] = array(
+			'status' => 'done',
+			'items'  => 0,
+		);
+		$this->update_option( 'full_sync', $status );
+
+		return true;
+	}
+
+	/**
 	 * Get all past Trakt.tv events from all Trakt.tv pages.
 	 *
 	 * @since 1.1.0
@@ -710,45 +771,6 @@ class Traktivity_Calls {
 		$this->update_option( 'full_sync', $status );
 
 		return true;
-	}
-
-	/**
-	 * Record Stats.
-	 *
-	 * While all data is attached to each individual post and can then easily be queried,
-	 * We also store some overall data for easy access later on, that won't need us running complicated queries.
-	 *
-	 * @since 2.2.0
-	 *
-	 * @param string $post_id  Post ID.
-	 * @param array  $meta     Array of Meta data added to the post.
-	 * @param string $date     Event date.
-	 */
-	private function record_stats( $post_id, $meta, $date ) {
-		$stats = get_option( 'traktivity_stats' );
-
-		// If that's the first time we're running this function, let's start with an empty object of stats.
-		if ( ! is_object( $stats ) ) {
-			$stats = new stdClass();
-		}
-
-	   // What do I need to store?
-	   /*
-	   Some ideas:
-	   http://docs.trakt.apiary.io/#reference/users/stats/get-stats
-	   https://developer.wordpress.com/docs/api/1.1/get/sites/%24site/stats/
-	   http://wpengineer.com/968/wordpress-working-with-options/
-	   - stats.
-		   time
-			   total
-			   year
-				   2016
-					   total
-					   01
-
-	   */
-
-		update_option( 'traktivity_stats', $stats );
 	}
 } // End class.
 new Traktivity_Calls();

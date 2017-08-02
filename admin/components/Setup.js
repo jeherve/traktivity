@@ -44,6 +44,7 @@ class Setup extends React.Component {
 			sync: {
 				status: `${traktivity_dash.sync_status}`,
 				pages: parseInt(traktivity_dash.sync_pages),
+				runtime: `${traktivity_dash.sync_runtime}`,
 			},
 		}
 	}
@@ -285,7 +286,7 @@ class Setup extends React.Component {
 			});
 	}
 
-	launchSync() {
+	launchSync( type = null ) {
 		const postOptions = {
 			credentials: 'same-origin',
 			method: 'POST',
@@ -293,20 +294,31 @@ class Setup extends React.Component {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json',
 				'X-WP-Nonce': traktivity_dash.api_nonce
-			}
+			},
+			body: JSON.stringify(
+				{type}
+			),
 		};
 		const syncPromise = fetch( `${traktivity_dash.api_url}traktivity/v1/sync`, postOptions );
 		return syncPromise
 			.then((response) => response.json())
 			.then((body) => {
+				// Get a copy of our state.
+				let sync = {...this.state.sync};
+
+				// Change the status to the matching body.
+				if ( type === 'total_runtime' ) {
+					sync.runtime = 'in_progress';
+				} else {
+					sync.status = body;
+				}
+
 				this.setState({
 					notice: {
 						message: body,
 						type: 'success',
 					},
-					sync: {
-						status: body,
-					}
+					sync
 				});
 			})
 			.catch((err) => {

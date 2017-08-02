@@ -102,6 +102,7 @@ function traktivity_dashboard_scripts( $hook ) {
 		'traktivity_step'        => isset( $options['step'] ) ? absint( $options['step'] ) : 1,
 		'sync_status'            => isset( $options['full_sync'], $options['full_sync']['status'] ) ? esc_attr( $options['full_sync']['status'] ) : '',
 		'sync_pages'             => isset( $options['full_sync'], $options['full_sync']['pages'] ) ? intval( $options['full_sync']['pages'] ) : null,
+		'sync_runtime'           => isset( $options['full_sync'], $options['full_sync']['runtime']['status'] ) ? esc_attr( $options['full_sync']['runtime']['status'] ) : '',
 		'title'                  => esc_html__( 'Traktivity Dashboard', 'traktivity' ),
 		'tagline'                => esc_html__( 'Log your activity in front of the screen.', 'traktivity' ),
 		'intro'                  => esc_html__( "Do you like to go to the movies and would like to remember what movies you saw, and when? Traktivity is for you! Are you a TV addict, and want to keep track of all the shows you've binge-watched? Traktivity is for you!", 'traktivity' ),
@@ -138,6 +139,8 @@ function traktivity_dashboard_scripts( $hook ) {
 		'dashboard_sup_trakt_a'  => esc_html__( 'It is! If you\'d like to support the Trakt.tv service, you can sign up for a VIP account at trakt.tv/vip. By doing so you will get rid of the ads and unlock lots of VIP features!', 'traktivity' ),
 		'dash_faq_who'           => esc_html__( 'Who is behind this great plugin?', 'traktivity' ),
 		'trakt_dash_credits'     => esc_html__( 'Traktivity is not endorsed or certified by TMDb or Trakt.tv. It is just a little plugin developed by a TV addict, just like you. :)', 'traktivity' ),
+		'sync_runtime_title'     => esc_html__( 'Recalculate total runtime for each one of the series you have watched.', 'traktivity' ),
+		'sync_runtime_desc'      => esc_html__( 'If you used the Traktivity plugin before version 2.1.0 was released, it did not track the amount of time you had spent watching each series. This form allows you to recalculate runtime for all your series at once.', 'traktivity' ),
 	);
 	wp_localize_script( 'traktivity-dashboard', 'traktivity_dash', $traktivity_dash_args );
 
