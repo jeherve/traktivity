@@ -60,18 +60,20 @@ class Dashboard extends React.Component {
 		const events = this.state.recent;
 
 		const list = events.map(event => {
-			return (
-				<a href={event.link} title={event.title.rendered} className="event-link" key={event.id}>
-					<img
-						className="event-image"
-						src={event._embedded['wp:featuredmedia'][0].media_details.sizes.medium.source_url}
-						alt={event._embedded['wp:featuredmedia'][0].alt_text}
-						width={event._embedded['wp:featuredmedia'][0].media_details.sizes.medium.width}
-						height={event._embedded['wp:featuredmedia'][0].media_details.sizes.medium.height}
-					/>
-				<span className="event-title">{event.title.rendered}</span>
-				</a>
-			)
+			if ( event._embedded['wp:featuredmedia'] != null ) {
+				return (
+					<a href={event.link} title={event.title.rendered} className="event-link" key={event.id}>
+						<img
+							className="event-image"
+							src={event._embedded['wp:featuredmedia'][0].media_details.sizes.medium.source_url}
+							alt={event._embedded['wp:featuredmedia'][0].alt_text}
+							width={event._embedded['wp:featuredmedia'][0].media_details.sizes.medium.width}
+							height={event._embedded['wp:featuredmedia'][0].media_details.sizes.medium.height}
+						/>
+					<span className="event-title">{event.title.rendered}</span>
+					</a>
+				)
+			}
 		});
 
 		return (
