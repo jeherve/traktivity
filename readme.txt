@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 Requires at least: 4.7
 Tested up to: 4.8
 License: GPLv2+
@@ -50,6 +50,15 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 6. Movie: example of a movie and some of the details logged for that movie.
 
 == Changelog ==
+
+= 2.2.0 =
+Release Date: August 2, 2017
+
+* Start recording total time spent watching things.
+* New dashboard component to display that information.
+* Add option to recalculate runtime for all series from the dashboard.
+* Avoid errors when no Featured Image is set for an event.
+* Allow display of series's total runtime in a nice, translatable tally of years, days, hours, and minutes.
 
 = 2.1.0 =
 Release Date: August 1, 2017

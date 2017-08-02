@@ -101,13 +101,13 @@ class Traktivity_Api {
 		) );
 
 		/**
-		 * Traktivity Dashboard.
+		 * Traktivity Stats Info.
 		 *
-		 * @since 1.1.0
+		 * @since 2.2.0
 		 */
 		register_rest_route( 'traktivity/v1', '/stats', array(
 			'methods'             => WP_REST_Server::READABLE,
-			'callback'            => array( $this, 'dashboard' ),
+			'callback'            => array( $this, 'get_stats' ),
 		) );
 	}
 
@@ -449,7 +449,7 @@ class Traktivity_Api {
 	 *
 	 * @return WP_REST_Response $response Response with all stats.
 	 */
-	public function stats( $request ) {
+	public function get_stats( $request ) {
 		$stats = get_option( 'traktivity_stats' );
 
 		return new WP_REST_Response(
