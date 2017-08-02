@@ -34,7 +34,7 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 == Installation ==
 
 1. Install the plugin either via the WordPress.org plugin directory, or by uploading the files to your server.
-2. Go to Traktivity > Settings in your dashboard.
+2. Go to Traktivity > Dashboard in your dashboard.
 3. Follow the instructions to set up the plugin.
 4. Sit back and watch something on TV. 📺
 
