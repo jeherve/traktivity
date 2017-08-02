@@ -538,21 +538,10 @@ class Traktivity_Data_Storage {
 		$show_runtime = get_term_meta( $term_id, 'show_runtime', true );
 
 		if ( ! empty( $show_runtime ) ) {
-			$days = floor( $show_runtime / (24 * 60) );
-			$hours = floor( $show_runtime / 60 );
-			$mins = $show_runtime % 60;
-			$duration = sprintf(
-				/* Translators: %1$s and %2$s are either nothing, either a number of days / hours followed by "days" or "hours". %3$s is a number of minutes. */
-				esc_html__( '%1$s%2$s%3$s minutes', 'traktivity' ),
-				$days ? $days . ' days ' : '',
-				$hours ? $hours . ' hours ' : '',
-				$mins
-			);
-
 			$content = sprintf(
 				'%1$s%2$s',
 				$content,
-				esc_html( $duration )
+				esc_html( Traktivity_Stats::convert_time( $show_runtime ) )
 			);
 		}
 
