@@ -27,7 +27,7 @@ class Traktivity_Stats {
 	 *
 	 * @param string|int $minutes Number of minutes.
 	 *
-	 * @return string $duration Time.
+	 * @return string $runtime Time.
 	 */
 	public static function convert_time( $minutes = 0 ) {
 		$minutes_per_hour = 60;
@@ -44,16 +44,20 @@ class Traktivity_Stats {
 		$minutes_left = $hour_minutes % $minutes_per_hour;
 		$minutes = ceil( $minutes_left );
 
-		$display_minutes = sprintf(
-			/* Translators: %1$d is the number of minutes */
-			_n(
-				'%1$d minute',
-				'%1$d minutes',
-				$minutes,
-				'traktivity'
-			),
-			$minutes
-		);
+		if ( 0 < $minutes ) {
+			$display_minutes = sprintf(
+				/* Translators: %1$d is the number of minutes */
+				_n(
+					'%1$d minute',
+					'%1$d minutes',
+					$minutes,
+					'traktivity'
+				),
+				$minutes
+			);
+		} else {
+			$display_minutes = '';
+		}
 
 		if ( 0 < $hours ) {
 			$display_hours = sprintf(
@@ -68,12 +72,11 @@ class Traktivity_Stats {
 				$display_minutes
 			);
 		} else {
-			return $display_minutes;
+			$display_hours = $display_minutes;
 		}
 
 		if ( 0 < $days ) {
-			// Build the final string.
-			return sprintf(
+			$runtime = sprintf(
 				/* Translators: %1$d is the number of days, %2$s is the number of hours and minutes. */
 				_n(
 					'%1$d day %2$s',
@@ -85,8 +88,10 @@ class Traktivity_Stats {
 				$display_hours
 			);
 		} else {
-			return $display_hours;
+			$runtime = $display_hours;
 		}
+
+		return $runtime;
 	}
 
 	/**
