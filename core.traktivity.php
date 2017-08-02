@@ -706,7 +706,6 @@ class Traktivity_Calls {
 
 		// Then loop through each show and calculate total runtime.
 		foreach ( $shows as $show ) {
-			error_log('recalcutating runtime for ' . $show);
 			$runtime = $this->series_total_runtime_sync( $show );
 			update_term_meta( $show, 'show_runtime', $runtime );
 		}
