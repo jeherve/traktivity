@@ -55,33 +55,38 @@ class Traktivity_Stats {
 			$minutes
 		);
 
-		$display_hours = sprintf(
-			/* Translators: %1$d is the number of hours, %2$d is the number of minutes. */
-			_n(
-				'%1$d hour %2$s',
-				'%1$d hours %2$s',
+		if ( 0 < $hours ) {
+			$display_hours = sprintf(
+				/* Translators: %1$d is the number of hours, %2$d is the number of minutes. */
+				_n(
+					'%1$d hour %2$s',
+					'%1$d hours %2$s',
+					$hours,
+					'traktivity'
+				),
 				$hours,
-				'traktivity'
-			),
-			$hours,
-			$display_minutes
-		);
+				$display_minutes
+			);
+		} else {
+			return $display_minutes;
+		}
 
-		// Build the final string.
-		$duration = sprintf(
-			/* Translators: %1$d is the number of days, %2$s is the number of hours and minutes. */
-			_n(
-				'%1$d day %2$s',
-				'%1$d days %2$s',
+		if ( 0 < $days ) {
+			// Build the final string.
+			return sprintf(
+				/* Translators: %1$d is the number of days, %2$s is the number of hours and minutes. */
+				_n(
+					'%1$d day %2$s',
+					'%1$d days %2$s',
+					$days,
+					'traktivity'
+				),
 				$days,
-				'traktivity'
-			),
-			$days,
-			$display_hours
-		);
-
-		// Finally, let's return the final result.
-		return $duration;
+				$display_hours
+			);
+		} else {
+			return $display_hours;
+		}
 	}
 
 	/**
