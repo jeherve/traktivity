@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import Notice from './Notice';
 import routes from '../routes.json';
 import SyncShowTime from './SyncShowTime';
+import StatsOverview from './stats/StatsOverview';
 
 class Dashboard extends React.Component {
 	constructor() {
@@ -23,7 +24,10 @@ class Dashboard extends React.Component {
 
 		// Initial state.
 		this.state = {
-			recent : []
+			recent : [],
+			stats: {
+				total_time_watched: `${traktivity_dash.total_time_watched}`,
+			},
 		};
 	}
 
@@ -105,6 +109,9 @@ class Dashboard extends React.Component {
 						<p><strong>{traktivity_dash.dash_faq_who}</strong></p>
 						<p>{traktivity_dash.trakt_dash_credits}</p>
 					</div>
+					<StatsOverview
+						stats={this.state.stats}
+					/>
 					{this.renderRecentEvents()}
 					<SyncShowTime
 						launchRuntimeSync={this.launchRuntimeSync}

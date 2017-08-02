@@ -93,10 +93,70 @@ class Traktivity_Stats {
 				$display_hours
 			);
 		} else {
-			$runtime = $display_hours;
+			$display_days = $display_hours;
+		}
+
+		if ( 0 < $years ) {
+			return sprintf(
+				/* Translators: %1$d is the number of years, %2$s is the number of days, hours and minutes. */
+				_n(
+					'%1$d year %2$s',
+					'%1$d years %2$s',
+					$years,
+					'traktivity'
+				),
+				$years,
+				$display_days
+			);
+		} else {
+			$runtime = $display_days;
 		}
 
 		return $runtime;
+	}
+
+	/**
+	 * Create an option where we store the Total time spent in front of a screen.
+	 *
+	 * @since 2.2.0
+	 *
+	 * @return string $time Total time spent in front of a screen.
+	 */
+	public static function total_time_watched() {
+		$stats = get_option( 'traktivity_stats' );
+
+		// If that's the first time we're running this function, let's start with an empty array of stats.
+		if ( empty( $stats ) ) {
+			$stats = array();
+		}
+
+		// If the total time is already set, let's stop here.
+		if ( ! empty( $stats['total_time_watched'] ) ) {
+			return $stats['total_time_watched'];
+		}
+
+		// Let's pull all trakt_runtime post meta from all Traktivity events.
+		global $wpdb;
+		$post_meta = 'trakt_runtime';
+
+		$all_runtimes = $wpdb->get_col( $wpdb->prepare( "
+			SELECT pm.meta_value FROM {$wpdb->postmeta} pm
+			LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+			WHERE pm.meta_key = '%s'
+			AND p.post_status = 'publish'
+			AND p.post_type = 'traktivity_event'
+		", $post_meta ) );
+
+		if ( ! empty( $all_runtimes ) ) {
+			$stats['total_time_watched'] = array_sum( $all_runtimes );
+			// Save the value as an option.
+			update_option( 'traktivity_stats', $stats );
+
+			return $stats['total_time_watched'];
+		}
+
+		// Fallback.
+		return 0;
 	}
 
 	/**
@@ -114,7 +174,7 @@ class Traktivity_Stats {
 	private function record_stats( $post_id, $meta, $date ) {
 		$stats = get_option( 'traktivity_stats' );
 
-		// If that's the first time we're running this function, let's start with an empty object of stats.
+		// If that's the first time we're running this function, let's start with an empty array of stats.
 		if ( ! is_object( $stats ) ) {
 			$stats = new stdClass();
 		}

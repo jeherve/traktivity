@@ -91,6 +91,7 @@ function traktivity_dashboard_scripts( $hook ) {
 	wp_register_script( 'traktivity-dashboard', plugins_url( '_build/admin.js' , __FILE__ ), array(), $version, true );
 
 	$options = (array) get_option( 'traktivity' );
+	$stats = (array) get_option( 'traktivity_stats' );
 	$traktivity_dash_args = array(
 		'api_url'                => esc_url_raw( rest_url() ),
 		'site_url'               => esc_url_raw( home_url() ),
@@ -103,6 +104,7 @@ function traktivity_dashboard_scripts( $hook ) {
 		'sync_status'            => isset( $options['full_sync'], $options['full_sync']['status'] ) ? esc_attr( $options['full_sync']['status'] ) : '',
 		'sync_pages'             => isset( $options['full_sync'], $options['full_sync']['pages'] ) ? intval( $options['full_sync']['pages'] ) : null,
 		'sync_runtime'           => isset( $options['full_sync'], $options['full_sync']['runtime']['status'] ) ? esc_attr( $options['full_sync']['runtime']['status'] ) : '',
+		'total_time_watched'     => isset( $stats['total_time_watched'] ) ? Traktivity_Stats::convert_time( $stats['total_time_watched'] ) : '',
 		'title'                  => esc_html__( 'Traktivity Dashboard', 'traktivity' ),
 		'tagline'                => esc_html__( 'Log your activity in front of the screen.', 'traktivity' ),
 		'intro'                  => esc_html__( "Do you like to go to the movies and would like to remember what movies you saw, and when? Traktivity is for you! Are you a TV addict, and want to keep track of all the shows you've binge-watched? Traktivity is for you!", 'traktivity' ),
@@ -141,6 +143,12 @@ function traktivity_dashboard_scripts( $hook ) {
 		'trakt_dash_credits'     => esc_html__( 'Traktivity is not endorsed or certified by TMDb or Trakt.tv. It is just a little plugin developed by a TV addict, just like you. :)', 'traktivity' ),
 		'sync_runtime_title'     => esc_html__( 'Recalculate total runtime for each one of the series you have watched.', 'traktivity' ),
 		'sync_runtime_desc'      => esc_html__( 'If you used the Traktivity plugin before version 2.1.0 was released, it did not track the amount of time you had spent watching each series. This form allows you to recalculate runtime for all your series at once.', 'traktivity' ),
+		'stats_overview_title'   => esc_html__( 'In a nutshell', 'traktivity' ),
+		'tt_watched_desc'        => sprintf(
+			/* Translators: %1$s is a unit of time, in years, days, hours, or minutes. Always plural. */
+			esc_html__( 'You have already spent %1$s watching movies and TV series. Congrats!', 'traktivity' ),
+			isset( $stats['total_time_watched'] ) ? Traktivity_Stats::convert_time( $stats['total_time_watched'] ) : esc_html__( 'quite some time', 'traktivity' )
+		),
 	);
 	wp_localize_script( 'traktivity-dashboard', 'traktivity_dash', $traktivity_dash_args );
 

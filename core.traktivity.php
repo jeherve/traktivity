@@ -494,8 +494,19 @@ class Traktivity_Calls {
 				// Create our post.
 				$post_id = wp_insert_post( $event_args );
 
-				// Record stats.
-				//$this->record_stats( $post_id, $meta, $event->watched_at );
+				/**
+				 * Add event's runtime to stats.
+				 */
+				$stats = get_option( 'traktivity_stats' );
+
+				// Increment our total watched counter, but only if we have a running tally.
+				if ( ! empty( $stats['total_time_watched'] ) ) {
+					$stats['total_time_watched'] += $meta['trakt_runtime'];
+					update_option( 'traktivity_stats', $stats );
+				} else {
+					// No running tally? Run our function to create it once.
+					Traktivity_Stats::total_time_watched();
+				}
 
 				/**
 				 * Grab the event image, add it to the post content.
