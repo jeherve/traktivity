@@ -32,9 +32,14 @@ class Traktivity_Stats {
 	public static function convert_time( $minutes = 0 ) {
 		$minutes_per_hour = 60;
 		$minutes_per_day = 24 * $minutes_per_hour;
+		$minutes_per_year = 365 * $minutes_per_day;
+
+		// Get number of years.
+		$years = floor( $minutes / $minutes_per_year );
 
 		// Get number of days.
-		$days = floor( $minutes / $minutes_per_day );
+		$days_minutes = $minutes % $minutes_per_year;
+		$days = floor( $days_minutes / $minutes_per_day );
 
 		// Get number of hours.
 		$hour_minutes = $minutes % $minutes_per_day;
@@ -76,7 +81,7 @@ class Traktivity_Stats {
 		}
 
 		if ( 0 < $days ) {
-			$runtime = sprintf(
+			$display_days = sprintf(
 				/* Translators: %1$d is the number of days, %2$s is the number of hours and minutes. */
 				_n(
 					'%1$d day %2$s',
