@@ -526,7 +526,12 @@ class Traktivity_Calls {
 					$image = $this->get_item_poster( $event->type, $tmdb_id, $season_num, $episode_num );
 
 					if ( is_array( $image ) && ! empty( $image ) ) {
-						$post_image = $this->sideload_image( $image['url'], $post_id, $title, true );
+						if ( 'episode' === $event->type ) {
+							$image_title = $title . ' -- ' . $taxonomies['trakt_show'];
+						} else {
+							$image_title = $title;
+						}
+						$post_image = $this->sideload_image( $image['url'], $post_id, $image_title, true );
 
 						if ( ! empty( $post_image ) ) {
 							$post_with_image = array(

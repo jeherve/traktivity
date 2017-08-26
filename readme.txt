@@ -51,6 +51,11 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 
 == Changelog ==
 
+= 2.2.1 =
+Release Date:
+
+* Include show title in image title for all images generated for TV shows.
+
 = 2.2.0 =
 Release Date: August 2, 2017
 
