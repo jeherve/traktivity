@@ -4,7 +4,7 @@
  * Plugin URI: https://wordpress.org/plugins/traktivity
  * Description: Log your activity on Trakt.tv
  * Author: Jeremy Herve
- * Version: 2.2.0
+ * Version: 2.2.1
  * Author URI: https://jeremy.hu
  * License: GPL2+
  * Text Domain: traktivity
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-define( 'TRAKTIVITY__VERSION',          '2.2.0' );
+define( 'TRAKTIVITY__VERSION',          '2.2.1' );
 define( 'TRAKTIVITY__API_URL',          'https://api.trakt.tv' );
 define( 'TRAKTIVITY__API_VERSION',      '2' );
 define( 'TRAKTIVITY__TMDB_API_URL',     'https://api.themoviedb.org' );

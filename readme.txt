@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 Requires at least: 4.7
 Tested up to: 4.8
 License: GPLv2+
@@ -52,7 +52,7 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 == Changelog ==
 
 = 2.2.1 =
-Release Date:
+Release Date: August 26, 2017
 
 * Include show title in image title for all images generated for TV shows.
 
