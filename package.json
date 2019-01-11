@@ -36,7 +36,7 @@
     "babel-preset-stage-1": "6.24.1",
     "browser-sync": "2.26.3",
     "browser-sync-webpack-plugin": "2.2.2",
-    "eslint": "4.19.1",
+    "eslint": "5.12.0",
     "eslint-config-wpcalypso": "0.8.0",
     "eslint-plugin-jsx-a11y": "6.1.2",
     "eslint-plugin-react": "7.12.3",
