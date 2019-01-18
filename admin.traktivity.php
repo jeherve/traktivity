@@ -75,6 +75,50 @@ function traktivity_do_dashboard() {
 /**
  * Enqueue Dashboard scripts.
  *
+ * @since 3.0.0
+ *
+ * @param int $hook Hook suffix for the current admin page.
+ */
+function traktivity_dash_scripts( $hook ) {
+	global $traktivity_dashboard_page;
+
+	// Only add our script to our Dashboard page.
+	if ( $traktivity_dashboard_page !== $hook ) {
+		return;
+	}
+
+	$version = defined( 'WP_DEBUG' ) && true === WP_DEBUG ? time() : TRAKTIVITY__VERSION;
+	$deps    = array(
+		'wp-components',
+		'wp-element',
+		'wp-i18n',
+	);
+	wp_register_script( 'traktivity-dashboard', plugins_url( 'dist/admin.js', __FILE__ ), $deps, $version, true );
+
+	$options = (array) get_option( 'traktivity' );
+	$traktivity_dash_args = array(
+		'api_url'                => esc_url_raw( rest_url() ),
+		'site_url'               => esc_url_raw( home_url() ),
+		'api_nonce'              => wp_create_nonce( 'wp_rest' ),
+		'trakt_username'         => isset( $options['username'] ) ? esc_attr( $options['username'] ) : '',
+		'trakt_key'              => isset( $options['api_key'] ) ? esc_attr( $options['api_key'] ) : '',
+		'tmdb_key'               => isset( $options['tmdb_api_key'] ) ? esc_attr( $options['tmdb_api_key'] ) : '',
+		'traktivity_step'        => isset( $options['step'] ) ? absint( $options['step'] ) : 1,
+		'sync_status'            => isset( $options['full_sync'], $options['full_sync']['status'] ) ? esc_attr( $options['full_sync']['status'] ) : '',
+		'sync_pages'             => isset( $options['full_sync'], $options['full_sync']['pages'] ) ? intval( $options['full_sync']['pages'] ) : null,
+	);
+	wp_localize_script( 'traktivity-dashboard', 'traktivity_dash', $traktivity_dash_args );
+	wp_enqueue_script( 'traktivity-dashboard' );
+	wp_set_script_translations( 'traktivity-dashboard', 'traktivity' );
+
+	wp_register_style( 'traktivity-dashboard-styles', plugins_url( 'admin/css/dashboard.css', __FILE__ ), array(), $version );
+	wp_enqueue_style( 'traktivity-dashboard-styles' );
+}
+add_action( 'admin_enqueue_scripts', 'traktivity_dash_scripts' );
+
+/**
+ * Enqueue Dashboard scripts.
+ *
  * @since 2.0.0
  *
  * @param int $hook Hook suffix for the current admin page.
@@ -157,7 +201,7 @@ function traktivity_dashboard_scripts( $hook ) {
 	wp_enqueue_script( 'traktivity-dashboard' );
 	wp_enqueue_style( 'traktivity-dashboard-styles' );
 }
-add_action( 'admin_enqueue_scripts', 'traktivity_dashboard_scripts' );
+//add_action( 'admin_enqueue_scripts', 'traktivity_dashboard_scripts' );
 
 /**
  * Add link to the Settings page to the plugin menu.
