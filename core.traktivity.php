@@ -643,7 +643,7 @@ class Traktivity_Calls {
 	 * @return string $runtime Total runtime for this series.
 	 */
 	private function series_total_runtime_sync( $term_id ) {
-		$runtime = '';
+		$runtime = 0;
 
 		$query_args = array(
 			'post_type'      => 'traktivity_event',
