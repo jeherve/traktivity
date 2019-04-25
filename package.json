@@ -43,7 +43,7 @@
     "eslint-plugin-wpcalypso": "4.0.2",
     "file-loader": "3.0.1",
     "webpack": "4.30.0",
-    "webpack-dashboard": "3.0.4",
+    "webpack-dashboard": "3.0.5",
     "webpack-dev-middleware": "3.6.2",
     "webpack-dev-server": "3.3.1"
   },
