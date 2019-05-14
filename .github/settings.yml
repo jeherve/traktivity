@@ -18,16 +18,16 @@ repository:
 
 # Labels: define labels for Issues and Pull Requests
 labels:
-    - name: Accessibility
+    - name: "Accessibility"
     color: d4c5f9
     description: ""
-    - name: Admin Page
+    - name: "Admin Page"
     color: 006b75
     description: ""
     - name: Build
     color: ffa260
     description: ""
-    - name: DO NOT MERGE
+    - name: "DO NOT MERGE"
     color: b60205
     description: "Don't merge it!"
     - name: Docker
@@ -36,16 +36,16 @@ labels:
     - name: Docs
     color: d4c5f9
     description: ""
-    - name: Good For Community
+    - name: "Good For Community"
     color: d64daf
     description: "This issue can be tackled by community contributors."
     - name: Hacktoberfest
     color: 00aadc
-    description: Support open source and earn a limited edition T-shirt! https://hacktoberfest.digitalocean.com/
+    description: "Support open source and earn a limited edition T-shirt! https://hacktoberfest.digitalocean.com/"
     - name: Internationalization
     color: d4c5f9
-    description: i18n, adaptation to different languages
-    - name: Master Issue
+    description: "i18n, adaptation to different languages"
+    - name: "Master Issue"
     color: 5319e7
     description: ""
     - name: Multisite
@@ -119,7 +119,7 @@ labels:
     description: "It would be useful to add that PR to the testing list so it gets tested by our beta testers in details."
     - name: "[Status] Needs Unit Tests"
     color: f24f90
-    description: Some Unit Tests would be really useful to include with this PR.
+    description: "Some Unit Tests would be really useful to include with this PR."
     - name: "[Status] Proposal"
     color: FC2888
     description: ""
@@ -137,7 +137,7 @@ labels:
     description: ""
     - name: "[Type] Bug"
     color: fc2929
-    description: When a feature is broken and / or not performing as intended
+    description: "When a feature is broken and / or not performing as intended"
     - name: "[Type] Dotcom Merge"
     color: bfdadc
     description: "Is this PR bringing a WordPress.com commit to your plugin?"
@@ -146,7 +146,7 @@ labels:
     description: ""
     - name: "[Type] Enhancement"
     color: c7def8
-    description: Changes to an existing feature — removing, adding, or changing parts of it
+    description: "Changes to an existing feature — removing, adding, or changing parts of it"
     - name: "[Type] Feature"
     color: c7def8
     description: "New feature."
@@ -155,7 +155,7 @@ labels:
     description: "If you are a new contributor, this is a great place to get started!"
     - name: "[Type] Happiness Request"
     color: d4c5f9
-    description: Issues or PRs that were reported via Happiness.
+    description: "Issues or PRs that were reported via Happiness."
     - name: "[Type] Janitorial"
     color: c7def8
     description: ""
