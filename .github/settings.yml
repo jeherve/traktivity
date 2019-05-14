@@ -18,7 +18,6 @@ repository:
 
 # Labels: define labels for Issues and Pull Requests
 labels:
-labels:
 	- name: Accessibility
 	color: d4c5f9
 	description: ""
