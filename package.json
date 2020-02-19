@@ -41,7 +41,7 @@
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-react": "7.18.3",
     "eslint-plugin-wpcalypso": "4.1.0",
-    "file-loader": "5.0.2",
+    "file-loader": "5.1.0",
     "webpack": "4.41.6",
     "webpack-dashboard": "3.2.0",
     "webpack-dev-middleware": "3.7.2",
