@@ -39,7 +39,7 @@
     "eslint": "7.0.0",
     "eslint-config-wpcalypso": "5.0.0",
     "eslint-plugin-jsx-a11y": "6.2.3",
-    "eslint-plugin-react": "7.19.0",
+    "eslint-plugin-react": "7.20.0",
     "eslint-plugin-wpcalypso": "4.1.0",
     "file-loader": "6.0.0",
     "webpack": "4.43.0",
