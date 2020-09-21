@@ -63,7 +63,14 @@ class Traktivity_Data_Storage {
 			'search_items'          => __( 'Search Event', 'traktivity' ),
 		);
 		$rewrites = array(
-			'slug'       => 'watched',
+			/**
+			 * Filter the main CPT (traktivity_event) slug.
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param string $core_cpt_slug Core CPT slug. Defaults to watched.
+			 */
+			'slug'       => apply_filters( 'traktivity_core_cpt_slug', 'watched' ),
 			'with_front' => true,
 			'feeds'      => true,
 			'pages'      => true,
@@ -141,7 +148,14 @@ class Traktivity_Data_Storage {
 			'items_list_navigation'      => __( 'Event Type list navigation', 'traktivity' ),
 		);
 		$rewrites = array(
-			'slug'         => 'type',
+			/**
+			 * Filter the show taxonomy slug  (trakt_type).
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param string $trakt_type_tax_slug slug. Defaults to type.
+			 */
+			'slug'         => apply_filters( 'traktivity_trakt_type_tax_slug', 'type' ),
 			'with_front'   => true,
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
@@ -190,7 +204,14 @@ class Traktivity_Data_Storage {
 			'items_list_navigation'      => __( 'Genre list navigation', 'traktivity' ),
 		);
 		$rewrites = array(
-			'slug'         => 'genre',
+			/**
+			 * Filter the genre taxonomy slug (trakt_genre).
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param string $trakt_genre_tax_slug slug. Defaults to genre.
+			 */
+			'slug'         => apply_filters( 'traktivity_trakt_genre_tax_slug', 'genre' ),
 			'with_front'   => true,
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
@@ -238,7 +259,14 @@ class Traktivity_Data_Storage {
 			'items_list_navigation'      => __( 'Event Year list navigation', 'traktivity' ),
 		);
 		$rewrites = array(
-			'slug'         => 'year',
+			/**
+			 * Filter the year taxonomy slug (trakt_year).
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param string $trakt_year_tax_slug slug. Defaults to year.
+			 */
+			'slug'         => apply_filters( 'traktivity_trakt_year_tax_slug', 'year' ),
 			'with_front'   => true,
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
@@ -286,7 +314,14 @@ class Traktivity_Data_Storage {
 			'items_list_navigation'      => __( 'Show list navigation', 'traktivity' ),
 		);
 		$rewrites = array(
-			'slug'         => 'show',
+			/**
+			 * Filter the show taxonomy slug (trakt_show).
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param string $trakt_show_tax_slug slug. Defaults to show.
+			 */
+			'slug'         => apply_filters( 'traktivity_trakt_show_tax_slug', 'show' ),
 			'with_front'   => true,
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
@@ -334,7 +369,14 @@ class Traktivity_Data_Storage {
 			'items_list_navigation'      => __( 'Season list navigation', 'traktivity' ),
 		);
 		$rewrites = array(
-			'slug'         => 'season',
+			/**
+			 * Filter the season taxonomy slug (trakt_season).
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param string $trakt_season_tax_slug slug. Defaults to season.
+			 */
+			'slug'         => apply_filters( 'traktivity_trakt_season_tax_slug', 'season' ),
 			'with_front'   => true,
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
@@ -382,7 +424,14 @@ class Traktivity_Data_Storage {
 			'items_list_navigation'      => __( 'Episode list navigation', 'traktivity' ),
 		);
 		$rewrites = array(
-			'slug'         => 'episode',
+			/**
+			 * Filter the episode taxonomy slug (trakt_episode).
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param string $trakt_episode_tax_slug slug. Defaults to episode.
+			 */
+			'slug'         => apply_filters( 'traktivity_trakt_episode_tax_slug', 'episode' ),
 			'with_front'   => true,
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,

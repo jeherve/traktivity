@@ -107,6 +107,17 @@ class Traktivity_Calls {
 		);
 
 		/**
+		 * Filter the URL used to fetch activity data from Trakt.
+		 *
+		 * @since 2.3.0
+		 *
+		 * @param string $query_url Query URL.
+		 * @param string $api_url   API URL. Default to TRAKTIVITY__API_URL.
+		 * @param string $username  Trakt username.
+		 */
+		$query_url = apply_filters( 'traktivity_get_activity_url', $query_url, TRAKTIVITY__API_URL, $username );
+
+		/**
 		 * If one specified an array of $args when calling get_trakt_activity(),
 		 * those arguments will be added to the query.
 		 * Possible args could be `page` or `limit`.
