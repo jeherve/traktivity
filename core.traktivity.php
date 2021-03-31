@@ -498,7 +498,7 @@ class Traktivity_Calls {
 						'role'    => 'administrator',
 						'orderby' => 'user_registered',
 						'order'   => 'ASC',
-						'fields'  => array( 'ID' ),
+						'fields'  => 'ID',
 						'number'  => 1,
 					)
 				);
@@ -513,7 +513,7 @@ class Traktivity_Calls {
 					'meta_input'   => $meta,
 					'post_content' => esc_html( $post_content ),
 					'post_excerpt' => esc_html( $post_excerpt ),
-					'post_author'  => ( ! empty( $first_admin ) ? (int) $first_admin[0]->ID : 0 )
+					'post_author'  => ( ! empty( $first_admin ) ? (int) $first_admin[0] : 0 )
 				);
 
 				// Create our post.
