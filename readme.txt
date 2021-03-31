@@ -1,9 +1,9 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 2.3.0
+Stable tag: 2.3.1
 Requires at least: 5.1
-Tested up to: 5.5
+Tested up to: 5.7
 License: GPLv2+
 
 Are you a TV addict, and want to keep track of all the shows you've binge-watched and movies you saw? Traktivity is for you!
@@ -50,6 +50,11 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 6. Movie: example of a movie and some of the details logged for that movie.
 
 == Changelog ==
+
+= 2.3.1 =
+Release Date: March 31, 2021
+
+* Automatically add an author (first registered admin) to events created by the plugin.
 
 = 2.3.0 =
 Release Date: September 21, 2020

@@ -490,6 +490,27 @@ class Traktivity_Calls {
 				 */
 				$title = apply_filters( 'traktivity_event_title', $title, $event );
 
+				/**
+				 * Get the first registered admin.
+				 */
+				$first_admin = get_users(
+					array(
+						'role'    => 'administrator',
+						'orderby' => 'user_registered',
+						'order'   => 'ASC',
+						'fields'  => 'ID',
+						'number'  => 1,
+					)
+				);
+				/**
+				 * Allow third-parties to provide their own author to be used.
+				 *
+				 * @since 2.3.1
+				 *
+				 * @param array $first_admin Array of user IDs, e.g. [ "1" ].
+				 */
+				$first_admin = apply_filters( 'traktivity_event_author', $first_admin );
+
 				// Let it all come together as a list of things we'll add to the post we're creating.
 				$event_args = array(
 					'post_title'   => esc_html( $title ),
@@ -500,6 +521,7 @@ class Traktivity_Calls {
 					'meta_input'   => $meta,
 					'post_content' => esc_html( $post_content ),
 					'post_excerpt' => esc_html( $post_excerpt ),
+					'post_author'  => ( ! empty( $first_admin ) ? (int) $first_admin[0] : 0 )
 				);
 
 				// Create our post.
