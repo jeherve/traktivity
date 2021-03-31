@@ -502,6 +502,14 @@ class Traktivity_Calls {
 						'number'  => 1,
 					)
 				);
+				/**
+				 * Allow third-parties to provide their own author to be used.
+				 *
+				 * @since 2.3.1
+				 *
+				 * @param array $first_admin Array of user IDs, e.g. [ "1" ].
+				 */
+				$first_admin = apply_filters( 'traktivity_event_author', $first_admin );
 
 				// Let it all come together as a list of things we'll add to the post we're creating.
 				$event_args = array(
