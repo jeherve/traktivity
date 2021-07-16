@@ -42,7 +42,7 @@
     "eslint-plugin-react": "7.24.0",
     "eslint-plugin-wpcalypso": "5.0.0",
     "file-loader": "6.2.0",
-    "webpack": "5.44.0",
+    "webpack": "5.45.0",
     "webpack-dashboard": "3.3.5",
     "webpack-dev-middleware": "5.0.0",
     "webpack-dev-server": "3.11.2"
