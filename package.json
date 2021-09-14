@@ -45,7 +45,7 @@
     "webpack": "5.52.1",
     "webpack-dashboard": "3.3.6",
     "webpack-dev-middleware": "5.1.0",
-    "webpack-dev-server": "4.2.0"
+    "webpack-dev-server": "4.2.1"
   },
   "dependencies": {
     "extract-text-webpack-plugin": "^3.0.0",
