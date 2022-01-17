@@ -1,6 +1,6 @@
 {
   "name": "traktivity",
-  "version": "2.2.1",
+  "version": "2.3.2",
   "description": "Log your activity on Trakt.tv",
   "main": "traktivity.php",
   "directories": {
