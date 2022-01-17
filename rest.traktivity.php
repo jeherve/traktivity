@@ -108,6 +108,7 @@ class Traktivity_Api {
 		register_rest_route( 'traktivity/v1', '/stats', array(
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'get_stats' ),
+			'permission_callback' => '__return_true',
 		) );
 	}
 
