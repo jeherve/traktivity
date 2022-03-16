@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 2.3.2
+Stable tag: 2.3.3
 Requires at least: 5.1
 Tested up to: 5.9
 License: GPLv2+
@@ -50,6 +50,11 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 6. Movie: example of a movie and some of the details logged for that movie.
 
 == Changelog ==
+
+= 2.3.3 =
+Release date: March 16, 2022
+
+* Allow numbers in Trakt.tv usernames.
 
 = 2.3.2 =
 Release date: January 17, 2022
