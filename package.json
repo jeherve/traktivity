@@ -44,7 +44,7 @@
     "file-loader": "6.2.0",
     "webpack": "5.72.1",
     "webpack-dashboard": "3.3.7",
-    "webpack-dev-middleware": "5.3.2",
+    "webpack-dev-middleware": "5.3.3",
     "webpack-dev-server": "4.9.0"
   },
   "dependencies": {
