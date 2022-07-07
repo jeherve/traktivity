@@ -56,7 +56,7 @@ class Traktivity_Api {
 		 *
 		 * @since 1.1.0
 		 */
-		register_rest_route( 'traktivity/v1', '/connection/(?P<user>[a-z0-9\-]+)/(?P<trakt>[a-zA-Z0-9-]+)', array(
+		register_rest_route( 'traktivity/v1', '/connection/(?P<user>[a-z0-9\-\.]+)/(?P<trakt>[a-zA-Z0-9-]+)', array(
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'test_trakt_api_connection' ),
 			'permission_callback' => array( $this, 'permissions_check' ),
