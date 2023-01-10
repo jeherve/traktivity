@@ -38,7 +38,7 @@
     "browser-sync-webpack-plugin": "2.3.0",
     "eslint": "8.31.0",
     "eslint-config-wpcalypso": "6.1.0",
-    "eslint-plugin-jsx-a11y": "6.6.1",
+    "eslint-plugin-jsx-a11y": "6.7.0",
     "eslint-plugin-react": "7.31.11",
     "eslint-plugin-wpcalypso": "6.1.0",
     "file-loader": "6.2.0",
