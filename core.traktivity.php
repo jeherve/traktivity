@@ -346,9 +346,13 @@ class Traktivity_Calls {
 				 * We don't want that.
 				 * The Photon URL will be added later on on the front end.
 				 *
-				 * @see https://ethitter.com/p/897/
+				 * Old versions of Jetpack used the Jetpack_Photon class to do this.
+				 * New versions use the Image_CDN class.
+				 * Let's handle both.
 				 */
-				if ( class_exists( 'Jetpack_Photon' ) ) {
+				if ( class_exists( '\Automattic\Jetpack\Image_CDN\Image_CDN' ) ) {
+					remove_filter( 'image_downsize', array( \Automattic\Jetpack\Image_CDN\Image_CDN::instance(), 'filter_image_downsize' ) );
+				} elseif ( class_exists( 'Jetpack_Photon' ) ) {
 					remove_filter( 'image_downsize', array( Jetpack_Photon::instance(), 'filter_image_downsize' ) );
 				}
 
@@ -359,7 +363,9 @@ class Traktivity_Calls {
 				);
 
 				// Re-enable Photon now that the image URL has been built.
-				if ( class_exists( 'Jetpack_Photon' ) ) {
+				if ( class_exists( '\Automattic\Jetpack\Image_CDN\Image_CDN' ) ) {
+					add_filter( 'image_downsize', array( \Automattic\Jetpack\Image_CDN\Image_CDN::instance(), 'filter_image_downsize' ), 10, 3 );
+				} elseif ( class_exists( 'Jetpack_Photon' ) ) {
 					add_filter( 'image_downsize', array( Jetpack_Photon::instance(), 'filter_image_downsize' ), 10, 3 );
 				}
 			} // End if().

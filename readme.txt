@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 2.3.4
+Stable tag: 2.3.5
 Requires at least: 5.1
 Tested up to: 6.2
 License: GPLv2+
@@ -50,6 +50,11 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 6. Movie: example of a movie and some of the details logged for that movie.
 
 == Changelog ==
+
+= 2.3.5 =
+Release date: April 24, 2023
+
+* Ensure full compatibility with the upcoming version of Jetpack, 12.1.
 
 = 2.3.4 =
 Release date: July 7, 2022
