@@ -19,7 +19,7 @@ class Traktivity_Content {
 	/**
 	 * Constructor
 	 */
-	function __construct() {
+	public function __construct() {
 		add_filter( 'the_content', array( $this, 'credits' ), 5 );
 	}
 
@@ -38,7 +38,7 @@ class Traktivity_Content {
 
 		// If we have an image in that post, we'll add credits.
 		if ( false !== strpos( $content, '<img' ) ) {
-			$credits = '<div class="tmdb_credits"><p><small>';
+			$credits  = '<div class="tmdb_credits"><p><small>';
 			$credits .= sprintf(
 				/* Translators: URL to THMDB website. */
 				__( 'Image source: <a href="%s">themoviedb.org</a>', 'traktivity' ),
@@ -63,5 +63,5 @@ class Traktivity_Content {
 		// Final fallback.
 		return $content;
 	}
-} // End class.
+}
 new Traktivity_Content();

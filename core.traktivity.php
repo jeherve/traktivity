@@ -19,7 +19,7 @@ class Traktivity_Calls {
 	/**
 	 * Constructor
 	 */
-	function __construct() {
+	public function __construct() {
 		// Check for new events and publish them every hour.
 		add_action( 'traktivity_publish', array( $this, 'publish_event' ) );
 		if ( ! wp_next_scheduled( 'traktivity_publish' ) ) {
@@ -40,7 +40,7 @@ class Traktivity_Calls {
 	 *
 	 * @param string $name Option name.
 	 *
-	 * @return string $str Specific option.
+	 * @return mixed $value Specific option, or an empty string when unset.
 	 */
 	private function get_option( $name ) {
 		$options = get_option( 'traktivity' );
@@ -63,7 +63,7 @@ class Traktivity_Calls {
 	private function update_option( $name, $value ) {
 		$options = get_option( 'traktivity' );
 
-		if ( isset( $value ) && ! empty( $value ) ) {
+		if ( ! empty( $value ) ) {
 			$options[ $name ] = $value;
 			update_option( 'traktivity', $options );
 		}
@@ -75,10 +75,10 @@ class Traktivity_Calls {
 	 * @since 1.0.0
 	 *
 	 * @param array $args {
-	 * 	Optional. Array of possible query args for the call to Trakt.tv API.
+	 *  Optional. Array of possible query args for the call to Trakt.tv API.
 	 *
-	 *	@int int page  Number of page of results to be returned. Accepts integers.
-	 *	@int int limit Number of results to return per page. Accepts integers.
+	 *  @int int page  Number of page of results to be returned. Accepts integers.
+	 *  @int int limit Number of results to return per page. Accepts integers.
 	 * }
 	 * @param bool  $test Optional. Pass true to only make a test request, and return the number of event pages.
 	 *
@@ -95,7 +95,7 @@ class Traktivity_Calls {
 		/**
 		 * Query the API for that username, using our API key.
 		 */
-		$headers = array(
+		$headers   = array(
 			'Content-Type'      => 'application/json',
 			'trakt-api-version' => TRAKTIVITY__API_VERSION,
 			'trakt-api-key'     => $this->get_option( 'api_key' ),
@@ -122,7 +122,7 @@ class Traktivity_Calls {
 		 * those arguments will be added to the query.
 		 * Possible args could be `page` or `limit`.
 		 */
-		if ( isset( $args ) && is_array( $args ) && ! empty( $args ) ) {
+		if ( ! empty( $args ) ) {
 			$query_url = add_query_arg(
 				$args,
 				$query_url
@@ -138,13 +138,13 @@ class Traktivity_Calls {
 
 		if (
 			is_wp_error( $data )
-			|| 200 != $data['response']['code']
+			|| 200 !== wp_remote_retrieve_response_code( $data )
 			|| empty( $data['body'] )
 		) {
-			return;
+			return null;
 		}
 
-		if ( isset( $test ) && true === $test ) {
+		if ( true === $test ) {
 			return (int) wp_remote_retrieve_header( $data, 'X-Pagination-Page-Count' );
 		}
 
@@ -164,10 +164,10 @@ class Traktivity_Calls {
 	 * @param int|bool $episode_num Episode number if we're talking about a TV episode. False if it doesn't apply.
 	 *
 	 * @return null|array $image {
-	 * 	Array of images details.
-	 * 		@string string url   Image  URL.
-	 * 		@int    int    width Image  Width.
-	 * 		@int    int    height Image Height.
+	 *  Array of images details.
+	 *      @string string url   Image  URL.
+	 *      @int    int    width Image  Width.
+	 *      @int    int    height Image Height.
 	 * }
 	 */
 	private function get_item_poster( $type, $id, $season_num, $episode_num ) {
@@ -191,7 +191,7 @@ class Traktivity_Calls {
 				(int) $episode_num
 			);
 		} else {
-			return;
+			return null;
 		}
 
 		$query_url = sprintf(
@@ -205,16 +205,16 @@ class Traktivity_Calls {
 		$data = wp_remote_get( esc_url_raw( $query_url ) );
 		if (
 			is_wp_error( $data )
-			|| 200 != $data['response']['code']
+			|| 200 !== wp_remote_retrieve_response_code( $data )
 			|| empty( $data['body'] )
 		) {
-			return;
+			return null;
 		}
 
 		$resp = json_decode( $data['body'] );
 
-		if ( ! isset( $resp ) || ! is_object( $resp ) ) {
-			return;
+		if ( ! is_object( $resp ) ) {
+			return null;
 		}
 
 		// We will pick the first backdrop and move from there.
@@ -225,7 +225,7 @@ class Traktivity_Calls {
 		} elseif ( ! empty( $resp->stills ) ) { // If there are no posters either, we'll pick from the stills.
 			$img_details = $resp->stills[0];
 		} else {
-			return;
+			return null;
 		}
 
 		// Let's start with an empty $image array we'll fill in with some image details.
@@ -253,15 +253,15 @@ class Traktivity_Calls {
 	 * @since 1.0.0
 	 *
 	 * @param string $url      Image URL.
-	 * @param string $post_id  Post ID.
+	 * @param int    $post_id  Post ID.
 	 * @param string $title    Post Title.
 	 * @param bool   $featured Should the image be a featured image.
 	 *
 	 * @return array $post_image {
-	 * 	Array containing information about the post image.
+	 *  Array containing information about the post image.
 	 *
-	 * 		@int    int    id  Attachment ID for this image.
-	 * 		@string string tag Image HTML tag of a large version of the image.
+	 *      @int    int    id  Attachment ID for this image.
+	 *      @string string tag Image HTML tag of a large version of the image.
 	 * }
 	 */
 	private function sideload_image( $url, $post_id, $title, $featured ) {
@@ -300,8 +300,8 @@ class Traktivity_Calls {
 				 * 1. Movies: only one image was uploaded and is attached to that post: the movie poster.
 				 * 2. Episode in an existing series: only one image was uploaded and is attached to that post: the episode screenshot (still).
 				 * 3. Episode of a new series:
-				 *  	First time this sideload_image runs, there will only be one image attached to the post: the episode screenshot.
-				 *  	2nd time it runs, the show poster will be added as well. We want the function to return that second image then.
+				 *      First time this sideload_image runs, there will only be one image attached to the post: the episode screenshot.
+				 *      2nd time it runs, the show poster will be added as well. We want the function to return that second image then.
 				 */
 
 				/**
@@ -368,8 +368,8 @@ class Traktivity_Calls {
 				} elseif ( class_exists( 'Jetpack_Photon' ) ) {
 					add_filter( 'image_downsize', array( Jetpack_Photon::instance(), 'filter_image_downsize' ), 10, 3 );
 				}
-			} // End if().
-		} // End if().
+			}
+		}
 
 		return $post_image;
 	}
@@ -380,10 +380,10 @@ class Traktivity_Calls {
 	 * @since 1.0.0
 	 *
 	 * @param array $args {
-	 * 	Optional. Array of possible query args for the call to Trakt.tv API.
+	 *  Optional. Array of possible query args for the call to Trakt.tv API.
 	 *
-	 *	@int int page  Number of page of results to be returned. Accepts integers.
-	 *	@int int limit Number of results to return per page. Accepts integers.
+	 *  @int int page  Number of page of results to be returned. Accepts integers.
+	 *  @int int limit Number of results to return per page. Accepts integers.
 	 * }
 	 */
 	public function publish_event( $args = array() ) {
@@ -413,7 +413,7 @@ class Traktivity_Calls {
 						),
 					),
 				);
-				$does_event_exist = new WP_Query( $event_exists_args );
+				$does_event_exist  = new WP_Query( $event_exists_args );
 
 				// If a post already exists with that ID, we can skip it.
 				if ( $does_event_exist->have_posts() ) {
@@ -439,22 +439,22 @@ class Traktivity_Calls {
 				// Let's start with movies.
 				if ( 'movie' === $event->type ) {
 
-					$taxonomies['trakt_type']  = esc_html__( 'Movie', 'traktivity' );
+					$taxonomies['trakt_type'] = esc_html__( 'Movie', 'traktivity' );
 					// Let's capitalize genres.
 					$taxonomies['trakt_genre'] = array_map( 'ucwords', $event->movie->genres );
 					$taxonomies['trakt_year']  = esc_html( $event->movie->year );
 
-					$meta['trakt_movie_id']    = intval( $event->movie->ids->trakt );
-					$meta['imdb_movie_id']     = esc_html( $event->movie->ids->imdb );
-					$meta['tmdb_movie_id']     = esc_html( $event->movie->ids->tmdb );
-					$meta['trakt_runtime']     = intval( $event->movie->runtime );
+					$meta['trakt_movie_id'] = intval( $event->movie->ids->trakt );
+					$meta['imdb_movie_id']  = esc_html( $event->movie->ids->imdb );
+					$meta['tmdb_movie_id']  = esc_html( $event->movie->ids->tmdb );
+					$meta['trakt_runtime']  = intval( $event->movie->runtime );
 
-					$post_excerpt              = $event->movie->tagline;
-					$post_content              = $event->movie->overview;
+					$post_excerpt = $event->movie->tagline;
+					$post_content = $event->movie->overview;
 
 				} elseif ( 'episode' === $event->type ) { // Then let's gather info about series.
 
-					$taxonomies['trakt_type']    = esc_html__( 'TV Series', 'traktivity' );
+					$taxonomies['trakt_type'] = esc_html__( 'TV Series', 'traktivity' );
 					// Let's capitalize genres.
 					$taxonomies['trakt_genre']   = array_map( 'ucwords', $event->show->genres );
 					$taxonomies['trakt_year']    = esc_html( $event->show->year );
@@ -462,28 +462,26 @@ class Traktivity_Calls {
 					$taxonomies['trakt_season']  = esc_html( $event->episode->season );
 					$taxonomies['trakt_episode'] = esc_html( $event->episode->number );
 
-					$meta['trakt_episode_id']    = intval( $event->episode->ids->trakt );
-					$meta['trakt_show_id']       = intval( $event->show->ids->trakt );
-					$meta['imdb_episode_id']     = esc_html( $event->episode->ids->imdb );
-					$meta['imdb_show_id']        = esc_html( $event->show->ids->imdb );
-					$meta['tmdb_episode_id']     = esc_html( $event->episode->ids->tmdb );
-					$meta['tmdb_show_id']        = esc_html( $event->show->ids->tmdb );
-					$meta['trakt_runtime']       = intval( $event->show->runtime );
+					$meta['trakt_episode_id'] = intval( $event->episode->ids->trakt );
+					$meta['trakt_show_id']    = intval( $event->show->ids->trakt );
+					$meta['imdb_episode_id']  = esc_html( $event->episode->ids->imdb );
+					$meta['imdb_show_id']     = esc_html( $event->show->ids->imdb );
+					$meta['tmdb_episode_id']  = esc_html( $event->episode->ids->tmdb );
+					$meta['tmdb_show_id']     = esc_html( $event->show->ids->tmdb );
+					$meta['trakt_runtime']    = intval( $event->show->runtime );
 
-					$post_excerpt                = $event->episode->overview;
-					$post_content                = $event->episode->overview;
+					$post_excerpt = $event->episode->overview;
+					$post_content = $event->episode->overview;
 
 				} else { // If it's neither a movie nor a tv show, we don't need to log it.
 					continue;
-				} // End if().
+				}
 
 				// Grab the event title.
 				if ( 'movie' === $event->type ) {
 					$title = $event->movie->title;
-				} elseif ( 'episode' === $event->type ) {
-					$title = $event->episode->title;
 				} else {
-					continue;
+					$title = $event->episode->title;
 				}
 
 				/**
@@ -492,7 +490,7 @@ class Traktivity_Calls {
 				 * @since 1.0.0
 				 *
 				 * @param string $title Event title. By default it's the movie title, or the episode title followed by the show title.
-				 * @param array  $event Array of details about the event.
+				 * @param object $event Details about the event, as returned by the Trakt.tv API.
 				 */
 				$title = apply_filters( 'traktivity_event_title', $title, $event );
 
@@ -527,7 +525,7 @@ class Traktivity_Calls {
 					'meta_input'   => $meta,
 					'post_content' => esc_html( $post_content ),
 					'post_excerpt' => esc_html( $post_excerpt ),
-					'post_author'  => ( ! empty( $first_admin ) ? (int) $first_admin[0] : 0 )
+					'post_author'  => ( ! empty( $first_admin ) ? (int) $first_admin[0] : 0 ),
 				);
 
 				// Create our post.
@@ -554,12 +552,12 @@ class Traktivity_Calls {
 				$tmdb_api_key = $this->get_option( 'tmdb_api_key' );
 				if ( ! empty( $tmdb_api_key ) ) {
 					if ( 'episode' === $event->type ) {
-						$tmdb_id = $meta['tmdb_show_id'];
-						$season_num = $taxonomies['trakt_season'];
+						$tmdb_id     = $meta['tmdb_show_id'];
+						$season_num  = $taxonomies['trakt_season'];
 						$episode_num = $taxonomies['trakt_episode'];
 					} else {
-						$tmdb_id = $meta['tmdb_movie_id'];
-						$season_num = 0;
+						$tmdb_id     = $meta['tmdb_movie_id'];
+						$season_num  = 0;
 						$episode_num = 0;
 					}
 					$image = $this->get_item_poster( $event->type, $tmdb_id, $season_num, $episode_num );
@@ -665,12 +663,12 @@ class Traktivity_Calls {
 								 */
 								update_term_meta( $term_id, 'show_network', esc_html( $event->show->network ) );
 							} // End adding extra info to new shows.
-						} // End foreach().
-					} // End if().
+						}
+					}
 				} // End loop for each taxonomy that was created.
 			} // End loop for each event.
 		} // End check for valid array of events.
-	} // End publish_event().
+	}
 
 	/**
 	 * Add up runtime from all recorded events for a specific series.
@@ -679,12 +677,12 @@ class Traktivity_Calls {
 	 *
 	 * @param int $term_id Series' term ID.
 	 *
-	 * @return string $runtime Total runtime for this series.
+	 * @return int $runtime Total runtime for this series, in minutes.
 	 */
 	private function series_total_runtime_sync( $term_id ) {
 		$runtime = 0;
 
-		$query_args = array(
+		$query_args   = array(
 			'post_type'      => 'traktivity_event',
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
@@ -700,8 +698,8 @@ class Traktivity_Calls {
 		while ( $all_episodes->have_posts() ) {
 			$all_episodes->the_post();
 
-			$runtime = $runtime + get_post_meta( $all_episodes->post->ID, 'trakt_runtime', true );
-		} // End while().
+			$runtime += (int) get_post_meta( $all_episodes->post->ID, 'trakt_runtime', true );
+		}
 		wp_reset_postdata();
 
 		return $runtime;
@@ -712,7 +710,7 @@ class Traktivity_Calls {
 	 *
 	 * @since 2.2.0
 	 *
-	 * @return bool $done Returns true when done.
+	 * @return void This is an action callback; WordPress discards any return value.
 	 */
 	public function total_runtime_sync() {
 		// Get sync status.
@@ -723,21 +721,23 @@ class Traktivity_Calls {
 			! empty( $status['runtime'] )
 			&& 'in_progress' === $status['runtime']['status']
 		) {
-			return true;
+			return;
 		}
 
 		/**
 		 * First let's get a list of term IDs for each one of the shows currently recorded.
 		 */
-		$shows = get_terms( array(
-			'taxonomy'   => 'trakt_show',
-			'hide_empty' => false,
-			'fields'     => 'tt_ids',
-		) );
+		$shows = get_terms(
+			array(
+				'taxonomy'   => 'trakt_show',
+				'hide_empty' => false,
+				'fields'     => 'tt_ids',
+			)
+		);
 
 		// Stop right here if we have no shows.
 		if ( ! is_array( $shows ) || empty( $shows ) ) {
-			return false;
+			return;
 		}
 
 		// Set it to in progress.
@@ -760,8 +760,6 @@ class Traktivity_Calls {
 			'items'  => 0,
 		);
 		$this->update_option( 'full_sync', $status );
-
-		return true;
 	}
 
 	/**
@@ -769,7 +767,7 @@ class Traktivity_Calls {
 	 *
 	 * @since 1.1.0
 	 *
-	 * @return bool $done Returns true when done.
+	 * @return void This is an action callback; WordPress discards any return value.
 	 */
 	public function full_sync() {
 		/**
@@ -778,15 +776,15 @@ class Traktivity_Calls {
 		 * The 'full_sync' option can be one of 2 things:
 		 * 1. Empty string -> Option doesn't exist, Sync was never run before. Sync will start and an option will be set.
 		 * 2. Array $args {
-		 * 		string status Sync Status. Can be 'in_progress' or 'done'.
-		 *		int    pages  Number of pages left to sync.
+		 *      string status Sync Status. Can be 'in_progress' or 'done'.
+		 *      int    pages  Number of pages left to sync.
 		 * }
 		 */
 		$status = $this->get_option( 'full_sync' );
 
 		// If sync already ran successfully, we can stop here.
 		if ( ! empty( $status ) && isset( $status['status'] ) && 'done' === $status['status'] ) {
-			return true;
+			return;
 		}
 
 		/**
@@ -803,19 +801,20 @@ class Traktivity_Calls {
 		}
 
 		// Set WP_IMPORTING to avoid triggering things like subscription emails.
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WP_IMPORTING is defined by WordPress core, not by this plugin.
 		defined( 'WP_IMPORTING' ) || define( 'WP_IMPORTING', true );
 
 		// let's start looping.
 		do {
-			$args = array(
+			$args         = array(
 				'page'  => $status['pages'],
 				'limit' => 10,
 			);
 			$trakt_events = $this->publish_event( $args );
 
 			// One page less to go.
-			$status['pages']--;
-		} while ( 'in_progress' === $status['status'] && 0 != $status['pages'] );
+			--$status['pages'];
+		} while ( 'in_progress' === $status['status'] && 0 !== (int) $status['pages'] );
 
 		// We're done. Save options.
 		$status = array(
@@ -823,8 +822,6 @@ class Traktivity_Calls {
 			'pages'  => 0,
 		);
 		$this->update_option( 'full_sync', $status );
-
-		return true;
 	}
-} // End class.
+}
 new Traktivity_Calls();

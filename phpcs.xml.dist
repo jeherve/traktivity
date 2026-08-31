@@ -46,6 +46,31 @@
 		</properties>
 	</rule>
 
+	<!--
+		The widget file registers its widget with a named function and then
+		declares the widget class. Splitting a 400-line widget in two just to
+		house a one-line registration callback is not worth it.
+	-->
+	<rule ref="Universal.Files.SeparateFunctionsFromOO">
+		<exclude-pattern>/widgets/list-events\.php$</exclude-pattern>
+	</rule>
+
+	<!--
+		The plugin's whole job is querying events by taxonomy and by meta, so
+		these two are load-bearing rather than accidental.
+	-->
+	<rule ref="WordPress.DB.SlowDBQuery">
+		<severity>0</severity>
+	</rule>
+
+	<!--
+		REST permission and validation callbacks have signatures fixed by
+		WordPress; unused arguments there document the contract.
+	-->
+	<rule ref="Generic.CodeAnalysis.UnusedFunctionParameter">
+		<exclude-pattern>/rest\.traktivity\.php$</exclude-pattern>
+	</rule>
+
 	<!-- The plugin declares PHP 7.4 as its minimum in composer.json and the plugin header. -->
 	<config name="testVersion" value="7.4-"/>
 	<rule ref="PHPCompatibilityWP"/>

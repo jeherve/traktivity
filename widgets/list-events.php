@@ -27,10 +27,10 @@ class Traktivity_List_Widget extends WP_Widget {
 	/**
 	 * Constructor
 	 */
-	function __construct() {
+	public function __construct() {
 		$widget_ops = array(
-			'classname' => 'traktivity_list_widget',
-			'description' => esc_html__( "Display some of the recent things you've watched in a widget.", 'traktivity' ),
+			'classname'                   => 'traktivity_list_widget',
+			'description'                 => esc_html__( "Display some of the recent things you've watched in a widget.", 'traktivity' ),
 			'customize_selective_refresh' => true,
 		);
 		parent::__construct(
@@ -65,11 +65,13 @@ class Traktivity_List_Widget extends WP_Widget {
 	public function defaults() {
 		return array(
 			'title'           => esc_html__( 'Recently Watched', 'traktivity' ),
-			'type'            => get_terms( array(
-				'taxonomy'   => 'trakt_type',
-				'hide_empty' => true,
-				'fields'     => 'names',
-			) ),
+			'type'            => get_terms(
+				array(
+					'taxonomy'   => 'trakt_type',
+					'hide_empty' => true,
+					'fields'     => 'names',
+				)
+			),
 			'number'          => 5, // Never more than 50 though.
 			'display_excerpt' => false,
 			'display_image'   => false,
@@ -84,17 +86,19 @@ class Traktivity_List_Widget extends WP_Widget {
 	 *
 	 * @return void Echoes its output.
 	 **/
-	function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
 		$instance = wp_parse_args( $instance, $this->defaults() );
 
 		// Enqueue front end assets.
 		$this->enqueue_scripts();
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Wrapper markup supplied by the theme via register_sidebar().
 		echo $args['before_widget'];
 
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
 		$title = apply_filters( 'widget_title', $instance['title'] );
 		if ( ! empty( $title ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Wrapper markup supplied by the theme via register_sidebar().
 			echo $args['before_title'] . esc_html( $title ) . $args['after_title'];
 		}
 
@@ -111,7 +115,7 @@ class Traktivity_List_Widget extends WP_Widget {
 			'post_status'    => 'publish',
 			'posts_per_page' => (int) $instance['number'],
 			'paged'          => 1,
-			'tax_query'   => array(
+			'tax_query'      => array(
 				array(
 					'taxonomy' => 'trakt_type',
 					'field'    => 'name',
@@ -119,7 +123,7 @@ class Traktivity_List_Widget extends WP_Widget {
 				),
 			),
 		);
-		$query = new WP_Query( $events_args );
+		$query       = new WP_Query( $events_args );
 
 		if ( $query->have_posts() ) {
 			echo '<div class="traktivity-display-events">';
@@ -129,6 +133,7 @@ class Traktivity_List_Widget extends WP_Widget {
 				$query->the_post();
 
 				// Display event.
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- display_event() escapes each value as it builds the markup.
 				echo $this->display_event( $instance, $query->post->ID );
 
 			}
@@ -148,6 +153,7 @@ class Traktivity_List_Widget extends WP_Widget {
 		 */
 		do_action( 'traktivity_list_widget_after' );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Wrapper markup supplied by the theme via register_sidebar().
 		echo $args['after_widget'];
 	}
 
@@ -161,29 +167,31 @@ class Traktivity_List_Widget extends WP_Widget {
 	 *
 	 * @return array $instance Instance of settings to be saved.
 	 */
-	function update( $new_instance, $old_instance ) {
-		$instance                    = array();
+	public function update( $new_instance, $old_instance ) {
+		$instance = array();
 
 		$instance['title']           = wp_kses( $new_instance['title'], array() );
 		$instance['display_excerpt'] = isset( $new_instance['display_excerpt'] ) ? (bool) $new_instance['display_excerpt'] : false;
 		$instance['display_image']   = isset( $new_instance['display_image'] ) ? (bool) $new_instance['display_image'] : false;
 
 		// We allow numbers between 1 and 50.
-		$instance['number']          = isset( $new_instance['number'] ) ? absint( $new_instance['number'] ) : 5;
+		$instance['number'] = isset( $new_instance['number'] ) ? absint( $new_instance['number'] ) : 5;
 		if ( $instance['number'] < 1 || 50 < $instance['number'] ) {
 			$instance['number'] = 5;
 		}
 
 		// We only allow Event types that match what's existing on the site.
-		$allowed_type_names = get_terms( array(
-			'taxonomy'   => 'trakt_type',
-			'hide_empty' => true,
-			'fields'     => 'names',
-		) );
-		$instance['type'] = isset( $new_instance['type'] ) ? $new_instance['type'] : $allowed_type_names;
-		foreach ( $instance['type'] as $term_name ) {
-			if ( ! in_array( $term_name, $allowed_type_names ) ) {
-				unset( $instance['type'][ $term_name ] );
+		$allowed_type_names = get_terms(
+			array(
+				'taxonomy'   => 'trakt_type',
+				'hide_empty' => true,
+				'fields'     => 'names',
+			)
+		);
+		$instance['type']   = isset( $new_instance['type'] ) ? $new_instance['type'] : $allowed_type_names;
+		foreach ( $instance['type'] as $key => $term_name ) {
+			if ( ! in_array( $term_name, $allowed_type_names, true ) ) {
+				unset( $instance['type'][ $key ] );
 			}
 		}
 
@@ -197,17 +205,19 @@ class Traktivity_List_Widget extends WP_Widget {
 	 *
 	 * @param array $instance Instance configuration.
 	 *
-	 * @return void
+	 * @return string
 	 */
-	function form( $instance ) {
+	public function form( $instance ) {
 		$instance = wp_parse_args( $instance, $this->defaults() );
 
-		$allowed_event_types = get_terms( array(
-			'taxonomy'   => 'trakt_type',
-			'hide_empty' => true,
-			'fields'     => 'names',
-		) );
-		$event_types = isset( $instance['type'] ) ? (array) $instance['type'] : $allowed_event_types;
+		$allowed_event_types = get_terms(
+			array(
+				'taxonomy'   => 'trakt_type',
+				'hide_empty' => true,
+				'fields'     => 'names',
+			)
+		);
+		$event_types         = isset( $instance['type'] ) ? (array) $instance['type'] : $allowed_event_types;
 
 		?>
 		<!-- Title -->
@@ -220,18 +230,16 @@ class Traktivity_List_Widget extends WP_Widget {
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'type' ) ); ?>"><?php esc_html_e( 'Types of events to display:', 'traktivity' ); ?></label>
 			<ul>
-				<?php foreach ( $allowed_event_types as $type ) {
-					$checked = '';
-					if ( in_array( $type, $event_types ) ) {
-						$checked = 'checked="checked" ';
-					} ?>
+				<?php
+				foreach ( $allowed_event_types as $type ) {
+					?>
 
 					<li><label>
-						<input value="<?php echo esc_attr( $type ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'type' ) ); ?>[]" id="<?php echo esc_attr( $this->get_field_id( 'type' ) ); ?>-<?php echo esc_attr( $type ); ?>" type="checkbox" <?php echo esc_html( $checked ); ?>>
+						<input value="<?php echo esc_attr( $type ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'type' ) ); ?>[]" id="<?php echo esc_attr( $this->get_field_id( 'type' ) ); ?>-<?php echo esc_attr( $type ); ?>" type="checkbox" <?php checked( in_array( $type, $event_types, true ) ); ?>>
 						<?php echo esc_html( $type ); ?>
 					</label></li>
 
-				<?php } // End foreach(). ?>
+				<?php } ?>
 			</ul>
 		</p>
 
@@ -254,6 +262,7 @@ class Traktivity_List_Widget extends WP_Widget {
 		</p>
 
 		<?php
+		return '';
 	}
 
 	/**
@@ -264,16 +273,18 @@ class Traktivity_List_Widget extends WP_Widget {
 	 *
 	 * @return string $event HTML for one event.
 	 */
-	function display_event( $instance, $post_id ) {
+	public function display_event( $instance, $post_id ) {
 		$event = '<div class="traktivity-display-event">';
 
 		$event_title = sprintf(
 			'<h3 class="traktivity-event-title"><a href="%1$s" title="%2$s">%3$s</a></h3>',
-			get_the_permalink(),
-			the_title_attribute( array(
-				'echo' => false,
-			) ),
-			get_the_title()
+			esc_url( get_the_permalink() ),
+			the_title_attribute(
+				array(
+					'echo' => false,
+				)
+			),
+			esc_html( get_the_title() )
 		);
 
 		/**
@@ -293,7 +304,7 @@ class Traktivity_List_Widget extends WP_Widget {
 		}
 
 		if ( true === $instance['display_excerpt'] ) {
-			$event .= '<p>' . get_the_excerpt() . '</p>';
+			$event .= '<p>' . wp_kses_post( get_the_excerpt() ) . '</p>';
 		}
 
 		$event .= '</div>';
@@ -320,10 +331,10 @@ class Traktivity_List_Widget extends WP_Widget {
 	 * @param string $event_title  HTML output for the event title.
 	 * @param int    $post_id Post ID.
 	 */
-	function custom_tv_event_title( $event_title, $post_id ) {
+	public function custom_tv_event_title( $event_title, $post_id ) {
 		if ( has_term( 'TV Series', 'trakt_type', $post_id ) ) {
 			// Show title.
-			$show_title_terms = get_the_terms( $post_id , 'trakt_show' );
+			$show_title_terms = get_the_terms( $post_id, 'trakt_show' );
 			if ( $show_title_terms && ! is_wp_error( $show_title_terms ) ) {
 				// We only want to keep one element.
 				$first_show = true;
@@ -343,7 +354,7 @@ class Traktivity_List_Widget extends WP_Widget {
 			}
 
 			// Season number.
-			$show_season_terms = get_the_terms( $post_id , 'trakt_season' );
+			$show_season_terms = get_the_terms( $post_id, 'trakt_season' );
 			if ( $show_season_terms && ! is_wp_error( $show_season_terms ) ) {
 				// We only want to keep one element.
 				$first_season_num = true;
@@ -359,7 +370,7 @@ class Traktivity_List_Widget extends WP_Widget {
 			}
 
 			// Episode number.
-			$show_episode_terms = get_the_terms( $post_id , 'trakt_episode' );
+			$show_episode_terms = get_the_terms( $post_id, 'trakt_episode' );
 			if ( $show_episode_terms && ! is_wp_error( $show_episode_terms ) ) {
 				// We only want to keep one element.
 				$first_episode_num = true;
@@ -403,6 +414,6 @@ class Traktivity_List_Widget extends WP_Widget {
 			return $event_title;
 		} else {
 			return $event_title;
-		} // End if().
+		}
 	}
 }

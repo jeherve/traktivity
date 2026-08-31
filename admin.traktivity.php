@@ -43,14 +43,25 @@ function traktivity_submenu_order( $menu_ord ) {
 		return $menu_ord;
 	}
 
+	// Nothing to reorder if our own menu was never registered.
+	if ( ! isset( $submenu['edit.php?post_type=traktivity_event'] ) ) {
+		return $menu_ord;
+	}
+
 	// Get the original key of the dashboard submenu item.
+	$index = null;
 	foreach ( $submenu['edit.php?post_type=traktivity_event'] as $key => $details ) {
-		if ( 'traktivity_dashboard' == $details[2] ) {
+		if ( 'traktivity_dashboard' === $details[2] ) {
 			$index = $key;
 		}
 	}
 
+	if ( null === $index ) {
+		return $menu_ord;
+	}
+
 	// Set the 'Dashboard' submenu as item with key '4'.
+	// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reordering the submenu is the purpose of this callback.
 	$submenu['edit.php?post_type=traktivity_event'][4] = $submenu['edit.php?post_type=traktivity_event'][ $index ];
 
 	// Remove the original dashboard submenu.
@@ -83,15 +94,15 @@ function traktivity_dashboard_scripts( $hook ) {
 	global $traktivity_dashboard_page;
 
 	// Only add our script to our Dashboard page.
-	if ( $traktivity_dashboard_page != $hook ) {
+	if ( $traktivity_dashboard_page !== $hook ) {
 		return;
 	}
 
 	$version = defined( 'WP_DEBUG' ) && true === WP_DEBUG ? time() : TRAKTIVITY__VERSION;
-	wp_register_script( 'traktivity-dashboard', plugins_url( '_build/admin.js' , __FILE__ ), array(), $version, true );
+	wp_register_script( 'traktivity-dashboard', plugins_url( '_build/admin.js', __FILE__ ), array(), $version, true );
 
-	$options = (array) get_option( 'traktivity' );
-	$stats = (array) get_option( 'traktivity_stats' );
+	$options              = (array) get_option( 'traktivity' );
+	$stats                = (array) get_option( 'traktivity_stats' );
 	$traktivity_dash_args = array(
 		'api_url'                => esc_url_raw( rest_url() ),
 		'site_url'               => esc_url_raw( home_url() ),

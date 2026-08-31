@@ -16,7 +16,7 @@ class Traktivity_Data_Storage {
 	/**
 	 * Constructor
 	 */
-	function __construct() {
+	public function __construct() {
 		// Post Type.
 		add_action( 'init', array( $this, 'register_post_type' ), 0 );
 		add_filter( 'rest_api_allowed_post_types', array( $this, 'whitelist_post_type_wpcom' ) );
@@ -47,20 +47,20 @@ class Traktivity_Data_Storage {
 	 */
 	public function register_post_type() {
 
-		$labels = array(
-			'name'                  => _x( 'Trakt.tv Events', 'Post Type General Name', 'traktivity' ),
-			'singular_name'         => _x( 'Trakt.tv Event', 'Post Type Singular Name', 'traktivity' ),
-			'menu_name'             => __( 'Traktivity', 'traktivity' ),
-			'name_admin_bar'        => __( 'Trakt.tv Event', 'traktivity' ),
-			'archives'              => __( 'Event Archives', 'traktivity' ),
-			'all_items'             => __( 'All Trakt.tv Events', 'traktivity' ),
-			'add_new_item'          => __( 'Add New Event', 'traktivity' ),
-			'add_new'               => __( 'Add New', 'traktivity' ),
-			'new_item'              => __( 'New Event', 'traktivity' ),
-			'edit_item'             => __( 'Edit Event', 'traktivity' ),
-			'update_item'           => __( 'Update Event', 'traktivity' ),
-			'view_item'             => __( 'View Event', 'traktivity' ),
-			'search_items'          => __( 'Search Event', 'traktivity' ),
+		$labels   = array(
+			'name'           => _x( 'Trakt.tv Events', 'Post Type General Name', 'traktivity' ),
+			'singular_name'  => _x( 'Trakt.tv Event', 'Post Type Singular Name', 'traktivity' ),
+			'menu_name'      => __( 'Traktivity', 'traktivity' ),
+			'name_admin_bar' => __( 'Trakt.tv Event', 'traktivity' ),
+			'archives'       => __( 'Event Archives', 'traktivity' ),
+			'all_items'      => __( 'All Trakt.tv Events', 'traktivity' ),
+			'add_new_item'   => __( 'Add New Event', 'traktivity' ),
+			'add_new'        => __( 'Add New', 'traktivity' ),
+			'new_item'       => __( 'New Event', 'traktivity' ),
+			'edit_item'      => __( 'Edit Event', 'traktivity' ),
+			'update_item'    => __( 'Update Event', 'traktivity' ),
+			'view_item'      => __( 'View Event', 'traktivity' ),
+			'search_items'   => __( 'Search Event', 'traktivity' ),
 		);
 		$rewrites = array(
 			/**
@@ -75,34 +75,33 @@ class Traktivity_Data_Storage {
 			'feeds'      => true,
 			'pages'      => true,
 		);
-		$args = array(
-			'label'                 => __( 'Trakt.tv Event', 'traktivity' ),
-			'description'           => __( 'Trakt.tv Event', 'traktivity' ),
-			'labels'                => $labels,
-			'rewrite'               => $rewrites,
-			'supports'              => array( 'title', 'editor', 'wpcom-markdown', 'publicize', 'thumbnail', 'excerpt', 'comments' ),
-			'taxonomies'            => array( 'trakt_type', 'trakt_genre', 'trakt_year', 'trakt_show', 'trakt_season', 'trakt_episode' ),
-			'hierarchical'          => false,
-			'public'                => true,
-			'show_ui'               => true,
-			'show_in_menu'          => true,
-			'menu_position'         => 20,
-			'show_in_admin_bar'     => true,
-			'show_in_nav_menus'     => true,
-			'can_export'            => true,
-			'has_archive'           => true,
-			'exclude_from_search'   => false,
-			'publicly_queryable'    => true,
-			'capability_type'       => 'page',
-			'map_meta_cap'          => true,
-			'capabilities'          => array(
+		$args     = array(
+			'label'               => __( 'Trakt.tv Event', 'traktivity' ),
+			'description'         => __( 'Trakt.tv Event', 'traktivity' ),
+			'labels'              => $labels,
+			'rewrite'             => $rewrites,
+			'supports'            => array( 'title', 'editor', 'wpcom-markdown', 'publicize', 'thumbnail', 'excerpt', 'comments' ),
+			'taxonomies'          => array( 'trakt_type', 'trakt_genre', 'trakt_year', 'trakt_show', 'trakt_season', 'trakt_episode' ),
+			'hierarchical'        => false,
+			'public'              => true,
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'menu_position'       => 20,
+			'show_in_admin_bar'   => true,
+			'show_in_nav_menus'   => true,
+			'can_export'          => true,
+			'has_archive'         => true,
+			'exclude_from_search' => false,
+			'publicly_queryable'  => true,
+			'capability_type'     => 'page',
+			'map_meta_cap'        => true,
+			'capabilities'        => array(
 				'create_posts' => 'do_not_allow',
 			),
-			'menu_icon'             => 'dashicons-format-video',
-			'show_in_rest'          => true,
+			'menu_icon'           => 'dashicons-format-video',
+			'show_in_rest'        => true,
 		);
 		register_post_type( 'traktivity_event', $args );
-
 	}
 
 	/**
@@ -127,7 +126,7 @@ class Traktivity_Data_Storage {
 	 */
 	public function register_event_type_taxonomy() {
 
-		$labels = array(
+		$labels   = array(
 			'name'                       => _x( 'Event Types', 'Taxonomy General Name', 'traktivity' ),
 			'singular_name'              => _x( 'Event Type', 'Taxonomy Singular Name', 'traktivity' ),
 			'menu_name'                  => __( 'Type', 'traktivity' ),
@@ -160,19 +159,18 @@ class Traktivity_Data_Storage {
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
 		);
-		$args = array(
-			'labels'                     => $labels,
-			'rewrite'                    => $rewrites,
-			'hierarchical'               => false,
-			'public'                     => true,
-			'show_ui'                    => true,
-			'show_admin_column'          => true,
-			'show_in_nav_menus'          => true,
-			'show_tagcloud'              => true,
-			'show_in_rest'               => true,
+		$args     = array(
+			'labels'            => $labels,
+			'rewrite'           => $rewrites,
+			'hierarchical'      => false,
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'show_in_nav_menus' => true,
+			'show_tagcloud'     => true,
+			'show_in_rest'      => true,
 		);
 		register_taxonomy( 'trakt_type', array( 'traktivity_event' ), $args );
-
 	}
 
 	/**
@@ -183,7 +181,7 @@ class Traktivity_Data_Storage {
 	 */
 	public function register_genre_taxonomy() {
 
-		$labels = array(
+		$labels   = array(
 			'name'                       => _x( 'Genre', 'Taxonomy General Name', 'traktivity' ),
 			'singular_name'              => _x( 'Genre', 'Taxonomy Singular Name', 'traktivity' ),
 			'menu_name'                  => __( 'Genre', 'traktivity' ),
@@ -216,19 +214,18 @@ class Traktivity_Data_Storage {
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
 		);
-		$args = array(
-			'labels'                     => $labels,
-			'rewrite'                    => $rewrites,
-			'hierarchical'               => false,
-			'public'                     => true,
-			'show_ui'                    => true,
-			'show_admin_column'          => true,
-			'show_in_nav_menus'          => true,
-			'show_tagcloud'              => true,
-			'show_in_rest'               => true,
+		$args     = array(
+			'labels'            => $labels,
+			'rewrite'           => $rewrites,
+			'hierarchical'      => false,
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'show_in_nav_menus' => true,
+			'show_tagcloud'     => true,
+			'show_in_rest'      => true,
 		);
 		register_taxonomy( 'trakt_genre', array( 'traktivity_event' ), $args );
-
 	}
 
 	/**
@@ -238,7 +235,7 @@ class Traktivity_Data_Storage {
 	 */
 	public function register_event_year_taxonomy() {
 
-		$labels = array(
+		$labels   = array(
 			'name'                       => _x( 'Event Year', 'Taxonomy General Name', 'traktivity' ),
 			'singular_name'              => _x( 'Event Year', 'Taxonomy Singular Name', 'traktivity' ),
 			'menu_name'                  => __( 'Year', 'traktivity' ),
@@ -271,19 +268,18 @@ class Traktivity_Data_Storage {
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
 		);
-		$args = array(
-			'labels'                     => $labels,
-			'rewrite'                    => $rewrites,
-			'hierarchical'               => false,
-			'public'                     => true,
-			'show_ui'                    => true,
-			'show_admin_column'          => true,
-			'show_in_nav_menus'          => true,
-			'show_tagcloud'              => true,
-			'show_in_rest'               => true,
+		$args     = array(
+			'labels'            => $labels,
+			'rewrite'           => $rewrites,
+			'hierarchical'      => false,
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'show_in_nav_menus' => true,
+			'show_tagcloud'     => true,
+			'show_in_rest'      => true,
 		);
 		register_taxonomy( 'trakt_year', array( 'traktivity_event' ), $args );
-
 	}
 
 	/**
@@ -293,7 +289,7 @@ class Traktivity_Data_Storage {
 	 */
 	public function register_show_taxonomy() {
 
-		$labels = array(
+		$labels   = array(
 			'name'                       => _x( 'Show', 'Taxonomy General Name', 'traktivity' ),
 			'singular_name'              => _x( 'Show', 'Taxonomy Singular Name', 'traktivity' ),
 			'menu_name'                  => __( 'Show', 'traktivity' ),
@@ -326,19 +322,18 @@ class Traktivity_Data_Storage {
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
 		);
-		$args = array(
-			'labels'                     => $labels,
-			'rewrite'                    => $rewrites,
-			'hierarchical'               => false,
-			'public'                     => true,
-			'show_ui'                    => true,
-			'show_admin_column'          => true,
-			'show_in_nav_menus'          => true,
-			'show_tagcloud'              => true,
-			'show_in_rest'               => true,
+		$args     = array(
+			'labels'            => $labels,
+			'rewrite'           => $rewrites,
+			'hierarchical'      => false,
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'show_in_nav_menus' => true,
+			'show_tagcloud'     => true,
+			'show_in_rest'      => true,
 		);
 		register_taxonomy( 'trakt_show', array( 'traktivity_event' ), $args );
-
 	}
 
 	/**
@@ -348,7 +343,7 @@ class Traktivity_Data_Storage {
 	 */
 	public function register_season_taxonomy() {
 
-		$labels = array(
+		$labels   = array(
 			'name'                       => _x( 'Season', 'Taxonomy General Name', 'traktivity' ),
 			'singular_name'              => _x( 'Season', 'Taxonomy Singular Name', 'traktivity' ),
 			'menu_name'                  => __( 'Season', 'traktivity' ),
@@ -381,19 +376,18 @@ class Traktivity_Data_Storage {
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
 		);
-		$args = array(
-			'labels'                     => $labels,
-			'rewrite'                    => $rewrites,
-			'hierarchical'               => false,
-			'public'                     => true,
-			'show_ui'                    => true,
-			'show_admin_column'          => true,
-			'show_in_nav_menus'          => true,
-			'show_tagcloud'              => true,
-			'show_in_rest'               => true,
+		$args     = array(
+			'labels'            => $labels,
+			'rewrite'           => $rewrites,
+			'hierarchical'      => false,
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'show_in_nav_menus' => true,
+			'show_tagcloud'     => true,
+			'show_in_rest'      => true,
 		);
 		register_taxonomy( 'trakt_season', array( 'traktivity_event' ), $args );
-
 	}
 
 	/**
@@ -403,7 +397,7 @@ class Traktivity_Data_Storage {
 	 */
 	public function register_episode_taxonomy() {
 
-		$labels = array(
+		$labels   = array(
 			'name'                       => _x( 'Episode', 'Taxonomy General Name', 'traktivity' ),
 			'singular_name'              => _x( 'Episode', 'Taxonomy Singular Name', 'traktivity' ),
 			'menu_name'                  => __( 'Episode Numbers', 'traktivity' ),
@@ -436,19 +430,18 @@ class Traktivity_Data_Storage {
 			'hierarchical' => false,
 			'ep_mask'      => EP_NONE,
 		);
-		$args = array(
-			'labels'                     => $labels,
-			'rewrite'                    => $rewrites,
-			'hierarchical'               => false,
-			'public'                     => true,
-			'show_ui'                    => true,
-			'show_admin_column'          => true,
-			'show_in_nav_menus'          => true,
-			'show_tagcloud'              => true,
-			'show_in_rest'               => true,
+		$args     = array(
+			'labels'            => $labels,
+			'rewrite'           => $rewrites,
+			'hierarchical'      => false,
+			'public'            => true,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'show_in_nav_menus' => true,
+			'show_tagcloud'     => true,
+			'show_in_rest'      => true,
 		);
 		register_taxonomy( 'trakt_episode', array( 'traktivity_event' ), $args );
-
 	}
 
 	/**
@@ -479,11 +472,11 @@ class Traktivity_Data_Storage {
 	public function show_poster_display_in_column( $content, $column_name, $term_id ) {
 		global $feature_groups;
 
-		if ( 'show_poster' != $column_name ) {
+		if ( 'show_poster' !== $column_name ) {
 			return $content;
 		}
 
-		$term_id = absint( $term_id );
+		$term_id     = absint( $term_id );
 		$show_poster = get_term_meta( $term_id, 'show_poster', true );
 
 		if ( is_array( $show_poster ) && ! empty( $show_poster ) ) {
@@ -510,11 +503,11 @@ class Traktivity_Data_Storage {
 	public function show_network_display_in_column( $content, $column_name, $term_id ) {
 		global $feature_groups;
 
-		if ( 'show_network' != $column_name ) {
+		if ( 'show_network' !== $column_name ) {
 			return $content;
 		}
 
-		$term_id = absint( $term_id );
+		$term_id      = absint( $term_id );
 		$show_network = get_term_meta( $term_id, 'show_network', true );
 
 		if ( ! empty( $show_network ) ) {
@@ -540,11 +533,11 @@ class Traktivity_Data_Storage {
 	public function show_imdb_display_in_column( $content, $column_name, $term_id ) {
 		global $feature_groups;
 
-		if ( 'show_imdb' != $column_name ) {
+		if ( 'show_imdb' !== $column_name ) {
 			return $content;
 		}
 
-		$term_id = absint( $term_id );
+		$term_id  = absint( $term_id );
 		$show_ids = get_term_meta( $term_id, 'show_external_ids', true );
 
 		if (
@@ -552,7 +545,7 @@ class Traktivity_Data_Storage {
 			&& isset( $show_ids['imdb'] )
 			&& ! empty( $show_ids['imdb'] )
 		) {
-			$link = sprintf(
+			$link    = sprintf(
 				'http://www.imdb.com/title/%1$s/',
 				esc_attr( $show_ids['imdb'] )
 			);
@@ -579,11 +572,11 @@ class Traktivity_Data_Storage {
 	public function show_runtime_display_in_column( $content, $column_name, $term_id ) {
 		global $feature_groups;
 
-		if ( 'show_runtime' != $column_name ) {
+		if ( 'show_runtime' !== $column_name ) {
 			return $content;
 		}
 
-		$term_id = absint( $term_id );
+		$term_id      = absint( $term_id );
 		$show_runtime = get_term_meta( $term_id, 'show_runtime', true );
 
 		if ( ! empty( $show_runtime ) ) {
@@ -596,5 +589,5 @@ class Traktivity_Data_Storage {
 
 		return $content;
 	}
-} // End class.
+}
 new Traktivity_Data_Storage();

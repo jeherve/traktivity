@@ -16,11 +16,6 @@ defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 class Traktivity_Stats {
 
 	/**
-	 * Constructor
-	 */
-	function __construct() {}
-
-	/**
 	 * Convert minutes into string of days, hours, and minutes.
 	 *
 	 * @since 2.2.0
@@ -31,23 +26,23 @@ class Traktivity_Stats {
 	 */
 	public static function convert_time( $minutes = 0 ) {
 		$minutes_per_hour = 60;
-		$minutes_per_day = 24 * $minutes_per_hour;
+		$minutes_per_day  = 24 * $minutes_per_hour;
 		$minutes_per_year = 365 * $minutes_per_day;
 
 		// Get number of years.
-		$years = floor( $minutes / $minutes_per_year );
+		$years = (int) floor( $minutes / $minutes_per_year );
 
 		// Get number of days.
 		$days_minutes = $minutes % $minutes_per_year;
-		$days = floor( $days_minutes / $minutes_per_day );
+		$days         = (int) floor( $days_minutes / $minutes_per_day );
 
 		// Get number of hours.
 		$hour_minutes = $minutes % $minutes_per_day;
-		$hours = floor( $hour_minutes / $minutes_per_hour );
+		$hours        = (int) floor( $hour_minutes / $minutes_per_hour );
 
 		// Get the minutes left.
 		$minutes_left = $hour_minutes % $minutes_per_hour;
-		$minutes = ceil( $minutes_left );
+		$minutes      = (int) ceil( $minutes_left );
 
 		if ( 0 < $minutes ) {
 			$display_minutes = sprintf(
@@ -120,7 +115,7 @@ class Traktivity_Stats {
 	 *
 	 * @since 2.2.0
 	 *
-	 * @return string $time Total time spent in front of a screen.
+	 * @return int $time Total time spent in front of a screen, in minutes.
 	 */
 	public static function total_time_watched() {
 		$stats = get_option( 'traktivity_stats' );
@@ -132,23 +127,36 @@ class Traktivity_Stats {
 
 		// If the total time is already set, let's stop here.
 		if ( ! empty( $stats['total_time_watched'] ) ) {
-			return $stats['total_time_watched'];
+			return (int) $stats['total_time_watched'];
 		}
 
 		// Let's pull all trakt_runtime post meta from all Traktivity events.
 		global $wpdb;
 		$post_meta = 'trakt_runtime';
 
-		$all_runtimes = $wpdb->get_col( $wpdb->prepare( "
+		/*
+		 * %s is deliberately unquoted: prepare() quotes string placeholders
+		 * itself, so wrapping it here is redundant.
+		 *
+		 * The result is stored in the traktivity_stats option just below,
+		 * which is what the rest of the plugin reads, so this uncached direct
+		 * query runs at most once per stats refresh.
+		 */
+		$all_runtimes = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Result is cached in the traktivity_stats option.
+			$wpdb->prepare(
+				"
 			SELECT pm.meta_value FROM {$wpdb->postmeta} pm
 			LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-			WHERE pm.meta_key = '%s'
+			WHERE pm.meta_key = %s
 			AND p.post_status = 'publish'
 			AND p.post_type = 'traktivity_event'
-		", $post_meta ) );
+		",
+				$post_meta
+			)
+		);
 
 		if ( ! empty( $all_runtimes ) ) {
-			$stats['total_time_watched'] = array_sum( $all_runtimes );
+			$stats['total_time_watched'] = (int) array_sum( $all_runtimes );
 			// Save the value as an option.
 			update_option( 'traktivity_stats', $stats );
 
@@ -158,5 +166,4 @@ class Traktivity_Stats {
 		// Fallback.
 		return 0;
 	}
-} // End class.
-new Traktivity_Stats();
+}
