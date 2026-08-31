@@ -1,24 +1,22 @@
 /**
  * WordPress dependencies
  */
-import { Component } from '@wordpress/element';
+import { Card, CardBody, CardHeader } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import settings from '../../settings';
 
-class StatsOverview extends Component {
-	render() {
-		return (
-			<div className="stats_overview card">
-				<h2 className="card_title">
-					{ settings.stats_overview_title }
-				</h2>
+export default function StatsOverview() {
+	return (
+		<Card>
+			<CardHeader>
+				<h2>{ settings.stats_overview_title }</h2>
+			</CardHeader>
+			<CardBody>
 				<p>{ settings.tt_watched_desc }</p>
-			</div>
-		);
-	}
+			</CardBody>
+		</Card>
+	);
 }
-
-export default StatsOverview;

@@ -177,10 +177,14 @@ function traktivity_dashboard_scripts( $hook ) {
 	);
 	wp_localize_script( 'traktivity-dashboard', 'traktivity_dash', $traktivity_dash_args );
 
+	/*
+	 * The dashboard is built from @wordpress/components, so it needs the
+	 * wp-components stylesheet underneath its own layout rules.
+	 */
 	wp_register_style(
 		'traktivity-dashboard-styles',
 		plugins_url( 'build/style-index.css', __FILE__ ),
-		array(),
+		array( 'wp-components' ),
 		$asset['version']
 	);
 

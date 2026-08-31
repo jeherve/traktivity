@@ -1,32 +1,25 @@
 /**
  * WordPress dependencies
  */
-import { Component } from '@wordpress/element';
+import { Button, Card, CardBody } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import settings from '../settings';
 
-class Intro extends Component {
-	render() {
-		return (
-			<div className="intro card">
+export default function Intro( { nextStep } ) {
+	return (
+		<Card>
+			<CardBody>
 				<p>
 					<strong>{ settings.intro }</strong>
 				</p>
 				<p>{ settings.description }</p>
-				<div className="action">
-					<button
-						className="nav-button"
-						onClick={ this.props.nextStep }
-					>
-						{ settings.intro_next }
-					</button>
-				</div>
-			</div>
-		);
-	}
+				<Button variant="primary" onClick={ nextStep }>
+					{ settings.intro_next }
+				</Button>
+			</CardBody>
+		</Card>
+	);
 }
-
-export default Intro;

@@ -1,30 +1,25 @@
 /**
  * WordPress dependencies
  */
-import { Component } from '@wordpress/element';
+import { Button, Card, CardBody, CardHeader } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import settings from '../settings';
 
-class SyncForm extends Component {
-	render() {
-		return (
-			<div className="sync_settings card">
-				<h2 className="card_title">{ settings.sync_title }</h2>
+export default function SyncForm( { nextStep } ) {
+	return (
+		<Card>
+			<CardHeader>
+				<h2>{ settings.sync_title }</h2>
+			</CardHeader>
+			<CardBody>
 				<p>{ settings.sync_description }</p>
-				<div className="action">
-					<button
-						className="nav-button"
-						onClick={ this.props.nextStep }
-					>
-						{ settings.launch_sync }
-					</button>
-				</div>
-			</div>
-		);
-	}
+				<Button variant="primary" onClick={ nextStep }>
+					{ settings.launch_sync }
+				</Button>
+			</CardBody>
+		</Card>
+	);
 }
-
-export default SyncForm;

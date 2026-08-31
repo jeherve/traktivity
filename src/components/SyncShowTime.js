@@ -1,33 +1,32 @@
 /**
  * WordPress dependencies
  */
-import { Component } from '@wordpress/element';
+import { Button, Card, CardBody, CardHeader } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import settings from '../settings';
 
-class SyncShowTime extends Component {
-	render() {
-		const inProgress = this.props.sync.runtime === 'in_progress';
+export default function SyncShowTime( { sync, launchRuntimeSync } ) {
+	const inProgress = sync.runtime === 'in_progress';
 
-		return (
-			<div className="sync_settings card">
-				<h2 className="card_title">{ settings.sync_runtime_title }</h2>
+	return (
+		<Card>
+			<CardHeader>
+				<h2>{ settings.sync_runtime_title }</h2>
+			</CardHeader>
+			<CardBody>
 				<p>{ settings.sync_runtime_desc }</p>
-				<div className="action">
-					<button
-						className="nav-button"
-						disabled={ inProgress }
-						onClick={ this.props.launchRuntimeSync }
-					>
-						{ settings.launch_sync }
-					</button>
-				</div>
-			</div>
-		);
-	}
+				<Button
+					variant="secondary"
+					disabled={ inProgress }
+					isBusy={ inProgress }
+					onClick={ launchRuntimeSync }
+				>
+					{ settings.launch_sync }
+				</Button>
+			</CardBody>
+		</Card>
+	);
 }
-
-export default SyncShowTime;

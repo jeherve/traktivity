@@ -1,8 +1,16 @@
 /**
  * WordPress dependencies
  */
-import { Component } from '@wordpress/element';
-import { Icon, external } from '@wordpress/icons';
+import {
+	Button,
+	Card,
+	CardBody,
+	CardHeader,
+	ExternalLink,
+	TextControl,
+} from '@wordpress/components';
+import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -10,77 +18,92 @@ import { Icon, external } from '@wordpress/icons';
 import Notice from './Notice';
 import settings from '../settings';
 
-class TraktForm extends Component {
-	constructor() {
-		super();
+/**
+ * Step 2: collect and verify the Trakt.tv credentials.
+ *
+ * Credentials are saved and checked once on submit rather than on every
+ * keystroke, which is what the previous version did.
+ *
+ * @param {Object}   props
+ * @param {Object}   props.trakt        Current Trakt settings.
+ * @param {Function} props.saveCreds    Persists and verifies the credentials.
+ * @param {Function} props.nextStep     Advances the wizard.
+ * @param {Object}   [props.notice]     Status message to display.
+ * @param {Function} props.removeNotice Clears the status message.
+ * @return {Element} The form.
+ */
+export default function TraktForm( {
+	trakt,
+	saveCreds,
+	nextStep,
+	notice,
+	removeNotice,
+} ) {
+	const [ username, setUsername ] = useState( trakt.username );
+	const [ key, setKey ] = useState( trakt.key );
+	const [ isBusy, setIsBusy ] = useState( false );
 
-		this.saveTraktCreds = this.saveTraktCreds.bind( this );
-	}
-
-	saveTraktCreds( event ) {
+	const onSubmit = ( event ) => {
 		event.preventDefault();
+		setIsBusy( true );
 
-		// Send that data back so it can be tested and saved.
-		this.props.saveCreds( event.target.name, event.target.value );
-	}
+		saveCreds( username, key )
+			.then( ( valid ) => {
+				if ( valid ) {
+					return nextStep();
+				}
+				return null;
+			} )
+			.finally( () => setIsBusy( false ) );
+	};
 
-	render() {
-		const traktInfo = this.props.trakt;
-		const canContinue = traktInfo.valid === true;
-		return (
-			<div className="trakt_settings card">
-				<h2 className="card_title">{ settings.form_trakt_title }</h2>
+	return (
+		<Card>
+			<CardHeader>
+				<h2>{ settings.form_trakt_title }</h2>
+			</CardHeader>
+			<CardBody>
 				<p>
-					{ settings.form_trakt_intro }
-					<span>
-						<a
-							href={ settings.form_trakt_api_url }
-							title={ settings.form_trakt_create_app }
-						>
-							<Icon size={ 24 } icon={ external } />
-						</a>
-					</span>
+					{ settings.form_trakt_intro }{ ' ' }
+					<ExternalLink href={ settings.form_trakt_api_url }>
+						{ settings.form_trakt_create_app }
+					</ExternalLink>
 				</p>
 				<p>{ settings.form_trakt_api_options }</p>
 				<p>{ settings.form_trakt_api_fields }</p>
-				<label htmlFor="username">
-					<span>{ settings.form_trakt_username }</span>
-					<input
-						name="username"
-						defaultValue={ traktInfo.username }
-						type="text"
-						placeholder={ settings.form_trakt_username }
-						required
-						onChange={ ( event ) => this.saveTraktCreds( event ) }
-					/>
-				</label>
-				<label htmlFor="key">
-					<span>{ settings.form_trakt_key }</span>
-					<input
-						name="key"
-						defaultValue={ traktInfo.key }
-						type="text"
-						placeholder={ settings.form_trakt_key }
-						required
-						onChange={ ( event ) => this.saveTraktCreds( event ) }
-					/>
-				</label>
-				<Notice
-					notice={ this.props.notice }
-					removeNotice={ this.props.removeNotice }
-				/>
-				<div className="action">
-					<button
-						className="nav-button"
-						disabled={ ! canContinue }
-						onClick={ this.props.nextStep }
-					>
-						{ settings.button_next }
-					</button>
-				</div>
-			</div>
-		);
-	}
-}
 
-export default TraktForm;
+				<form onSubmit={ onSubmit }>
+					<TextControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
+						label={ settings.form_trakt_username }
+						value={ username }
+						onChange={ setUsername }
+						autoComplete="off"
+						required
+					/>
+					<TextControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
+						label={ settings.form_trakt_key }
+						value={ key }
+						onChange={ setKey }
+						autoComplete="off"
+						required
+					/>
+
+					<Notice notice={ notice } removeNotice={ removeNotice } />
+
+					<Button
+						variant="primary"
+						type="submit"
+						isBusy={ isBusy }
+						disabled={ isBusy || ! username || ! key }
+					>
+						{ __( 'Verify and continue', 'traktivity' ) }
+					</Button>
+				</form>
+			</CardBody>
+		</Card>
+	);
+}
