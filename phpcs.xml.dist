@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<ruleset name="Traktivity">
+	<description>Coding standards for the Traktivity plugin.</description>
+
+	<!-- Scan the whole plugin, minus generated and third-party code. -->
+	<file>.</file>
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+	<exclude-pattern>/_build/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg name="parallel" value="8"/>
+	<arg value="sp"/>
+
+	<!-- The minimum WordPress version the plugin supports. -->
+	<config name="minimum_wp_version" value="7.0"/>
+
+	<rule ref="WordPress"/>
+
+	<!--
+		Historic file naming: this plugin ships `core.traktivity.php` and friends,
+		and the names are baked into the wordpress.org SVN layout. Renaming them
+		is churn with no upside, so the file name sniff stays off.
+	-->
+	<rule ref="WordPress.Files.FileName">
+		<severity>0</severity>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="traktivity"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="traktivity"/>
+				<element value="Traktivity"/>
+				<element value="TRAKTIVITY"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- The plugin declares PHP 7.4 as its minimum in composer.json and the plugin header. -->
+	<config name="testVersion" value="7.4-"/>
+	<rule ref="PHPCompatibilityWP"/>
+</ruleset>
