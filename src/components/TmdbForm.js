@@ -81,7 +81,7 @@ export default function TmdbForm( {
 					</ExternalLink>
 				</p>
 
-				<form onSubmit={ onSubmit }>
+				<form className="traktivity-form" onSubmit={ onSubmit }>
 					<TextControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom

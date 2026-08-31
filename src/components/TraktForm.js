@@ -86,7 +86,7 @@ export default function TraktForm( {
 					) }
 				</p>
 
-				<form onSubmit={ onSubmit }>
+				<form className="traktivity-form" onSubmit={ onSubmit }>
 					<TextControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
