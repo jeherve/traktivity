@@ -6,11 +6,6 @@ import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies
- */
-import settings from '../settings';
-
 const STORAGE_KEY = 'traktivity_recent_events';
 
 /**
@@ -87,7 +82,7 @@ export default function RecentEvents() {
 	return (
 		<Card>
 			<CardHeader>
-				<h2>{ settings.recent_list_title }</h2>
+				<h2>{ __( 'Recently Watched', 'traktivity' ) }</h2>
 			</CardHeader>
 			<CardBody>
 				{ events === null && <Spinner /> }

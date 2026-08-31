@@ -16,7 +16,8 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import Notice from './Notice';
-import settings from '../settings';
+
+const CREATE_APP_URL = 'https://trakt.tv/oauth/applications/new';
 
 /**
  * Step 2: collect and verify the Trakt.tv credentials.
@@ -60,23 +61,36 @@ export default function TraktForm( {
 	return (
 		<Card>
 			<CardHeader>
-				<h2>{ settings.form_trakt_title }</h2>
+				<h2>{ __( 'Trakt.tv Settings', 'traktivity' ) }</h2>
 			</CardHeader>
 			<CardBody>
 				<p>
-					{ settings.form_trakt_intro }{ ' ' }
-					<ExternalLink href={ settings.form_trakt_api_url }>
-						{ settings.form_trakt_create_app }
+					{ __(
+						'To use the plugin, you will need to create an API application on Trakt.tv first.',
+						'traktivity'
+					) }{ ' ' }
+					<ExternalLink href={ CREATE_APP_URL }>
+						{ __( 'Click here to create that app.', 'traktivity' ) }
 					</ExternalLink>
 				</p>
-				<p>{ settings.form_trakt_api_options }</p>
-				<p>{ settings.form_trakt_api_fields }</p>
+				<p>
+					{ __(
+						'In the Redirect uri field, you can enter your site URL. You can give it both checkin and scrobble permissions.',
+						'traktivity'
+					) }
+				</p>
+				<p>
+					{ __(
+						'Once you created your app, copy the "Client ID" value below. You will also want to enter your Trakt.tv username.',
+						'traktivity'
+					) }
+				</p>
 
 				<form onSubmit={ onSubmit }>
 					<TextControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
-						label={ settings.form_trakt_username }
+						label={ __( 'Trakt.tv Username', 'traktivity' ) }
 						value={ username }
 						onChange={ setUsername }
 						autoComplete="off"
@@ -85,7 +99,7 @@ export default function TraktForm( {
 					<TextControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
-						label={ settings.form_trakt_key }
+						label={ __( 'Trakt.tv API Key', 'traktivity' ) }
 						value={ key }
 						onChange={ setKey }
 						autoComplete="off"

@@ -17,7 +17,8 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import Notice from './Notice';
-import settings from '../settings';
+
+const CREATE_APP_URL = 'https://www.themoviedb.org/login';
 
 /**
  * Step 3: collect and verify the TMDb API key. This step is optional.
@@ -57,17 +58,26 @@ export default function TmdbForm( {
 	return (
 		<Card>
 			<CardHeader>
-				<h2>{ settings.form_tmdb_title }</h2>
+				<h2>{ __( 'The Movie Database Settings', 'traktivity' ) }</h2>
 			</CardHeader>
 			<CardBody>
 				<p>
-					{ settings.form_tmdb_intro }{ ' ' }
-					{ settings.form_tmdb_intro_opt }
+					{ __(
+						'To get images for each TV show, episode, and movie, we will also need to use another service, The Movie DB API.',
+						'traktivity'
+					) }{ ' ' }
+					{ __(
+						'This is optional. If you do not want to store and display images about the things you watch on your site, you can ignore this.',
+						'traktivity'
+					) }
 				</p>
 				<p>
-					{ settings.form_tmdb_create_app }{ ' ' }
-					<ExternalLink href={ settings.form_tmdb_api_url }>
-						{ settings.form_trakt_create_app }
+					{ __(
+						'To register for an API key, sign up and/or login to your account page on TMDb and click the "API" link in the left hand sidebar. Once your application is approved, copy the contents of the "API Key (v3 auth)" field, and paste it below.',
+						'traktivity'
+					) }{ ' ' }
+					<ExternalLink href={ CREATE_APP_URL }>
+						{ __( 'Click here to create that app.', 'traktivity' ) }
 					</ExternalLink>
 				</p>
 
@@ -75,7 +85,7 @@ export default function TmdbForm( {
 					<TextControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
-						label={ settings.form_tmdb_key }
+						label={ __( 'TMDB API Key', 'traktivity' ) }
 						value={ key }
 						onChange={ setKey }
 						autoComplete="off"
@@ -89,7 +99,7 @@ export default function TmdbForm( {
 							onClick={ nextStep }
 							disabled={ isBusy }
 						>
-							{ settings.button_skip }
+							{ __( 'Skip', 'traktivity' ) }
 						</Button>
 						<Button
 							variant="primary"

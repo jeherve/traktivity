@@ -33,19 +33,19 @@ function check( path ) {
  */
 export default function useTraktivitySettings() {
 	const [ step, setStep ] = useState(
-		() => parseInt( settings.traktivity_step, 10 ) || 1
+		() => parseInt( settings.step, 10 ) || 1
 	);
 	const [ trakt, setTrakt ] = useState( () => ( {
-		username: settings.trakt_username || '',
-		key: settings.trakt_key || '',
+		username: settings.traktUsername || '',
+		key: settings.traktKey || '',
 	} ) );
 	const [ tmdb, setTmdb ] = useState( () => ( {
-		key: settings.tmdb_key || '',
+		key: settings.tmdbKey || '',
 	} ) );
 	const [ sync, setSync ] = useState( () => ( {
-		status: settings.sync_status || '',
-		pages: parseInt( settings.sync_pages, 10 ) || 0,
-		runtime: settings.sync_runtime || '',
+		status: settings.syncStatus || '',
+		pages: parseInt( settings.syncPages, 10 ) || 0,
+		runtime: settings.syncRuntime || '',
 	} ) );
 	const [ notice, setNotice ] = useState( null );
 

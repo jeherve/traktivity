@@ -1,13 +1,18 @@
 /**
- * Internal dependencies
+ * WordPress dependencies
  */
-import settings from '../settings';
+import { __ } from '@wordpress/i18n';
 
 export default function Header() {
 	return (
 		<header className="traktivity-header">
-			<h1>{ settings.title }</h1>
-			<p className="traktivity-header__tagline">{ settings.tagline }</p>
+			<h1>{ __( 'Traktivity Dashboard', 'traktivity' ) }</h1>
+			<p className="traktivity-header__tagline">
+				{ __(
+					'Log your activity in front of the screen.',
+					'traktivity'
+				) }
+			</p>
 		</header>
 	);
 }
