@@ -29,6 +29,7 @@
     "lint:pkg-json": "wp-scripts lint-pkg-json",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js",
     "test:e2e": "wp-scripts test-playwright",
+    "test:package": "npm run plugin-zip && node tests/package/verify-package.mjs",
     "env": "wp-env",
     "packages-update": "wp-scripts packages-update"
   },

@@ -66,28 +66,37 @@ npm run test:e2e
 The wizard talks to the Trakt.tv and TMDb APIs. Rather than depend on either
 service, `tests/e2e/mu-plugins/traktivity-e2e.php` answers both from inside the
 container through `pre_http_request`, so the suite needs no API keys and stays
-deterministic. That file is loaded only by `wp-env` and is excluded from
-releases by `.svnignore`.
+deterministic. That file is loaded only by `wp-env` and never ships.
 
 ## Releasing
 
 ```sh
-npm run plugin-zip
+npm run test:package
 ```
 
-That builds production assets and writes `traktivity.zip`, ready to upload or
-to copy into the wordpress.org SVN trunk.
+That builds the production assets, writes `traktivity.zip`, and then checks the
+archive. Use `npm run plugin-zip` on its own if you only want the file.
 
-What goes in is the `files` allowlist in `package.json`, not an ignore list, so
-a new file has to be named there to ship rather than shipping by default
-because nobody remembered to exclude it. `img/` is deliberately absent: it is a
-build input, and webpack copies the image into `build/images/` with a hashed
-name, which is what the compiled CSS asks for.
+**The `files` allowlist in `package.json` is the only description of a
+release.** There is no separate ignore list to keep in step with it. A new file
+has to be named in `files` to ship, rather than shipping by default because
+nobody remembered to exclude it.
 
-The command strips `package.json` and `README.md` afterwards. npm always adds
-those to a package regardless of the `files` field, and neither belongs in a
-plugin someone installs.
+Two things about that list are easy to misread:
 
-Composer carries dev dependencies only, so nothing needs a `vendor/` directory
-at runtime and none is released. `.svnignore` still describes the same split
-for the SVN side.
+- `img/` is deliberately absent. It is a build input; webpack copies the image
+  into `build/images/` under a hashed name, and that copy is what the compiled
+  CSS requests. Shipping the original sent the same image twice.
+- `package.json` and `README.md` are removed from the archive after it is
+  written. npm adds them to any package regardless of `files`, and neither
+  belongs in a plugin someone installs.
+
+`npm run test:package` is what stops the allowlist drifting. It unpacks the
+archive and checks that no development files crept in, that every
+`require_once`, `plugins_url()` and stylesheet `url()` resolves inside the
+archive, and that the plugin header version matches the readme's stable tag. It
+runs in CI on every pull request.
+
+To release to wordpress.org, unpack the archive over the SVN `trunk/`
+directory; its contents are exactly what should be there. Composer carries dev
+dependencies only, so nothing needs a `vendor/` directory at runtime.

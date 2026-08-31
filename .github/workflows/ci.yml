@@ -36,6 +36,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Also builds the release archive, so a broken allowlist fails here
+      # rather than at release time.
+      - name: Verify the release archive
+        run: npm run test:package
+
   php:
     name: PHP
     runs-on: ubuntu-latest
