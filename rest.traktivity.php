@@ -56,7 +56,7 @@ class Traktivity_Api {
 		 *
 		 * @since 1.1.0
 		 */
-		register_rest_route( 'traktivity/v1', '/connection/(?P<user>[a-z0-9\-\.]+)/(?P<trakt>[a-zA-Z0-9-]+)', array(
+		register_rest_route( 'traktivity/v1', '/connection/(?P<user>[^/]+)/(?P<trakt>[^/]+)', array(
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'test_trakt_api_connection' ),
 			'permission_callback' => array( $this, 'permissions_check' ),
@@ -77,7 +77,7 @@ class Traktivity_Api {
 		 *
 		 * @since 2.0.0
 		 */
-		register_rest_route( 'traktivity/v1', '/tmdb/(?P<tmdb>[a-zA-Z0-9-]+)', array(
+		register_rest_route( 'traktivity/v1', '/tmdb/(?P<tmdb>[^/]+)', array(
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'test_tmdb_api_connection' ),
 			'permission_callback' => array( $this, 'permissions_check' ),
@@ -137,7 +137,12 @@ class Traktivity_Api {
 	 * @return bool $validated Is the API key in a valid format.
 	 */
 	public function validate_string( $param, $request, $key ) {
-		return is_string( $param );
+		// Usernames and API keys are single opaque tokens: never empty, never whitespace or control characters.
+		return (
+			is_string( $param )
+			&& '' !== $param
+			&& ! preg_match( '/[\s\x00-\x1F\x7F]/', $param )
+		);
 	}
 
 	/**
@@ -170,12 +175,12 @@ class Traktivity_Api {
 		$headers = array(
 			'Content-Type'      => 'application/json',
 			'trakt-api-version' => TRAKTIVITY__API_VERSION,
-			'trakt-api-key'     => esc_html( $trakt ),
+			'trakt-api-key'     => $trakt,
 		);
 		$query_url = sprintf(
 			'%1$s/users/%2$s/history?limit=1',
 			TRAKTIVITY__API_URL,
-			esc_html( $user )
+			rawurlencode( $user )
 		);
 		$data = wp_remote_get(
 			esc_url_raw( $query_url ),
@@ -257,7 +262,7 @@ class Traktivity_Api {
 			TRAKTIVITY__TMDB_API_URL,
 			TRAKTIVITY__TMDB_API_VERSION,
 			'discover/movie',
-			esc_attr( $request['tmdb'] )
+			rawurlencode( $request['tmdb'] )
 		);
 		$data = wp_remote_get( esc_url_raw( $query_url ) );
 

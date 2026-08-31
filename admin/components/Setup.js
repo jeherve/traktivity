@@ -221,7 +221,7 @@ class Setup extends React.Component {
 				'X-WP-Nonce': traktivity_dash.api_nonce
 			},
 		};
-		const checkCredsPromise = fetch( `${traktivity_dash.api_url}traktivity/v1/connection/${username}/${key}`, fetchOptions );
+		const checkCredsPromise = fetch( `${traktivity_dash.api_url}traktivity/v1/connection/${encodeURIComponent(username)}/${encodeURIComponent(key)}`, fetchOptions );
 		return checkCredsPromise
 			.then((response) => response.json())
 			.then((body) => {
@@ -259,7 +259,7 @@ class Setup extends React.Component {
 				'X-WP-Nonce': traktivity_dash.api_nonce
 			},
 		};
-		const checkCredsPromise = fetch( `${traktivity_dash.api_url}traktivity/v1/tmdb/${key}`, fetchOptions );
+		const checkCredsPromise = fetch( `${traktivity_dash.api_url}traktivity/v1/tmdb/${encodeURIComponent(key)}`, fetchOptions );
 		return checkCredsPromise
 			.then((response) => response.json())
 			.then((body) => {
