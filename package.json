@@ -3,8 +3,23 @@
   "version": "3.0.0",
   "description": "Log your activity on Trakt.tv",
   "main": "traktivity.php",
+  "files": [
+    "build",
+    "css",
+    "widgets",
+    "admin.traktivity.php",
+    "content.traktivity.php",
+    "core.traktivity.php",
+    "cpt.traktivity.php",
+    "rest.traktivity.php",
+    "stats.traktivity.php",
+    "traktivity.php",
+    "uninstall.php",
+    "readme.txt"
+  ],
   "scripts": {
     "build": "wp-scripts build",
+    "plugin-zip": "npm run build && wp-scripts plugin-zip && zip -q -d traktivity.zip traktivity/package.json traktivity/README.md",
     "start": "wp-scripts start",
     "format": "wp-scripts format",
     "lint:js": "wp-scripts lint-js",

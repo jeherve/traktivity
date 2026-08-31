@@ -156,6 +156,10 @@ function traktivity_dashboard_scripts( $hook ) {
 		$asset['version']
 	);
 
+	// wp-scripts emits style-index-rtl.css alongside the stylesheet on each
+	// build; this is what makes WordPress serve it to right-to-left locales.
+	wp_style_add_data( 'traktivity-dashboard-styles', 'rtl', 'replace' );
+
 	wp_enqueue_script( 'traktivity-dashboard' );
 	wp_enqueue_style( 'traktivity-dashboard-styles' );
 }

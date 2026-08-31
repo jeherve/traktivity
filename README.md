@@ -71,7 +71,23 @@ releases by `.svnignore`.
 
 ## Releasing
 
-`.svnignore` lists everything kept out of the wordpress.org package. `build/`
-ships; `src/`, `tests/`, `node_modules/`, `vendor/` and the tooling configs do
-not. Composer carries dev dependencies only, so no `vendor/` directory is
-released.
+```sh
+npm run plugin-zip
+```
+
+That builds production assets and writes `traktivity.zip`, ready to upload or
+to copy into the wordpress.org SVN trunk.
+
+What goes in is the `files` allowlist in `package.json`, not an ignore list, so
+a new file has to be named there to ship rather than shipping by default
+because nobody remembered to exclude it. `img/` is deliberately absent: it is a
+build input, and webpack copies the image into `build/images/` with a hashed
+name, which is what the compiled CSS asks for.
+
+The command strips `package.json` and `README.md` afterwards. npm always adds
+those to a package regardless of the `files` field, and neither belongs in a
+plugin someone installs.
+
+Composer carries dev dependencies only, so nothing needs a `vendor/` directory
+at runtime and none is released. `.svnignore` still describes the same split
+for the SVN side.
