@@ -75,6 +75,18 @@ add_filter( 'pre_http_request', 'traktivity_e2e_mock_http', 10, 3 );
 function traktivity_e2e_register_routes() {
 	register_rest_route(
 		'traktivity-e2e/v1',
+		'/options',
+		array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => 'traktivity_e2e_options',
+			'permission_callback' => static function () {
+				return current_user_can( 'manage_options' );
+			},
+		)
+	);
+
+	register_rest_route(
+		'traktivity-e2e/v1',
 		'/reset',
 		array(
 			'methods'             => WP_REST_Server::CREATABLE,
@@ -86,6 +98,15 @@ function traktivity_e2e_register_routes() {
 	);
 }
 add_action( 'rest_api_init', 'traktivity_e2e_register_routes' );
+
+/**
+ * Return the plugin's stored options, so specs can assert on what was saved.
+ *
+ * @return WP_REST_Response The traktivity option.
+ */
+function traktivity_e2e_options() {
+	return new WP_REST_Response( (array) get_option( 'traktivity' ), 200 );
+}
 
 /**
  * Put the plugin back to a freshly installed state.

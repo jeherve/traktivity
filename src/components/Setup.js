@@ -58,7 +58,12 @@ export default function Setup() {
 					/>
 				);
 			case 4:
-				return <SyncForm nextStep={ goToNextStep } />;
+				return (
+					<SyncForm
+						nextStep={ goToNextStep }
+						launchSync={ launchSync }
+					/>
+				);
 			default:
 				return <Dashboard sync={ sync } launchSync={ launchSync } />;
 		}

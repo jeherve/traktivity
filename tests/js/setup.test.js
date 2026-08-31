@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * WordPress dependencies
@@ -35,6 +36,23 @@ describe( 'Setup', () => {
 		render( <Setup /> );
 
 		expect( screen.getAllByText( expected ).length ).toBeGreaterThan( 0 );
+	} );
+
+	it( 'starts the full sync from step 4, not just advances', async () => {
+		const user = userEvent.setup();
+		resetSettings( { step: '4' } );
+
+		render( <Setup /> );
+
+		await user.click(
+			screen.getByRole( 'button', { name: 'Start synchronization' } )
+		);
+
+		await waitFor( () =>
+			expect( apiFetch ).toHaveBeenCalledWith(
+				expect.objectContaining( { path: '/traktivity/v1/sync' } )
+			)
+		);
 	} );
 
 	it( 'shows the dashboard once setup is complete', async () => {

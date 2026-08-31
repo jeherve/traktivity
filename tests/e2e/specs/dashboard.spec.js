@@ -109,6 +109,34 @@ test.describe( 'Traktivity dashboard', () => {
 		).toBeVisible();
 	} );
 
+	test( 'starts the full sync when the wizard asks for it', async ( {
+		page,
+		requestUtils,
+	} ) => {
+		await page
+			.getByRole( 'button', { name: "Let's get started!" } )
+			.click();
+		await page.getByLabel( 'Trakt.tv Username' ).fill( 'jeherve' );
+		await page.getByLabel( 'Trakt.tv API Key' ).fill( VALID_TRAKT_KEY );
+		await page
+			.getByRole( 'button', { name: 'Verify and continue' } )
+			.click();
+		await page.getByRole( 'button', { name: 'Skip' } ).click();
+
+		// Step 4 is the only place a first sync is ever kicked off.
+		await page
+			.getByRole( 'button', { name: 'Start synchronization' } )
+			.click();
+		await expect(
+			page.getByText( 'I am all set! What now?' )
+		).toBeVisible();
+
+		const options = await requestUtils.rest( {
+			path: '/traktivity-e2e/v1/options',
+		} );
+		expect( options.full_sync ).toBeTruthy();
+	} );
+
 	test( 'remembers the step it was left on', async ( { page, admin } ) => {
 		await page
 			.getByRole( 'button', { name: "Let's get started!" } )

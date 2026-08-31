@@ -2,9 +2,26 @@
  * WordPress dependencies
  */
 import { Button, Card, CardBody, CardHeader } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-export default function SyncForm( { nextStep } ) {
+/**
+ * Step 4: offer to back-fill everything watched so far.
+ *
+ * @param {Object}   props
+ * @param {Function} props.launchSync Starts the full sync.
+ * @param {Function} props.nextStep   Advances to the dashboard.
+ * @return {Element} The form.
+ */
+export default function SyncForm( { launchSync, nextStep } ) {
+	const [ isBusy, setIsBusy ] = useState( false );
+
+	const onClick = async () => {
+		setIsBusy( true );
+		await launchSync();
+		await nextStep();
+	};
+
 	return (
 		<Card>
 			<CardHeader>
@@ -22,7 +39,12 @@ export default function SyncForm( { nextStep } ) {
 						'traktivity'
 					) }
 				</p>
-				<Button variant="primary" onClick={ nextStep }>
+				<Button
+					variant="primary"
+					isBusy={ isBusy }
+					disabled={ isBusy }
+					onClick={ onClick }
+				>
 					{ __( 'Start synchronization', 'traktivity' ) }
 				</Button>
 			</CardBody>

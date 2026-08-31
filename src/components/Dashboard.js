@@ -24,7 +24,10 @@ export default function Dashboard( { sync, launchSync } ) {
 	const pagesLeft = sync.pages;
 
 	useEffect( () => {
-		// Resume a sync that still has pages left to fetch.
+		/*
+		 * Pick a sync back up if it was interrupted with pages still to go.
+		 * A sync started from step 4 is kicked off there, not here.
+		 */
 		if ( pagesLeft !== 0 ) {
 			launchSync();
 		}
