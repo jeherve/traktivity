@@ -98,8 +98,22 @@ function traktivity_dashboard_scripts( $hook ) {
 		return;
 	}
 
-	$version = defined( 'WP_DEBUG' ) && true === WP_DEBUG ? time() : TRAKTIVITY__VERSION;
-	wp_register_script( 'traktivity-dashboard', plugins_url( '_build/admin.js', __FILE__ ), array(), $version, true );
+	$asset_file = TRAKTIVITY__PLUGIN_DIR . 'build/index.asset.php';
+
+	// The build has not been generated; there is nothing to render into.
+	if ( ! file_exists( $asset_file ) ) {
+		return;
+	}
+
+	$asset = require $asset_file;
+
+	wp_register_script(
+		'traktivity-dashboard',
+		plugins_url( 'build/index.js', __FILE__ ),
+		$asset['dependencies'],
+		$asset['version'],
+		true
+	);
 
 	$options              = (array) get_option( 'traktivity' );
 	$stats                = (array) get_option( 'traktivity_stats' );
@@ -163,7 +177,12 @@ function traktivity_dashboard_scripts( $hook ) {
 	);
 	wp_localize_script( 'traktivity-dashboard', 'traktivity_dash', $traktivity_dash_args );
 
-	wp_register_style( 'traktivity-dashboard-styles', plugins_url( 'admin/css/dashboard.css', __FILE__ ), array(), $version );
+	wp_register_style(
+		'traktivity-dashboard-styles',
+		plugins_url( 'build/style-index.css', __FILE__ ),
+		array(),
+		$asset['version']
+	);
 
 	wp_enqueue_script( 'traktivity-dashboard' );
 	wp_enqueue_style( 'traktivity-dashboard-styles' );

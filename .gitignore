@@ -1,6 +1,6 @@
 /node_modules
 /vendor
+/build
 .DS_Store
 npm-debug.log
 *.unison.tmp
-/_build

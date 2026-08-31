@@ -10,6 +10,10 @@ Page layout
 	margin: 0;
 }
 
+.card p {
+	font-size: 0.875rem;
+}
+
 .card_list,
 .traktivity_dashboard header.top p {
 	margin: 0 auto;
@@ -33,9 +37,6 @@ Card Design
 	box-shadow: 0 0 0 1px rgba(200, 215, 225, 0.5), 0 1px 2px #e9eff3;
 }
 
-.card p {
-	font-size: .875rem;
-}
 
 /* Card header */
 
@@ -52,18 +53,15 @@ Header
 
 .top {
 	background:
-		linear-gradient(
-			rgba(0, 0, 0, 0),
-			rgba(0, 0, 0, 0.65)
-		),
-		url('../../img/watching.jpg');
+		linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.65)),
+		url(../img/watching.jpg);
 	background-position: no-repeat;
 	background-position: top center;
 	margin: 0 auto;
 	position: relative;
 	height: 192px;
 	width: 800px;
-	box-shadow: 0 1px 0 rgba(200,215,225,0.5), 0 1px 2px #e9eff3;
+	box-shadow: 0 1px 0 rgba(200, 215, 225, 0.5), 0 1px 2px #e9eff3;
 	border-bottom: 1px #d9e3ea solid;
 }
 
@@ -82,6 +80,7 @@ Header
 	padding: 0.4em 0.5em;
 	display: inline-block;
 }
+
 .top nav {
 	display: inline-block;
 }
@@ -129,9 +128,9 @@ Inputs
 	color: #2e4453;
 	display: inline-block;
 	padding: 1.23em 2em;
-	font-family: Consolas,Monaco,monospace;
+	font-family: Consolas, Monaco, monospace;
 	margin: 0;
-	transition: all .15s ease-in-out;
+	transition: all 0.15s ease-in-out;
 	width: 70%;
 	float: right;
 }
@@ -160,12 +159,15 @@ Notices
 .message.empty {
 	padding: 1.5em;
 }
+
 .message.traktivity__success {
 	background-color: #4ab866;
 }
+
 .message.traktivity__progress {
 	background-color: #f0b849;
 }
+
 .message.traktivity__error {
 	background-color: #d94f4f;
 }
@@ -176,7 +178,7 @@ Notices
 
 .message .notice_text {
 	font-size: 18px;
-	padding: 0 0 0 .5em;
+	padding: 0 0 0 0.5em;
 	position: relative;
 	bottom: 4px;
 }
@@ -243,6 +245,7 @@ Buttons
 .nav-button:visited {
 	color: #2e4453;
 }
+
 .nav-button:disabled,
 .nav-button[disabled] {
 	background: #bceefd;
@@ -251,7 +254,7 @@ Buttons
 }
 
 .nav-button.secondary {
-	background: white;
+	background: #fff;
 	border-color: #c8d7e1;
 	border-width: 1px 1px 2px;
 	color: #2e4453;
@@ -296,7 +299,7 @@ Events
 	position: absolute;
 	top: 40px;
 	left: 0;
-	padding: .25em 1em;
+	padding: 0.25em 1em;
 	color: #fff;
 	background: rgba(0, 0, 0, 0.75);
 }
