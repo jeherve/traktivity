@@ -15,9 +15,12 @@ export const LAST_STEP = 5;
 /**
  * Run a credential check.
  *
- * Both endpoints answer with { code, message } whether or not the credentials
- * work, but a rejected key comes back on an error status, which apiFetch
- * rejects. Either way the payload is what we want to show the user.
+ * The endpoints read the credentials that were just saved, rather than taking
+ * them as arguments, so that keys never travel in a URL.
+ *
+ * Both answer with { code, message } whether or not the credentials work, but
+ * a rejected key comes back on an error status, which apiFetch rejects. Either
+ * way the payload is what we want to show the user.
  *
  * @param {string} path REST path to call.
  * @return {Promise<Object>} The endpoint's { code, message } payload.
@@ -91,13 +94,7 @@ export default function useTraktivitySettings() {
 			setTrakt( updated );
 
 			return save( { trakt: updated, tmdb, step } )
-				.then( () =>
-					check(
-						`/traktivity/v1/connection/${ encodeURIComponent(
-							username
-						) }/${ encodeURIComponent( key ) }`
-					)
-				)
+				.then( () => check( '/traktivity/v1/connection' ) )
 				.then( ( body ) => {
 					const valid = body.code === 200;
 					setTrakt( { ...updated, valid } );
@@ -121,11 +118,7 @@ export default function useTraktivitySettings() {
 			setTmdb( updated );
 
 			return save( { trakt, tmdb: updated, step } )
-				.then( () =>
-					check(
-						`/traktivity/v1/tmdb/${ encodeURIComponent( key ) }`
-					)
-				)
+				.then( () => check( '/traktivity/v1/tmdb' ) )
 				.then( ( body ) => {
 					const valid = body.code === 200;
 					setTmdb( { ...updated, valid } );

@@ -66,21 +66,11 @@ class Traktivity_Api {
 		 */
 		register_rest_route(
 			'traktivity/v1',
-			'/connection/(?P<user>[a-z0-9\-\.]+)/(?P<trakt>[a-zA-Z0-9-]+)',
+			'/connection',
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'test_trakt_api_connection' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
-				'args'                => array(
-					'user'  => array(
-						'required'          => true,
-						'validate_callback' => array( $this, 'validate_string' ),
-					),
-					'trakt' => array(
-						'required'          => true,
-						'validate_callback' => array( $this, 'validate_string' ),
-					),
-				),
 			)
 		);
 
@@ -91,17 +81,11 @@ class Traktivity_Api {
 		 */
 		register_rest_route(
 			'traktivity/v1',
-			'/tmdb/(?P<tmdb>[a-zA-Z0-9-]+)',
+			'/tmdb',
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'test_tmdb_api_connection' ),
 				'permission_callback' => array( $this, 'permissions_check' ),
-				'args'                => array(
-					'tmdb' => array(
-						'required'          => true,
-						'validate_callback' => array( $this, 'validate_string' ),
-					),
-				),
 			)
 		);
 
@@ -150,21 +134,6 @@ class Traktivity_Api {
 	}
 
 	/**
-	 * Validate an API key.
-	 *
-	 * @since 1.1.0
-	 *
-	 * @param mixed           $param   Parameter that needs to be validated.
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @param string          $key     key argument.
-	 *
-	 * @return bool $validated Is the API key in a valid format.
-	 */
-	public function validate_string( $param, $request, $key ) {
-		return is_string( $param );
-	}
-
-	/**
 	 * Check the status of our Trakt.tv connection.
 	 *
 	 * @since 1.0.0
@@ -174,11 +143,11 @@ class Traktivity_Api {
 	 * @return WP_REST_Response|WP_Error $response Status of our Trakt.tv connection. Response code matches the response from the API.
 	 */
 	public function test_trakt_api_connection( $request ) {
-		// Get parameter from request.
-		if ( isset( $request['user'], $request['trakt'] ) ) {
-			$user  = $request['user'];
-			$trakt = $request['trakt'];
-		} else {
+		$options = (array) get_option( 'traktivity' );
+		$user    = isset( $options['username'] ) ? $options['username'] : '';
+		$trakt   = isset( $options['api_key'] ) ? $options['api_key'] : '';
+
+		if ( empty( $user ) || empty( $trakt ) ) {
 			return new WP_Error(
 				'not_found',
 				esc_html__( 'You did not specify your username or a Trakt.tv API key.', 'traktivity' ),
@@ -199,7 +168,7 @@ class Traktivity_Api {
 		$query_url = sprintf(
 			'%1$s/users/%2$s/history?limit=1',
 			TRAKTIVITY__API_URL,
-			esc_html( $user )
+			rawurlencode( $user )
 		);
 		$data      = wp_remote_get(
 			esc_url_raw( $query_url ),
@@ -262,8 +231,10 @@ class Traktivity_Api {
 	 * @return WP_REST_Response|WP_Error $response Status of our TMDb connection. Response code matches the response from the API.
 	 */
 	public function test_tmdb_api_connection( $request ) {
-		// Get parameter from request.
-		if ( ! isset( $request['tmdb'] ) ) {
+		$options = (array) get_option( 'traktivity' );
+		$tmdb    = isset( $options['tmdb_api_key'] ) ? $options['tmdb_api_key'] : '';
+
+		if ( empty( $tmdb ) ) {
 			return new WP_Error(
 				'not_found',
 				esc_html__( 'You did not specify your TMDb API key.', 'traktivity' ),
@@ -284,11 +255,19 @@ class Traktivity_Api {
 			TRAKTIVITY__TMDB_API_URL,
 			TRAKTIVITY__TMDB_API_VERSION,
 			'discover/movie',
-			esc_attr( $request['tmdb'] )
+			rawurlencode( $tmdb )
 		);
 		$data      = wp_remote_get( esc_url_raw( $query_url ) );
 
-		$code = $data['response']['code'];
+		if ( is_wp_error( $data ) ) {
+			$response = array(
+				'message' => esc_html__( 'TMDb is unavailable right now. Try again later.', 'traktivity' ),
+				'code'    => 500,
+			);
+			return new WP_REST_Response( $response, 500 );
+		}
+
+		$code = wp_remote_retrieve_response_code( $data );
 
 		/**
 		 * Tweak our endpoint response message based on the response from TMDb API.
@@ -297,13 +276,13 @@ class Traktivity_Api {
 		 */
 		if ( 429 === $code ) {
 			$message = __( 'Rate Limit Exceeded with your TMDb App. Try again later, but give it some time!', 'traktivity' );
-		} elseif ( '4' === substr( $code, 0, 1 ) ) {
+		} elseif ( $code >= 400 && $code < 500 ) {
 			$message = __( 'Your TMDb API key does not exist, or is not valid.', 'traktivity' );
-		} elseif ( '2' === substr( $code, 0, 1 ) ) {
+		} elseif ( $code >= 200 && $code < 300 ) {
 			$message = __( 'Your TMDb API key is working.', 'traktivity' );
 			// Let's overwrite the response code. If it's a success, we don't care what success response code, 200 is good enough.
 			$code = 200;
-		} elseif ( '5' === substr( $code, 0, 1 ) ) {
+		} elseif ( $code >= 500 && $code < 600 ) {
 			$message = __( 'TMDb is unavailable right now. Try again later.', 'traktivity' );
 		} else {
 			$message = __(
