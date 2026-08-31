@@ -6,6 +6,8 @@
  * Author: Jeremy Herve
  * Version: 2.3.5
  * Author URI: https://jeremy.hu
+ * Requires at least: 7.0
+ * Requires PHP: 7.4
  * License: GPL2+
  * Text Domain: traktivity
  * Domain Path: /languages/

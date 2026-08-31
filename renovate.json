@@ -1,5 +1,18 @@
 {
-  "extends": [
-    "config:base"
-  ]
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [ "config:recommended" ],
+	"labels": [ "dependencies" ],
+	"packageRules": [
+		{
+			"description": "The @wordpress packages are released together and expect matching versions, so they move as one pull request.",
+			"matchPackageNames": [ "@wordpress/**" ],
+			"groupName": "WordPress packages"
+		},
+		{
+			"description": "Group the PHP tooling too; it is all dev-only.",
+			"matchManagers": [ "composer" ],
+			"groupName": "PHP tooling"
+		}
+	],
+	"minimumReleaseAge": "3 days"
 }
