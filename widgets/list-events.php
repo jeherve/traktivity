@@ -51,7 +51,14 @@ class Traktivity_List_Widget extends WP_Widget {
 	 * Enqueue scripts and styles.
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_style( 'traktivity-list-widget', plugins_url( 'css/list-widget.css', __FILE__ ), array(), TRAKTIVITY__VERSION );
+		// plugins_url() resolves against the file it is handed, so this has to
+		// be the plugin root rather than __FILE__, which lives in widgets/.
+		wp_enqueue_style(
+			'traktivity-list-widget',
+			plugins_url( 'css/list-widget.css', TRAKTIVITY__PLUGIN_DIR . 'traktivity.php' ),
+			array(),
+			TRAKTIVITY__VERSION
+		);
 	}
 
 

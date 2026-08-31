@@ -9,7 +9,6 @@ jest.config.js
 playwright.config.js
 composer.json
 composer.lock
-docs
 LICENSE.md
 README.md
 node_modules

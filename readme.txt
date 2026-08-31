@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 2.3.5
+Stable tag: 3.0.0
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -50,7 +50,27 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 5. Genres: Multiple details are logged for each event, like the movie or show's genre.
 6. Movie: example of a movie and some of the details logged for that movie.
 
+== Upgrade Notice ==
+
+= 3.0.0 =
+Needs WordPress 7.0 and PHP 7.4. Fixes the setup step that never actually started importing your watch history, and stops your API keys ending up in server logs.
+
 == Changelog ==
+
+= 3.0.0 =
+Release date: August 31, 2026
+
+**This version needs WordPress 7.0 and PHP 7.4.**
+
+The setup screens now use the same components as the rest of the WordPress admin, so they look a little different. Everything the plugin does with your Trakt.tv data works the way it did before.
+
+* Fixed the last step of the setup. The button offering to import everything you've watched moved you on to the dashboard without ever starting the import.
+* Your Trakt.tv and TMDb API keys are no longer part of the web address when the plugin checks them. Web addresses get written to server logs, so your keys were ending up in files you'd never think to look at.
+* Your credentials are now saved and checked once, when you submit the form. The plugin used to re-check them with Trakt.tv and TMDb on every keystroke, which could run you into their rate limits.
+* Fixed the list widget's stylesheet, which was loaded from the wrong folder and so never applied.
+* Fixed the list widget's event type setting, which never dropped a type once you had saved it.
+* Fixed a fatal error when checking your TMDb key while TMDb was unreachable.
+* Fixed deprecation notices on PHP 8.1 and later.
 
 = 2.3.5 =
 Release date: April 24, 2023
