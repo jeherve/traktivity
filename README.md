@@ -11,6 +11,10 @@ This file covers working on the plugin.
 - Node, at the version in `.nvmrc`
 - PHP 7.4 or later, and Composer
 - Docker, for the local WordPress used by the end-to-end tests
+- A Trakt.tv VIP account, but only to test against the real Trakt.tv API.
+  Creating a Trakt.tv API application has been a VIP feature since the middle of
+  2026. The end-to-end tests answer both APIs locally, so they need no account
+  and no keys.
 
 ## Getting set up
 

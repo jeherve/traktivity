@@ -13,6 +13,8 @@ Are you a TV addict, and want to keep track of all the shows you've binge-watche
 
 This plugin allows you to log your watched TV series on Trakt.tv.
 
+**You need a Trakt.tv VIP account to set this up.** The plugin reads your watch history through the Trakt.tv API, and since the middle of 2026 only VIP accounts can create the API application that key comes from. If you already had a key before that change, it should keep working. See the FAQ below for the details. :(
+
 Right now it only logs data. In the next version you will get ways to display that data on your site.
 
 **Questions, problems?**
@@ -40,6 +42,18 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 4. Sit back and watch something on TV. 📺
 
 == Frequently Asked Questions ==
+
+= Do I need a Trakt.tv VIP account? =
+
+To set the plugin up from scratch, yes. The plugin needs a Trakt.tv API key to read your watch history, and creating the API application that gives you that key became a VIP feature in the middle of 2026. Trakt.tv also removed applications that belonged to free accounts.
+
+This is what Trakt.tv support said about it:
+
+> Creating an API application is a VIP feature for now, so API applications of free accounts where they were the only users have been removed. We should have more options in the future, but for now, API applications is a VIP feature.
+
+So it may change again later. Nothing on the WordPress side changed here, and if you already have a working key the plugin keeps syncing exactly as it did before.
+
+There is more discussion in [issue #678](https://github.com/jeherve/traktivity/issues/678).
 
 == Screenshots ==
 
