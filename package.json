@@ -15,7 +15,7 @@
     "lint:css": "wp-scripts lint-style",
     "lint:css:fix": "wp-scripts lint-style --fix",
     "lint:pkg-json": "wp-scripts lint-pkg-json",
-    "test:unit": "wp-scripts test-unit-js",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js",
     "test:e2e": "wp-scripts test-playwright",
     "env": "wp-env",
     "packages-update": "wp-scripts packages-update"
@@ -38,12 +38,16 @@
   },
   "homepage": "https://wordpress.org/plugins/traktivity/",
   "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.6",
     "@wordpress/api-fetch": "^7.54.0",
     "@wordpress/components": "^40.0.0",
     "@wordpress/e2e-test-utils-playwright": "^1.54.0",
     "@wordpress/element": "^8.6.0",
     "@wordpress/env": "^11.14.0",
     "@wordpress/i18n": "^6.27.0",
+    "@wordpress/jest-console": "^9.2.0",
     "@wordpress/scripts": "^34.2.0"
   }
 }
