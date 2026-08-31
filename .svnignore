@@ -3,6 +3,9 @@
 .gitignore
 .svnignore
 .wp-env.json
+artifacts
+jest.config.js
+playwright.config.js
 composer.json
 composer.lock
 docs

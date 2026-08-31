@@ -6,6 +6,6 @@ parameters:
 		analyse:
 			- vendor/*
 			- node_modules/*
-			- _build/*
+			- build/*
 	bootstrapFiles:
 		- tests/phpstan/bootstrap.php

@@ -1,6 +1,7 @@
 /node_modules
 /vendor
 /build
+/artifacts
 .DS_Store
 npm-debug.log
 *.unison.tmp
