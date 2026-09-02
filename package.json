@@ -5,7 +5,6 @@
   "main": "traktivity.php",
   "files": [
     "build",
-    "css",
     "widgets",
     "admin.traktivity.php",
     "content.traktivity.php",

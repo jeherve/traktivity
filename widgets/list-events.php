@@ -39,28 +39,9 @@ class Traktivity_List_Widget extends WP_Widget {
 			$widget_ops
 		);
 
-		if ( is_customize_preview() ) {
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		}
-
 		// Customize event titles for TV series.
 		add_action( 'traktivity_list_widget_single_event_title', array( $this, 'custom_tv_event_title' ), 20, 2 );
 	}
-
-	/**
-	 * Enqueue scripts and styles.
-	 */
-	public function enqueue_scripts() {
-		// plugins_url() resolves against the file it is handed, so this has to
-		// be the plugin root rather than __FILE__, which lives in widgets/.
-		wp_enqueue_style(
-			'traktivity-list-widget',
-			plugins_url( 'css/list-widget.css', TRAKTIVITY__PLUGIN_DIR . 'traktivity.php' ),
-			array(),
-			TRAKTIVITY__VERSION
-		);
-	}
-
 
 	/**
 	 * Return an associative array of default values
@@ -95,9 +76,6 @@ class Traktivity_List_Widget extends WP_Widget {
 	 **/
 	public function widget( $args, $instance ) {
 		$instance = wp_parse_args( $instance, $this->defaults() );
-
-		// Enqueue front end assets.
-		$this->enqueue_scripts();
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Wrapper markup supplied by the theme via register_sidebar().
 		echo $args['before_widget'];
