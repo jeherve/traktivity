@@ -137,6 +137,37 @@ test.describe( 'Traktivity dashboard', () => {
 		expect( options.full_sync ).toBeTruthy();
 	} );
 
+	test( 'stores credentials exactly as they were typed', async ( {
+		page,
+		requestUtils,
+	} ) => {
+		// Trakt.tv and TMDb decide what their tokens look like. An underscore
+		// is the case that prompted this; the ampersand is the one that used
+		// to be stored as &amp; and sent to the API wrong.
+		const username = 'je_herve';
+		const key = 'abc_def&ghi';
+
+		await page
+			.getByRole( 'button', { name: "Let's get started!" } )
+			.click();
+		await page.getByLabel( 'Trakt.tv Username' ).fill( username );
+		await page.getByLabel( 'Trakt.tv API Key' ).fill( key );
+		await page
+			.getByRole( 'button', { name: 'Verify and continue' } )
+			.click();
+
+		// The mock rejects it as a key, but the save happens before the check.
+		await expect(
+			page.getByText( 'Invalid API key or unapproved app.' ).first()
+		).toBeVisible();
+
+		const options = await requestUtils.rest( {
+			path: '/traktivity-e2e/v1/options',
+		} );
+		expect( options.username ).toBe( username );
+		expect( options.api_key ).toBe( key );
+	} );
+
 	test( 'remembers the step it was left on', async ( { page, admin } ) => {
 		await page
 			.getByRole( 'button', { name: "Let's get started!" } )

@@ -122,24 +122,32 @@ function traktivity_dashboard_scripts( $hook ) {
 	 * Data only. Every user-facing string lives in the JavaScript, wrapped in
 	 * @wordpress/i18n and translated through wp_set_script_translations() below.
 	 */
-	wp_localize_script(
-		'traktivity-dashboard',
-		'traktivityDashboard',
-		array(
-			'step'             => isset( $options['step'] ) ? absint( $options['step'] ) : 1,
-			'traktUsername'    => isset( $options['username'] ) ? esc_attr( $options['username'] ) : '',
-			'traktKey'         => isset( $options['api_key'] ) ? esc_attr( $options['api_key'] ) : '',
-			'tmdbKey'          => isset( $options['tmdb_api_key'] ) ? esc_attr( $options['tmdb_api_key'] ) : '',
-			'syncStatus'       => isset( $options['full_sync']['status'] ) ? esc_attr( $options['full_sync']['status'] ) : '',
-			'syncPages'        => isset( $options['full_sync']['pages'] ) ? intval( $options['full_sync']['pages'] ) : 0,
-			'syncRuntime'      => isset( $options['full_sync']['runtime']['status'] ) ? esc_attr( $options['full_sync']['runtime']['status'] ) : '',
+	$dashboard_data = array(
+		'step'             => isset( $options['step'] ) ? absint( $options['step'] ) : 1,
+		'traktUsername'    => isset( $options['username'] ) ? (string) $options['username'] : '',
+		'traktKey'         => isset( $options['api_key'] ) ? (string) $options['api_key'] : '',
+		'tmdbKey'          => isset( $options['tmdb_api_key'] ) ? (string) $options['tmdb_api_key'] : '',
+		'syncStatus'       => isset( $options['full_sync']['status'] ) ? (string) $options['full_sync']['status'] : '',
+		'syncPages'        => isset( $options['full_sync']['pages'] ) ? intval( $options['full_sync']['pages'] ) : 0,
+		'syncRuntime'      => isset( $options['full_sync']['runtime']['status'] ) ? (string) $options['full_sync']['runtime']['status'] : '',
 
-			/*
-			 * Formatted here rather than in JavaScript: turning a minute count
-			 * into "3 days, 4 hours" needs _n() for each unit.
-			 */
-			'totalTimeWatched' => isset( $stats['total_time_watched'] ) ? Traktivity_Stats::convert_time( $stats['total_time_watched'] ) : '',
-		)
+		/*
+		 * Formatted here rather than in JavaScript: turning a minute count
+		 * into "3 days, 4 hours" needs _n() for each unit.
+		 */
+		'totalTimeWatched' => isset( $stats['total_time_watched'] ) ? Traktivity_Stats::convert_time( $stats['total_time_watched'] ) : '',
+	);
+
+	/*
+	 * wp_add_inline_script() rather than wp_localize_script(), because
+	 * localize runs every string through html_entity_decode(). That is right
+	 * for translations and wrong for API keys, which are opaque tokens that
+	 * should reach the browser exactly as stored.
+	 */
+	wp_add_inline_script(
+		'traktivity-dashboard',
+		'window.traktivityDashboard = ' . wp_json_encode( $dashboard_data ) . ';',
+		'before'
 	);
 
 	// Let translators reach the strings in the bundle.

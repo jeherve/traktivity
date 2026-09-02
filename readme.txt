@@ -82,6 +82,7 @@ The setup screens now use the same components as the rest of the WordPress admin
 * Fixed the last step of the setup. The button offering to import everything you've watched moved you on to the dashboard without ever starting the import.
 * Your Trakt.tv and TMDb API keys are no longer part of the web address when the plugin checks them. Web addresses get written to server logs, so your keys were ending up in files you'd never think to look at.
 * Your credentials are now saved and checked once, when you submit the form. The plugin used to re-check them with Trakt.tv and TMDb on every keystroke, which could run you into their rate limits.
+* Fixed API keys and usernames containing an ampersand, apostrophe or angle bracket being altered when saved. This dates back to 2.0.0, so re-save yours after updating if it contains one.
 * Fixed the list widget's stylesheet, which was loaded from the wrong folder and so never applied.
 * Fixed the list widget's event type setting, which never dropped a type once you had saved it.
 * Fixed a fatal error when checking your TMDb key while TMDb was unreachable.

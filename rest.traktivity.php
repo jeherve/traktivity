@@ -134,6 +134,28 @@ class Traktivity_Api {
 	}
 
 	/**
+	 * Is this value usable as a credential?
+	 *
+	 * Trakt.tv and TMDb decide what their tokens look like, and the plugin has
+	 * no say in it. Rather than guess an alphabet and reject the next format
+	 * they introduce, this only turns away what cannot be a token at all: an
+	 * empty value, or one carrying whitespace or control characters.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param mixed $value Value to check.
+	 *
+	 * @return bool Whether the value can be used as a credential.
+	 */
+	private function is_valid_credential( $value ) {
+		return (
+			is_string( $value )
+			&& '' !== $value
+			&& ! preg_match( '/[\s\x00-\x1F\x7F]/', $value )
+		);
+	}
+
+	/**
 	 * Check the status of our Trakt.tv connection.
 	 *
 	 * @since 1.0.0
@@ -163,7 +185,7 @@ class Traktivity_Api {
 		$headers   = array(
 			'Content-Type'      => 'application/json',
 			'trakt-api-version' => TRAKTIVITY__API_VERSION,
-			'trakt-api-key'     => esc_html( $trakt ),
+			'trakt-api-key'     => $trakt,
 		);
 		$query_url = sprintf(
 			'%1$s/users/%2$s/history?limit=1',
@@ -415,21 +437,41 @@ class Traktivity_Api {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
-	 * @return WP_REST_Response $response Response from the Sync function.
+	 * @return WP_REST_Response|WP_Error $response Response from the Sync function.
 	 */
 	public function post_settings( $request ) {
 		$options = (array) get_option( 'traktivity' );
 
-		if ( ! empty( $request['trakt']['username'] ) ) {
-			$options['username'] = esc_attr( $request['trakt']['username'] );
-		}
+		$submitted = array(
+			'username'     => isset( $request['trakt']['username'] ) ? $request['trakt']['username'] : null,
+			'api_key'      => isset( $request['trakt']['key'] ) ? $request['trakt']['key'] : null,
+			'tmdb_api_key' => isset( $request['tmdb']['key'] ) ? $request['tmdb']['key'] : null,
+		);
 
-		if ( ! empty( $request['trakt']['key'] ) ) {
-			$options['api_key'] = esc_attr( $request['trakt']['key'] );
-		}
+		foreach ( $submitted as $option_name => $value ) {
+			// Not supplied on this request; leave whatever is already stored.
+			if ( null === $value || '' === $value ) {
+				continue;
+			}
 
-		if ( ! empty( $request['tmdb']['key'] ) ) {
-			$options['tmdb_api_key'] = esc_attr( $request['tmdb']['key'] );
+			if ( ! $this->is_valid_credential( $value ) ) {
+				return new WP_Error(
+					'invalid-credential',
+					esc_html__( 'That does not look like a usable username or API key. Check for stray spaces, and that you copied the whole value.', 'traktivity' ),
+					array(
+						'status' => 400,
+						'param'  => $option_name,
+					)
+				);
+			}
+
+			/*
+			 * Stored exactly as supplied. These are opaque tokens belonging to
+			 * Trakt.tv and TMDb, and escaping one changes it: esc_attr() turned
+			 * an ampersand into &amp;, so the key sent to the API was not the
+			 * key the user pasted in.
+			 */
+			$options[ $option_name ] = $value;
 		}
 
 		if ( ! empty( $request['step'] ) ) {
