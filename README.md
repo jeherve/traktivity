@@ -65,7 +65,8 @@ npm run test:php
 
 They run inside the tests environment's container, against a database of their
 own, because the WordPress test suite drops and recreates its tables on every
-run. They cover the block markup events are stored as, the settings REST
+run. `npm run test:php` creates that database if it isn't there, so a clean
+checkout needs no setup beyond starting the environment. They cover the block markup events are stored as, the settings REST
 endpoints, the watch time formatter and the TMDb credits.
 
 Two of them are guards rather than feature coverage: one fails if a REST route
