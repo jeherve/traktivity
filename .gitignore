@@ -1,5 +1,10 @@
 /node_modules
+/vendor
+/build
+/artifacts
+/traktivity.zip
+/release
+.phpunit.result.cache
 .DS_Store
 npm-debug.log
 *.unison.tmp
-/_build

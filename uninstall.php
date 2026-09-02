@@ -8,7 +8,7 @@
 if (
 	! defined( 'WP_UNINSTALL_PLUGIN' )
 	|| ! WP_UNINSTALL_PLUGIN
-	|| dirname( WP_UNINSTALL_PLUGIN ) != dirname( plugin_basename( __FILE__ ) )
+	|| dirname( WP_UNINSTALL_PLUGIN ) !== dirname( plugin_basename( __FILE__ ) )
 ) {
 	exit;
 }

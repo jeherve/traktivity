@@ -1,14 +1,39 @@
 {
   "name": "traktivity",
-  "version": "2.3.2",
+  "version": "3.0.0",
   "description": "Log your activity on Trakt.tv",
   "main": "traktivity.php",
-  "directories": {
-    "doc": "docs"
-  },
+  "files": [
+    "build",
+    "widgets",
+    "admin.traktivity.php",
+    "content.traktivity.php",
+    "core.traktivity.php",
+    "cpt.traktivity.php",
+    "rest.traktivity.php",
+    "stats.traktivity.php",
+    "traktivity.php",
+    "uninstall.php",
+    "readme.txt"
+  ],
   "scripts": {
-    "dev": "webpack --progress --watch",
-    "build": "NODE_ENV=production webpack"
+    "build": "wp-scripts build",
+    "plugin-zip": "npm run build && wp-scripts plugin-zip && zip -q -d traktivity.zip traktivity/package.json traktivity/README.md",
+    "start": "wp-scripts start",
+    "format": "wp-scripts format",
+    "lint:js": "wp-scripts lint-js",
+    "lint:js:fix": "wp-scripts lint-js --fix",
+    "lint:css": "wp-scripts lint-style",
+    "lint:css:fix": "wp-scripts lint-style --fix",
+    "lint:pkg-json": "wp-scripts lint-pkg-json",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js",
+    "test:php:db": "wp-env --config=.wp-env.tests.json run cli wp db query \"CREATE DATABASE IF NOT EXISTS traktivity_phpunit\"",
+    "test:php": "npm run test:php:db && wp-env --config=.wp-env.tests.json run cli --env-cwd=wp-content/plugins/traktivity vendor/bin/phpunit",
+    "test:e2e": "wp-scripts test-playwright",
+    "test:package": "npm run plugin-zip && node tests/package/verify-package.mjs",
+    "env": "wp-env",
+    "env:tests": "wp-env --config=.wp-env.tests.json",
+    "packages-update": "wp-scripts packages-update"
   },
   "repository": {
     "type": "git",
@@ -28,32 +53,16 @@
   },
   "homepage": "https://wordpress.org/plugins/traktivity/",
   "devDependencies": {
-    "babel-core": "6.26.3",
-    "babel-loader": "10.0.0",
-    "babel-preset-env": "1.7.0",
-    "babel-preset-es2015": "6.24.1",
-    "babel-preset-react": "6.24.1",
-    "babel-preset-stage-1": "6.24.1",
-    "browser-sync": "3.0.4",
-    "browser-sync-webpack-plugin": "2.4.0",
-    "eslint": "10.0.0",
-    "eslint-config-wpcalypso": "6.1.0",
-    "eslint-plugin-jsx-a11y": "6.10.2",
-    "eslint-plugin-react": "7.37.5",
-    "eslint-plugin-wpcalypso": "8.0.0",
-    "file-loader": "6.2.0",
-    "webpack": "5.105.1",
-    "webpack-dashboard": "3.3.8",
-    "webpack-dev-middleware": "7.4.5",
-    "webpack-dev-server": "5.2.6"
-  },
-  "dependencies": {
-    "extract-text-webpack-plugin": "^3.0.0",
-    "gridicons": "^3.0.0",
-    "prop-types": "^15.5.10",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.0.0",
-    "wpapi": "^1.1.2"
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.6",
+    "@wordpress/api-fetch": "^7.54.0",
+    "@wordpress/components": "^40.0.0",
+    "@wordpress/e2e-test-utils-playwright": "^1.54.0",
+    "@wordpress/element": "^8.6.0",
+    "@wordpress/env": "^11.14.0",
+    "@wordpress/i18n": "^6.27.0",
+    "@wordpress/jest-console": "^9.2.0",
+    "@wordpress/scripts": "^34.2.0"
   }
 }

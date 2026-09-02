@@ -1,0 +1,11 @@
+parameters:
+	level: 5
+	paths:
+		- .
+	excludePaths:
+		analyse:
+			- vendor/*
+			- node_modules/*
+			- build/*
+	bootstrapFiles:
+		- tests/phpstan/bootstrap.php

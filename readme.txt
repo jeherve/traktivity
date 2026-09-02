@@ -1,9 +1,10 @@
 === Traktivity ===
 Contributors: jeherve
-Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
-Stable tag: 2.3.5
-Requires at least: 5.1
-Tested up to: 6.2
+Tags: Trakt.tv, TV, Activity, Movies, Log
+Stable tag: 3.0.0
+Requires at least: 7.0
+Tested up to: 7.1
+Requires PHP: 7.4
 License: GPLv2+
 
 Are you a TV addict, and want to keep track of all the shows you've binge-watched and movies you saw? Traktivity is for you!
@@ -11,6 +12,8 @@ Are you a TV addict, and want to keep track of all the shows you've binge-watche
 == Description ==
 
 This plugin allows you to log your watched TV series on Trakt.tv.
+
+**You need a Trakt.tv VIP account to set this up.** The plugin reads your watch history through the Trakt.tv API, and since the middle of 2026 only VIP accounts can create the API application that key comes from. If you already had a key before that change, it should keep working. See the FAQ below for the details. :(
 
 Right now it only logs data. In the next version you will get ways to display that data on your site.
 
@@ -40,6 +43,18 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 
 == Frequently Asked Questions ==
 
+= Do I need a Trakt.tv VIP account? =
+
+To set the plugin up from scratch, yes. The plugin needs a Trakt.tv API key to read your watch history, and creating the API application that gives you that key became a VIP feature in the middle of 2026. Trakt.tv also removed applications that belonged to free accounts.
+
+This is what Trakt.tv support said about it:
+
+> Creating an API application is a VIP feature for now, so API applications of free accounts where they were the only users have been removed. We should have more options in the future, but for now, API applications is a VIP feature.
+
+So it may change again later. Nothing on the WordPress side changed here, and if you already have a working key the plugin keeps syncing exactly as it did before.
+
+There is more discussion in [issue #678](https://github.com/jeherve/traktivity/issues/678).
+
 == Screenshots ==
 
 1. Dashboard: Discover the plugin and how to set it up.
@@ -49,7 +64,33 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 5. Genres: Multiple details are logged for each event, like the movie or show's genre.
 6. Movie: example of a movie and some of the details logged for that movie.
 
+== Upgrade Notice ==
+
+= 3.0.0 =
+Needs WordPress 7.0 and PHP 7.4.
+
 == Changelog ==
+
+= 3.0.0 =
+Release date: September 2, 2026
+
+**This version needs WordPress 7.0 and PHP 7.4.**
+
+* Rebuild the setup screens with the components used elsewhere in the WordPress admin.
+* Note on the connection screen that Trakt.tv now requires a VIP account to create an API application.
+* Store new events as an image block and a paragraph block. Events created by earlier versions are left as they are.
+* Remove the poster-image wrapper around event images.
+* Add alt text to event images.
+* Stop sending Trakt.tv and TMDb API keys in the URL when checking them.
+* Check credentials once on submit, rather than on every keystroke.
+* Fix API keys and usernames containing an ampersand, apostrophe or angle bracket being altered when saved, an issue since 2.0.0. Re-save yours if it contains one.
+* Fix the list widget's event type setting, which never removed a type once saved.
+* Fix a fatal error when checking the TMDb key while TMDb is unreachable.
+* Fix deprecation notices on PHP 8.1 and later.
+* Fix a full synchronization looping forever when Trakt.tv cannot be reached as it starts.
+* Fix requests for Trakt.tv usernames containing a character that has to be encoded in a URL.
+* Escape the poster image URL shown in the Shows column in the admin.
+* Fix a fatal error when recalculating total runtime on a site that never ran a full synchronization.
 
 = 2.3.5 =
 Release date: April 24, 2023

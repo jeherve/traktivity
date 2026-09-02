@@ -19,7 +19,7 @@ class Traktivity_Api {
 	/**
 	 * Constructor
 	 */
-	function __construct() {
+	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 	}
 
@@ -34,82 +34,90 @@ class Traktivity_Api {
 		 *
 		 * @since 2.0.0
 		 */
-		register_rest_route( 'traktivity/v1', '/settings', array(
-			'methods'             => WP_REST_Server::READABLE,
-			'callback'            => array( $this, 'get_settings' ),
-			'permission_callback' => array( $this, 'permissions_check' ),
-		) );
+		register_rest_route(
+			'traktivity/v1',
+			'/settings',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_settings' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+			)
+		);
 
 		/**
 		 * Edit Settings.
 		 *
 		 * @since 2.0.0
 		 */
-		register_rest_route( 'traktivity/v1', '/settings/edit', array(
-			'methods'             => WP_REST_Server::EDITABLE,
-			'callback'            => array( $this, 'post_settings' ),
-			'permission_callback' => array( $this, 'permissions_check' ),
-		) );
+		register_rest_route(
+			'traktivity/v1',
+			'/settings/edit',
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'post_settings' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+			)
+		);
 
 		/**
 		 * Check the validity of our Trakt.tv credentials.
 		 *
 		 * @since 1.1.0
 		 */
-		register_rest_route( 'traktivity/v1', '/connection/(?P<user>[a-z0-9\-\.]+)/(?P<trakt>[a-zA-Z0-9-]+)', array(
-			'methods'             => WP_REST_Server::READABLE,
-			'callback'            => array( $this, 'test_trakt_api_connection' ),
-			'permission_callback' => array( $this, 'permissions_check' ),
-			'args'                => array(
-				'user'  => array(
-					'required'          => true,
-					'validate_callback' => array( $this, 'validate_string' ),
-				),
-				'trakt' => array(
-					'required'          => true,
-					'validate_callback' => array( $this, 'validate_string' ),
-				),
-			),
-		) );
+		register_rest_route(
+			'traktivity/v1',
+			'/connection',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'test_trakt_api_connection' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+			)
+		);
 
 		/**
 		 * Check the validity of our TMDb credentials.
 		 *
 		 * @since 2.0.0
 		 */
-		register_rest_route( 'traktivity/v1', '/tmdb/(?P<tmdb>[a-zA-Z0-9-]+)', array(
-			'methods'             => WP_REST_Server::READABLE,
-			'callback'            => array( $this, 'test_tmdb_api_connection' ),
-			'permission_callback' => array( $this, 'permissions_check' ),
-			'args'                => array(
-				'tmdb' => array(
-					'required'          => true,
-					'validate_callback' => array( $this, 'validate_string' ),
-				),
-			),
-		) );
+		register_rest_route(
+			'traktivity/v1',
+			'/tmdb',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'test_tmdb_api_connection' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+			)
+		);
 
 		/**
 		 * Check Sync status for Traktivity.
 		 *
 		 * @since 1.1.0
 		 */
-		register_rest_route( 'traktivity/v1', '/sync', array(
-			'methods'             => WP_REST_Server::EDITABLE,
-			'callback'            => array( $this, 'trigger_sync' ),
-			'permission_callback' => array( $this, 'permissions_check' ),
-		) );
+		register_rest_route(
+			'traktivity/v1',
+			'/sync',
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'trigger_sync' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+			)
+		);
 
 		/**
 		 * Traktivity Stats Info.
 		 *
 		 * @since 2.2.0
 		 */
-		register_rest_route( 'traktivity/v1', '/stats', array(
-			'methods'             => WP_REST_Server::READABLE,
-			'callback'            => array( $this, 'get_stats' ),
-			'permission_callback' => '__return_true',
-		) );
+		register_rest_route(
+			'traktivity/v1',
+			'/stats',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_stats' ),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	/**
@@ -126,18 +134,25 @@ class Traktivity_Api {
 	}
 
 	/**
-	 * Validate an API key.
+	 * Is this value usable as a credential?
 	 *
-	 * @since 1.1.0
+	 * Trakt.tv and TMDb decide what their tokens look like, and the plugin has
+	 * no say in it. Rather than guess an alphabet and reject the next format
+	 * they introduce, this only turns away what cannot be a token at all: an
+	 * empty value, or one carrying whitespace or control characters.
 	 *
-	 * @param string          $param   Parameter that needs to be validated.
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @param string          $key     key argument.
+	 * @since 3.0.0
 	 *
-	 * @return bool $validated Is the API key in a valid format.
+	 * @param mixed $value Value to check.
+	 *
+	 * @return bool Whether the value can be used as a credential.
 	 */
-	public function validate_string( $param, $request, $key ) {
-		return is_string( $param );
+	private function is_valid_credential( $value ) {
+		return (
+			is_string( $value )
+			&& '' !== $value
+			&& ! preg_match( '/[\s\x00-\x1F\x7F]/', $value )
+		);
 	}
 
 	/**
@@ -147,14 +162,14 @@ class Traktivity_Api {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
-	 * @return WP_REST_Response $response Status of our Trakt.tv connection. Response code matches the response from the API.
+	 * @return WP_REST_Response|WP_Error $response Status of our Trakt.tv connection. Response code matches the response from the API.
 	 */
 	public function test_trakt_api_connection( $request ) {
-		// Get parameter from request.
-		if ( isset( $request['user'], $request['trakt'] ) ) {
-			$user  = $request['user'];
-			$trakt = $request['trakt'];
-		} else {
+		$options = (array) get_option( 'traktivity' );
+		$user    = isset( $options['username'] ) ? $options['username'] : '';
+		$trakt   = isset( $options['api_key'] ) ? $options['api_key'] : '';
+
+		if ( empty( $user ) || empty( $trakt ) ) {
 			return new WP_Error(
 				'not_found',
 				esc_html__( 'You did not specify your username or a Trakt.tv API key.', 'traktivity' ),
@@ -167,17 +182,17 @@ class Traktivity_Api {
 		/**
 		 * Query the API using the API key provided in the API request.
 		 */
-		$headers = array(
+		$headers   = array(
 			'Content-Type'      => 'application/json',
 			'trakt-api-version' => TRAKTIVITY__API_VERSION,
-			'trakt-api-key'     => esc_html( $trakt ),
+			'trakt-api-key'     => $trakt,
 		);
 		$query_url = sprintf(
 			'%1$s/users/%2$s/history?limit=1',
 			TRAKTIVITY__API_URL,
-			esc_html( $user )
+			rawurlencode( $user )
 		);
-		$data = wp_remote_get(
+		$data      = wp_remote_get(
 			esc_url_raw( $query_url ),
 			array(
 				'headers' => $headers,
@@ -200,22 +215,25 @@ class Traktivity_Api {
 		 * @see http://docs.trakt.apiary.io/#introduction/status-codes
 		 */
 		if ( 403 === $code ) {
-			$message = __( 'Invalid API key or unapproved app.' , 'traktivity' );
+			$message = __( 'Invalid API key or unapproved app.', 'traktivity' );
 		} elseif ( 429 === $code ) {
 			$message = __( 'Rate Limit Exceeded with your Trakt.tv App.', 'traktivity' );
 		} elseif ( 404 === $code ) {
 			$message = __( 'This Trakt.tv username does not exist.', 'traktivity' );
-		} elseif ( '2' === substr( $code, 0, 1 ) ) {
+		} elseif ( $code >= 200 && $code < 300 ) {
 			$message = __( 'Your Trakt.tv API key is working.', 'traktivity' );
 			// Let's overwrite the response code. If it's a success, we don't care what success response code, 200 is good enough.
 			$code = 200;
-		} elseif ( '5' === substr( $code, 0, 1 ) ) {
+		} elseif ( $code >= 500 && $code < 600 ) {
 			$message = __( 'Trakt.tv is unavailable right now. Try again later.', 'traktivity' );
 		} else {
-			$message = __( 'Something is not working as it should. Please double check that both your username and your API keys are correct.
+			$message = __(
+				'Something is not working as it should. Please double check that both your username and your API keys are correct.
 				If everything looks good, but you still see this message, please let me know, I\'ll see what I can do to help.
 				Post in the WordPress.org support forums and give me as many details as possible about your setup.
-				Thank you!', 'traktivity' );
+				Thank you!',
+				'traktivity'
+			);
 		}
 
 		$response = array(
@@ -232,11 +250,13 @@ class Traktivity_Api {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
-	 * @return WP_REST_Response $response Status of our TMDb connection. Response code matches the response from the API.
+	 * @return WP_REST_Response|WP_Error $response Status of our TMDb connection. Response code matches the response from the API.
 	 */
 	public function test_tmdb_api_connection( $request ) {
-		// Get parameter from request.
-		if ( ! isset( $request['tmdb'] ) ) {
+		$options = (array) get_option( 'traktivity' );
+		$tmdb    = isset( $options['tmdb_api_key'] ) ? $options['tmdb_api_key'] : '';
+
+		if ( empty( $tmdb ) ) {
 			return new WP_Error(
 				'not_found',
 				esc_html__( 'You did not specify your TMDb API key.', 'traktivity' ),
@@ -257,11 +277,19 @@ class Traktivity_Api {
 			TRAKTIVITY__TMDB_API_URL,
 			TRAKTIVITY__TMDB_API_VERSION,
 			'discover/movie',
-			esc_attr( $request['tmdb'] )
+			rawurlencode( $tmdb )
 		);
-		$data = wp_remote_get( esc_url_raw( $query_url ) );
+		$data      = wp_remote_get( esc_url_raw( $query_url ) );
 
-		$code = $data['response']['code'];
+		if ( is_wp_error( $data ) ) {
+			$response = array(
+				'message' => esc_html__( 'TMDb is unavailable right now. Try again later.', 'traktivity' ),
+				'code'    => 500,
+			);
+			return new WP_REST_Response( $response, 500 );
+		}
+
+		$code = wp_remote_retrieve_response_code( $data );
 
 		/**
 		 * Tweak our endpoint response message based on the response from TMDb API.
@@ -270,19 +298,22 @@ class Traktivity_Api {
 		 */
 		if ( 429 === $code ) {
 			$message = __( 'Rate Limit Exceeded with your TMDb App. Try again later, but give it some time!', 'traktivity' );
-		} elseif ( '4' === substr( $code, 0, 1 ) ) {
+		} elseif ( $code >= 400 && $code < 500 ) {
 			$message = __( 'Your TMDb API key does not exist, or is not valid.', 'traktivity' );
-		} elseif ( '2' === substr( $code, 0, 1 ) ) {
+		} elseif ( $code >= 200 && $code < 300 ) {
 			$message = __( 'Your TMDb API key is working.', 'traktivity' );
 			// Let's overwrite the response code. If it's a success, we don't care what success response code, 200 is good enough.
 			$code = 200;
-		} elseif ( '5' === substr( $code, 0, 1 ) ) {
+		} elseif ( $code >= 500 && $code < 600 ) {
 			$message = __( 'TMDb is unavailable right now. Try again later.', 'traktivity' );
 		} else {
-			$message = __( 'Something is not working as it should. Please double check that both your username and your API keys are correct.
+			$message = __(
+				'Something is not working as it should. Please double check that both your username and your API keys are correct.
 				If everything looks good, but you still see this message, please let me know, I\'ll see what I can do to help.
 				Post in the WordPress.org support forums and give me as many details as possible about your setup.
-				Thank you!', 'traktivity' );
+				Thank you!',
+				'traktivity'
+			);
 		}
 
 		$response = array(
@@ -385,7 +416,7 @@ class Traktivity_Api {
 			&& ( ! empty( $options['username'] ) && ! empty( $options['api_key'] ) )
 		) {
 			$settings->trakt->username = $options['username'];
-			$settings->trakt->key = $options['api_key'];
+			$settings->trakt->key      = $options['api_key'];
 		}
 
 		if ( isset( $options['tmdb_api_key'] ) && ! empty( $options['tmdb_api_key'] ) ) {
@@ -406,39 +437,50 @@ class Traktivity_Api {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
-	 * @return WP_REST_Response $response Response from the Sync function.
+	 * @return WP_REST_Response|WP_Error $response Response from the Sync function.
 	 */
 	public function post_settings( $request ) {
 		$options = (array) get_option( 'traktivity' );
 
-		if ( isset( $request ) ) {
-			if ( isset( $request['trakt']['username'] ) && ! empty( $request['trakt']['username'] ) ) {
-				$options['username'] = esc_attr( $request['trakt']['username'] );
+		$submitted = array(
+			'username'     => isset( $request['trakt']['username'] ) ? $request['trakt']['username'] : null,
+			'api_key'      => isset( $request['trakt']['key'] ) ? $request['trakt']['key'] : null,
+			'tmdb_api_key' => isset( $request['tmdb']['key'] ) ? $request['tmdb']['key'] : null,
+		);
+
+		foreach ( $submitted as $option_name => $value ) {
+			// Not supplied on this request; leave whatever is already stored.
+			if ( null === $value || '' === $value ) {
+				continue;
 			}
 
-			if ( isset( $request['trakt']['key'] ) && ! empty( $request['trakt']['key'] ) ) {
-				$options['api_key'] = esc_attr( $request['trakt']['key'] );
+			if ( ! $this->is_valid_credential( $value ) ) {
+				return new WP_Error(
+					'invalid-credential',
+					esc_html__( 'That does not look like a usable username or API key. Check for stray spaces, and that you copied the whole value.', 'traktivity' ),
+					array(
+						'status' => 400,
+						'param'  => $option_name,
+					)
+				);
 			}
 
-			if ( isset( $request['tmdb']['key'] ) && ! empty( $request['tmdb']['key'] ) ) {
-				$options['tmdb_api_key'] = esc_attr( $request['tmdb']['key'] );
-			}
-
-			if ( isset( $request['step'] ) && ! empty( $request['step'] ) ) {
-				$options['step'] = absint( $request['step'] );
-			}
-
-			update_option( 'traktivity', $options );
-			return new WP_REST_Response( $request, 200 );
+			/*
+			 * Stored exactly as supplied. These are opaque tokens belonging to
+			 * Trakt.tv and TMDb, and escaping one changes it: esc_attr() turned
+			 * an ampersand into &amp;, so the key sent to the API was not the
+			 * key the user pasted in.
+			 */
+			$options[ $option_name ] = $value;
 		}
 
-		return new WP_Error(
-			'cant-update',
-			esc_html__( 'Could not update your settings.', 'traktivity' ),
-			array(
-				'status' => 500,
-			)
-		);
+		if ( ! empty( $request['step'] ) ) {
+			$options['step'] = absint( $request['step'] );
+		}
+
+		update_option( 'traktivity', $options );
+
+		return new WP_REST_Response( $request, 200 );
 	}
 
 	/**
@@ -458,5 +500,5 @@ class Traktivity_Api {
 			200
 		);
 	}
-} // End class.
+}
 new Traktivity_Api();

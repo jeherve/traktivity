@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  javascript:
+    name: JavaScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint JavaScript
+        run: npm run lint:js
+
+      - name: Lint styles
+        run: npm run lint:css
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Build
+        run: npm run build
+
+      # Also builds the release archive, so a broken allowlist fails here
+      # rather than at release time.
+      - name: Verify the release archive
+        run: npm run test:package
+
+  php:
+    name: PHP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # The sniffs run on a current PHP. The 7.4 floor the plugin declares is
+      # checked statically by PHPCompatibilityWP, via testVersion in
+      # phpcs.xml.dist, so it does not need a 7.4 runtime to be enforced.
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
+      - uses: ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f # 3.2.1
+
+      - name: Coding standards
+        run: composer run lint
+
+      - name: Static analysis
+        run: composer run analyse
+
+  integration:
+    name: Integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
+      - run: npm ci
+
+      # PHPUnit runs inside the container, against the vendor directory
+      # mounted with the plugin.
+      - uses: ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f # 3.2.1
+
+      # wp-env serves the plugin directory as-is, so the bundle has to exist.
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start WordPress
+        run: npm run env:tests start
+
+      - name: PHP tests
+        run: npm run test:php
+
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: artifacts/
+          retention-days: 7

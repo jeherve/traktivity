@@ -19,7 +19,7 @@ class Traktivity_Content {
 	/**
 	 * Constructor
 	 */
-	function __construct() {
+	public function __construct() {
 		add_filter( 'the_content', array( $this, 'credits' ), 5 );
 	}
 
@@ -29,6 +29,8 @@ class Traktivity_Content {
 	 * @since 1.1.0
 	 *
 	 * @param string $content Post content.
+	 *
+	 * @return string $content Post content, with credits appended when relevant.
 	 */
 	public function credits( $content ) {
 		// Only add the credits to the detail pages of our post type.
@@ -38,11 +40,23 @@ class Traktivity_Content {
 
 		// If we have an image in that post, we'll add credits.
 		if ( false !== strpos( $content, '<img' ) ) {
-			$credits = '<div class="tmdb_credits"><p><small>';
-			$credits .= sprintf(
-				/* Translators: URL to THMDB website. */
-				__( 'Image source: <a href="%s">themoviedb.org</a>', 'traktivity' ),
-				esc_url( 'https://www.themoviedb.org/' )
+			/*
+			 * The string carries its own markup so translators can move the
+			 * link within the sentence, which means a translation decides what
+			 * HTML ends up on the page. wp_kses() holds it to a plain link.
+			 */
+			$credits  = '<div class="tmdb_credits"><p><small>';
+			$credits .= wp_kses(
+				sprintf(
+					/* Translators: %s is the URL of the TMDb website. */
+					__( 'Image source: <a href="%s">themoviedb.org</a>', 'traktivity' ),
+					esc_url( 'https://www.themoviedb.org/' )
+				),
+				array(
+					'a' => array(
+						'href' => array(),
+					),
+				)
 			);
 			$credits .= '</small></p></div>';
 
@@ -63,5 +77,5 @@ class Traktivity_Content {
 		// Final fallback.
 		return $content;
 	}
-} // End class.
+}
 new Traktivity_Content();
