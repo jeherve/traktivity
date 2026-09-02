@@ -85,7 +85,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Start WordPress
-        run: npm run env start
+        run: npm run env:tests start
 
       - name: Run end-to-end tests
         run: npm run test:e2e

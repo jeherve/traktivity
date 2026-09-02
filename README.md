@@ -10,7 +10,7 @@ This file covers working on the plugin.
 
 - Node, at the version in `.nvmrc`
 - PHP 7.4 or later, and Composer
-- Docker, for the local WordPress used by the end-to-end tests
+- Docker, for the local WordPress environments
 - A Trakt.tv VIP account, but only to test against the real Trakt.tv API.
   Creating a Trakt.tv API application has been a VIP feature since the middle of
   2026. The end-to-end tests answer both APIs locally, so they need no account
@@ -44,7 +44,8 @@ handles the bundle needs, and `admin.traktivity.php` enqueues them from there.
 | `npm run format` | Format source |
 | `npm run test:unit` | Jest unit tests |
 | `npm run test:e2e` | Playwright end-to-end tests |
-| `npm run env start` / `env stop` | Start or stop the local WordPress |
+| `npm run env start` / `env stop` | Start or stop the development site (port 8888) |
+| `npm run env:tests start` / `env:tests stop` | Start or stop the tests site (port 8889) |
 | `composer run lint` / `lint:fix` | PHP coding standards |
 | `composer run analyse` | PHPStan |
 
@@ -59,14 +60,43 @@ by [`wp-env`](https://developer.wordpress.org/block-editor/reference-guides/pack
 
 ```sh
 npm run build
-npm run env start
 npm run test:e2e
 ```
 
-The wizard talks to the Trakt.tv and TMDb APIs. Rather than depend on either
-service, `tests/e2e/mu-plugins/traktivity-e2e.php` answers both from inside the
-container through `pre_http_request`, so the suite needs no API keys and stays
-deterministic. That file is loaded only by `wp-env` and never ships.
+`npm run test:e2e` starts the tests environment itself, so there is usually
+nothing to start by hand.
+
+### Two environments
+
+There are two, from separate config files, with separate containers and
+separate databases:
+
+| | Port | Config | Talks to Trakt.tv and TMDb |
+| --- | --- | --- | --- |
+| Development | 8888 | `.wp-env.json` | Really |
+| Tests | 8889 | `.wp-env.tests.json` | Through a local mock |
+
+```sh
+npm run env start          # development, at localhost:8888
+npm run env:tests start    # tests, at localhost:8889
+```
+
+Log in to either at `/wp-admin` with `admin` / `password`.
+
+Use the development environment for looking at things by hand. It reaches the
+real APIs, so your own Trakt.tv and TMDb keys behave exactly as they would on a
+live site.
+
+The tests environment is the one Playwright drives. Only it maps
+`tests/e2e/mu-plugins/traktivity-e2e.php`, which answers both APIs from inside
+the container through `pre_http_request`. That keeps the suite deterministic and
+free of API keys, and gives it a route to reset the plugin between specs. In
+that environment `e2e-valid-trakt-key` and `e2e-valid-tmdb-key` verify
+successfully and anything else is rejected.
+
+Keeping the mock out of the development environment matters: an intercepted
+request there looks exactly like a rejected API key, which is a confusing way to
+lose an afternoon. The mu-plugin never ships either way.
 
 ## Releasing
 

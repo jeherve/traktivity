@@ -31,6 +31,7 @@
     "test:e2e": "wp-scripts test-playwright",
     "test:package": "npm run plugin-zip && node tests/package/verify-package.mjs",
     "env": "wp-env",
+    "env:tests": "wp-env --config=.wp-env.tests.json",
     "packages-update": "wp-scripts packages-update"
   },
   "repository": {
