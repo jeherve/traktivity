@@ -789,6 +789,11 @@ class Traktivity_Calls {
 		// Get sync status.
 		$status = $this->get_option( 'full_sync' );
 
+		// Sync was never run before, so there is nothing to read yet.
+		if ( ! is_array( $status ) ) {
+			$status = array();
+		}
+
 		// Let's not start sync if it's already running.
 		if (
 			! empty( $status['runtime'] )

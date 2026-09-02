@@ -90,6 +90,7 @@ Release date: September 2, 2026
 * Fix a full synchronization looping forever when Trakt.tv cannot be reached as it starts.
 * Fix requests for Trakt.tv usernames containing a character that has to be encoded in a URL.
 * Escape the poster image URL shown in the Shows column in the admin.
+* Fix a fatal error when recalculating total runtime on a site that never ran a full synchronization.
 
 = 2.3.5 =
 Release date: April 24, 2023
