@@ -46,14 +46,31 @@ handles the bundle needs, and `admin.traktivity.php` enqueues them from there.
 | `npm run test:e2e` | Playwright end-to-end tests |
 | `npm run env start` / `env stop` | Start or stop the development site (port 8888) |
 | `npm run env:tests start` / `env:tests stop` | Start or stop the tests site (port 8889) |
+| `npm run test:php` | PHPUnit, against a real WordPress |
 | `composer run lint` / `lint:fix` | PHP coding standards |
 | `composer run analyse` | PHPStan |
 
 ## Tests
 
-Unit tests are in `tests/js` and run against mocks. They cover the settings
-hook, the wizard's step routing, the recent-events list and the credentials
-form.
+JavaScript unit tests are in `tests/js` and run against mocks. They cover the
+settings hook, the wizard's step routing, the recent-events list and the
+credentials form.
+
+PHP tests are in `tests/php` and run against a real WordPress, using the test
+suite from `wp-phpunit`:
+
+```sh
+npm run test:php
+```
+
+They run inside the tests environment's container, against a database of their
+own, because the WordPress test suite drops and recreates its tables on every
+run. They cover the block markup events are stored as, the settings REST
+endpoints, the watch time formatter and the TMDb credits.
+
+Two of them are guards rather than feature coverage: one fails if a REST route
+takes a credential as a path parameter again, and one fails if the version
+constant and the plugin header disagree.
 
 End-to-end tests are in `tests/e2e/specs` and drive a real WordPress provisioned
 by [`wp-env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/):

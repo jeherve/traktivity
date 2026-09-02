@@ -700,8 +700,14 @@ class Traktivity_Calls {
 		$blocks = array();
 
 		if ( ! empty( $image['id'] ) && ! empty( $image['url'] ) ) {
+			/*
+			 * The space before the closing slash is what kses produces. Events
+			 * are created from cron, where no user holds unfiltered_html, so
+			 * everything stored goes through it. Emitting the same shape keeps
+			 * the markup identical whether or not kses touched it.
+			 */
 			$figure = sprintf(
-				'<figure class="wp-block-image size-large"><img src="%1$s" alt="%2$s" class="wp-image-%3$d"/></figure>',
+				'<figure class="wp-block-image size-large"><img src="%1$s" alt="%2$s" class="wp-image-%3$d" /></figure>',
 				esc_url( $image['url'] ),
 				esc_attr( isset( $image['alt'] ) ? $image['alt'] : '' ),
 				(int) $image['id']

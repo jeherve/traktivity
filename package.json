@@ -27,6 +27,7 @@
     "lint:css:fix": "wp-scripts lint-style --fix",
     "lint:pkg-json": "wp-scripts lint-pkg-json",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules wp-scripts test-unit-js",
+    "test:php": "wp-env --config=.wp-env.tests.json run cli --env-cwd=wp-content/plugins/traktivity vendor/bin/phpunit",
     "test:e2e": "wp-scripts test-playwright",
     "test:package": "npm run plugin-zip && node tests/package/verify-package.mjs",
     "env": "wp-env",

@@ -92,7 +92,7 @@ class Traktivity_Stats {
 		}
 
 		if ( 0 < $years ) {
-			return sprintf(
+			$runtime = sprintf(
 				/* Translators: %1$d is the number of years, %2$s is the number of days, hours and minutes. */
 				_n(
 					'%1$d year %2$s',
@@ -107,7 +107,12 @@ class Traktivity_Stats {
 			$runtime = $display_days;
 		}
 
-		return $runtime;
+		/*
+		 * Each unit is placed with a trailing space so the next one can follow,
+		 * which leaves a space behind whenever a unit is zero. "1 day " then
+		 * lands mid-sentence on the dashboard as a double space.
+		 */
+		return trim( preg_replace( '/\s+/', ' ', $runtime ) );
 	}
 
 	/**

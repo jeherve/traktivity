@@ -64,8 +64,8 @@ jobs:
       - name: Static analysis
         run: composer run analyse
 
-  e2e:
-    name: End-to-end
+  integration:
+    name: Integration
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -75,7 +75,17 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
       - run: npm ci
+
+      # PHPUnit runs inside the container, against the vendor directory
+      # mounted with the plugin.
+      - uses: ramsey/composer-install@v3
 
       # wp-env serves the plugin directory as-is, so the bundle has to exist.
       - name: Build
@@ -87,7 +97,10 @@ jobs:
       - name: Start WordPress
         run: npm run env:tests start
 
-      - name: Run end-to-end tests
+      - name: PHP tests
+        run: npm run test:php
+
+      - name: End-to-end tests
         run: npm run test:e2e
 
       - name: Upload failure artifacts

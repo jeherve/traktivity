@@ -71,6 +71,35 @@
 		<exclude-pattern>/rest\.traktivity\.php$</exclude-pattern>
 	</rule>
 
+	<!--
+		The PHPUnit harness. wp-tests-config.php defines WordPress' own
+		constants and $table_prefix, which is what a WordPress test config is;
+		prefixing them would stop the test suite booting.
+	-->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<exclude-pattern>/tests/php/wp-tests-config\.php$</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.GlobalVariablesOverride">
+		<exclude-pattern>/tests/php/wp-tests-config\.php$</exclude-pattern>
+	</rule>
+
+	<!--
+		putenv() is how wp-phpunit is told where the test config lives, and it
+		has to happen before the suite boots.
+	-->
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_putenv">
+		<exclude-pattern>/tests/php/bootstrap\.php$</exclude-pattern>
+	</rule>
+
+	<!--
+		False positive: this sniff stops recognising a file docblock when the
+		first statement after it is require_once, which is what a bootstrap
+		starts with. Swap that line for an assignment and the error goes away.
+	-->
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>/tests/php/bootstrap\.php$</exclude-pattern>
+	</rule>
+
 	<!-- The plugin declares PHP 7.4 as its minimum in composer.json and the plugin header. -->
 	<config name="testVersion" value="7.4-"/>
 	<rule ref="PHPCompatibilityWP"/>
