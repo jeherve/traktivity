@@ -72,7 +72,7 @@ Needs WordPress 7.0 and PHP 7.4. Fixes the setup step that never actually starte
 == Changelog ==
 
 = 3.0.0 =
-Release date: August 31, 2026
+Release date: September 2, 2026
 
 **This version needs WordPress 7.0 and PHP 7.4.**
 
