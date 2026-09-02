@@ -67,7 +67,7 @@ There is more discussion in [issue #678](https://github.com/jeherve/traktivity/i
 == Upgrade Notice ==
 
 = 3.0.0 =
-Needs WordPress 7.0 and PHP 7.4. Fixes the setup step that never actually started importing your watch history, and stops your API keys ending up in server logs.
+Needs WordPress 7.0 and PHP 7.4. Stops your API keys ending up in server logs.
 
 == Changelog ==
 
@@ -76,18 +76,18 @@ Release date: September 2, 2026
 
 **This version needs WordPress 7.0 and PHP 7.4.**
 
-The setup screens now use the same components as the rest of the WordPress admin, so they look a little different. Everything the plugin does with your Trakt.tv data works the way it did before.
-
-* The connection screen now tells you that Trakt.tv requires a VIP account to create an API application. Trakt.tv made that change in the middle of 2026, and removed the applications belonging to free accounts, which is why some syncs stopped on their own.
-* New events are stored as blocks, an image block and a paragraph block, so they can be edited like any other post instead of arriving as one lump of classic content. Events saved by earlier versions are left as they are and keep working. The `poster-image` wrapper around event images is gone; if you styled it, style the image block instead.
-* Event images now have alt text, taken from the event title. They were published with an empty alt attribute before, which left screen readers with nothing to announce.
-* Fixed the last step of the setup. The button offering to import everything you've watched moved you on to the dashboard without ever starting the import.
-* Your Trakt.tv and TMDb API keys are no longer part of the web address when the plugin checks them. Web addresses get written to server logs, so your keys were ending up in files you'd never think to look at.
-* Your credentials are now saved and checked once, when you submit the form. The plugin used to re-check them with Trakt.tv and TMDb on every keystroke, which could run you into their rate limits.
-* Fixed API keys and usernames containing an ampersand, apostrophe or angle bracket being altered when saved. This dates back to 2.0.0, so re-save yours after updating if it contains one.
-* Fixed the list widget's event type setting, which never dropped a type once you had saved it.
-* Fixed a fatal error when checking your TMDb key while TMDb was unreachable.
-* Fixed deprecation notices on PHP 8.1 and later.
+* Rebuild the setup screens with the components used elsewhere in the WordPress admin.
+* Note on the connection screen that Trakt.tv now requires a VIP account to create an API application.
+* Store new events as an image block and a paragraph block. Events created by earlier versions are left as they are.
+* Remove the poster-image wrapper around event images.
+* Add alt text to event images.
+* Stop sending Trakt.tv and TMDb API keys in the URL when checking them.
+* Check credentials once on submit, rather than on every keystroke.
+* Fix the last setup step, which never started the full import.
+* Fix API keys and usernames containing an ampersand, apostrophe or angle bracket being altered when saved, an issue since 2.0.0. Re-save yours if it contains one.
+* Fix the list widget's event type setting, which never removed a type once saved.
+* Fix a fatal error when checking the TMDb key while TMDb is unreachable.
+* Fix deprecation notices on PHP 8.1 and later.
 
 = 2.3.5 =
 Release date: April 24, 2023
