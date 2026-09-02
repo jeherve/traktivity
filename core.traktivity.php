@@ -103,7 +103,7 @@ class Traktivity_Calls {
 		$query_url = sprintf(
 			'%1$s/users/%2$s/history?extended=full',
 			TRAKTIVITY__API_URL,
-			$username
+			rawurlencode( $username )
 		);
 
 		/**
