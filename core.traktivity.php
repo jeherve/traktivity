@@ -855,20 +855,39 @@ class Traktivity_Calls {
 		 */
 		$status = $this->get_option( 'full_sync' );
 
+		// Sync was never run before, so there is nothing to read yet.
+		if ( ! is_array( $status ) ) {
+			$status = array();
+		}
+
 		// If sync already ran successfully, we can stop here.
-		if ( ! empty( $status ) && isset( $status['status'] ) && 'done' === $status['status'] ) {
+		if ( isset( $status['status'] ) && 'done' === $status['status'] ) {
 			return;
 		}
 
 		/**
-		 * If the option doesn't exist, that means we never ran sync before.
+		 * If we have no page count yet, that means we never ran sync before.
 		 * Let's get started by changing the status to 'in_progress', and get some data.
 		 */
-		if ( empty( $status ) ) {
-			$status = array(
-				'status' => 'in_progress',
-				'pages'  => (int) $this->get_trakt_activity( array(), true ),
-			);
+		if ( ! isset( $status['pages'] ) ) {
+			$pages = (int) $this->get_trakt_activity( array(), true );
+
+			/*
+			 * Trakt.tv reports how many pages of history there are, and the loop
+			 * below counts that number down. A failed request reports nothing,
+			 * and a count of zero counts down without ever reaching zero again.
+			 *
+			 * Stop without saving anything, so the next run asks Trakt.tv for
+			 * the count again rather than being left in progress with no pages
+			 * to fetch.
+			 */
+			if ( $pages < 1 ) {
+				return;
+			}
+
+			$status['status'] = 'in_progress';
+			$status['pages']  = $pages;
+
 			// Update our option.
 			$this->update_option( 'full_sync', $status );
 		}
@@ -877,23 +896,19 @@ class Traktivity_Calls {
 		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WP_IMPORTING is defined by WordPress core, not by this plugin.
 		defined( 'WP_IMPORTING' ) || define( 'WP_IMPORTING', true );
 
-		// let's start looping.
-		do {
-			$args         = array(
-				'page'  => $status['pages'],
-				'limit' => 10,
+		// let's start looping, from the last page back to the first.
+		for ( $page = (int) $status['pages']; $page > 0; $page-- ) {
+			$this->publish_event(
+				array(
+					'page'  => $page,
+					'limit' => 10,
+				)
 			);
-			$trakt_events = $this->publish_event( $args );
-
-			// One page less to go.
-			--$status['pages'];
-		} while ( 'in_progress' === $status['status'] && 0 !== (int) $status['pages'] );
+		}
 
 		// We're done. Save options.
-		$status = array(
-			'status' => 'done',
-			'pages'  => 0,
-		);
+		$status['status'] = 'done';
+		$status['pages']  = 0;
 		$this->update_option( 'full_sync', $status );
 	}
 }

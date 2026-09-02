@@ -87,6 +87,7 @@ Release date: September 2, 2026
 * Fix the list widget's event type setting, which never removed a type once saved.
 * Fix a fatal error when checking the TMDb key while TMDb is unreachable.
 * Fix deprecation notices on PHP 8.1 and later.
+* Fix a full synchronization looping forever when Trakt.tv cannot be reached as it starts.
 
 = 2.3.5 =
 Release date: April 24, 2023
