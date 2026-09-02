@@ -56,7 +56,7 @@ jobs:
           coverage: none
           tools: composer
 
-      - uses: ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f # 3.2.1
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
 
       - name: Coding standards
         run: composer run lint
@@ -85,7 +85,7 @@ jobs:
 
       # PHPUnit runs inside the container, against the vendor directory
       # mounted with the plugin.
-      - uses: ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f # 3.2.1
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
 
       # wp-env serves the plugin directory as-is, so the bundle has to exist.
       - name: Build
@@ -105,7 +105,7 @@ jobs:
 
       - name: Upload failure artifacts
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-artifacts
           path: artifacts/
