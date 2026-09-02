@@ -42,6 +42,27 @@ describe( 'TraktForm', () => {
 		);
 	} );
 
+	it( 'warns that creating a Trakt.tv API key now needs VIP', () => {
+		setup();
+
+		// The Notice renders a screen reader copy alongside the visible text.
+		expect(
+			screen.getAllByText( /requires a VIP account/ ).length
+		).toBeGreaterThan( 0 );
+
+		expect(
+			screen.getByRole( 'link', { name: /Trakt\.tv VIP/ } )
+		).toHaveAttribute( 'href', 'https://trakt.tv/vip' );
+	} );
+
+	it( 'keeps the VIP warning visible once a key is stored', () => {
+		setup( { trakt: { username: 'jeherve', key: 'stored-key' } } );
+
+		expect(
+			screen.getAllByText( /requires a VIP account/ ).length
+		).toBeGreaterThan( 0 );
+	} );
+
 	it( 'cannot be submitted until both fields are filled in', async () => {
 		const user = userEvent.setup();
 		setup();
