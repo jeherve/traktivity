@@ -127,6 +127,38 @@ archive and checks that no development files crept in, that every
 archive, and that the plugin header version matches the readme's stable tag. It
 runs in CI on every pull request.
 
-To release to wordpress.org, unpack the archive over the SVN `trunk/`
-directory; its contents are exactly what should be there. Composer carries dev
-dependencies only, so nothing needs a `vendor/` directory at runtime.
+Composer carries dev dependencies only, so nothing needs a `vendor/` directory
+at runtime.
+
+### Publishing to wordpress.org
+
+Publishing a GitHub release runs `.github/workflows/deploy.yml`, which builds
+the archive, verifies it, and commits it to Subversion with
+[10up/action-wordpress-plugin-deploy](https://github.com/10up/action-wordpress-plugin-deploy).
+
+To cut a release:
+
+1. Update the version in `traktivity.php` (both the header and
+   `TRAKTIVITY__VERSION`), the `Stable tag` in `readme.txt`, and `version` in
+   `package.json`, and add a changelog entry.
+2. Merge, then publish a GitHub release whose tag is the version number. A
+   leading `v` is fine.
+
+The workflow refuses to deploy when the tag, the plugin header and the readme's
+stable tag disagree, since wordpress.org takes the version from the header and a
+mismatch would publish something nobody intended.
+
+It deploys from the built archive through the action's `BUILD_DIR`, so the
+`files` allowlist stays the only description of a release and there is no
+`.distignore` to keep in step with it.
+
+Two things to know:
+
+- It needs `SVN_USERNAME` and `SVN_PASSWORD` repository secrets.
+- Banners, icons and screenshots are not in this repository, so the action
+  leaves the ones already on wordpress.org alone. If a `.wordpress-org`
+  directory is ever added it must hold the complete set: the action rsyncs it
+  with `--delete`, so a partial directory removes whatever is missing.
+
+Run the workflow manually from the Actions tab to rehearse it. That path
+defaults to a dry run, doing everything except the Subversion commit.

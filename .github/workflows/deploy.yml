@@ -1,0 +1,76 @@
+name: Deploy to WordPress.org
+
+on:
+  release:
+    # Published releases only, so a pre-release can be cut without shipping.
+    types: [ released ]
+
+  # For rehearsing the whole path without committing to Subversion.
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Build and verify, but do not commit to WordPress.org
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Builds the production assets, writes traktivity.zip, and checks the
+      # archive. A release stops here rather than shipping something broken.
+      - name: Build and verify the release archive
+        run: npm run test:package
+
+      # Guards against tagging one version and shipping another. WordPress.org
+      # takes the version from the plugin header, so a mismatch publishes
+      # something nobody asked for.
+      - name: Check the tag matches the plugin version
+        if: github.event_name == 'release'
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          HEADER=$(sed -n 's/^ \* Version:[[:space:]]*//p' traktivity.php | head -1)
+          STABLE=$(sed -n 's/^Stable tag:[[:space:]]*//p' readme.txt | head -1)
+          echo "tag=$TAG  plugin header=$HEADER  stable tag=$STABLE"
+          if [ "$TAG" != "$HEADER" ] || [ "$TAG" != "$STABLE" ]; then
+            echo "::error::Tag $TAG does not match the plugin header ($HEADER) and readme stable tag ($STABLE)."
+            exit 1
+          fi
+
+      # The archive already contains exactly what should ship, so BUILD_DIR
+      # points at its contents. That makes the files allowlist in package.json
+      # the single source of truth for a release, and means the action never
+      # consults a .distignore we would have to keep in step with it.
+      - name: Unpack the archive for deployment
+        run: unzip -q traktivity.zip -d release
+
+      - name: Deploy to WordPress.org
+        id: deploy
+        uses: 10up/action-wordpress-plugin-deploy@2.3.0
+        with:
+          generate-zip: true
+          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: traktivity
+          BUILD_DIR: release/traktivity
+
+      - name: Attach the archive to the release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.deploy.outputs.zip-path }}

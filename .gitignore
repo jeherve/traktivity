@@ -3,6 +3,7 @@
 /build
 /artifacts
 /traktivity.zip
+/release
 .DS_Store
 npm-debug.log
 *.unison.tmp
