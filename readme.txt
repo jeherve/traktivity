@@ -1,6 +1,6 @@
 === Traktivity ===
 Contributors: jeherve
-Tags: Trakt.tv, TV, Activity, Track, tmdb, Movies, TV Shows, Trakt, Log
+Tags: Trakt.tv, TV, Activity, Movies, Log
 Stable tag: 3.0.0
 Requires at least: 7.0
 Tested up to: 7.1
@@ -67,7 +67,7 @@ There is more discussion in [issue #678](https://github.com/jeherve/traktivity/i
 == Upgrade Notice ==
 
 = 3.0.0 =
-Needs WordPress 7.0 and PHP 7.4. Stops your API keys ending up in server logs.
+Needs WordPress 7.0 and PHP 7.4.
 
 == Changelog ==
 
@@ -83,7 +83,6 @@ Release date: September 2, 2026
 * Add alt text to event images.
 * Stop sending Trakt.tv and TMDb API keys in the URL when checking them.
 * Check credentials once on submit, rather than on every keystroke.
-* Fix the last setup step, which never started the full import.
 * Fix API keys and usernames containing an ampersand, apostrophe or angle bracket being altered when saved, an issue since 2.0.0. Re-save yours if it contains one.
 * Fix the list widget's event type setting, which never removed a type once saved.
 * Fix a fatal error when checking the TMDb key while TMDb is unreachable.
