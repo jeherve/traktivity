@@ -484,7 +484,7 @@ class Traktivity_Data_Storage {
 				'%1$s<img %2$s src="%3$s" />',
 				$content,
 				'style="max-width:100%;"',
-				wp_get_attachment_thumb_url( $show_poster['id'] )
+				esc_url( wp_get_attachment_thumb_url( $show_poster['id'] ) )
 			);
 		}
 

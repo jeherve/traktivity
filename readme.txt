@@ -89,6 +89,7 @@ Release date: September 2, 2026
 * Fix deprecation notices on PHP 8.1 and later.
 * Fix a full synchronization looping forever when Trakt.tv cannot be reached as it starts.
 * Fix requests for Trakt.tv usernames containing a character that has to be encoded in a URL.
+* Escape the poster image URL shown in the Shows column in the admin.
 
 = 2.3.5 =
 Release date: April 24, 2023
