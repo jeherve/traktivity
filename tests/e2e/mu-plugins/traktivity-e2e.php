@@ -87,6 +87,18 @@ function traktivity_e2e_register_routes() {
 
 	register_rest_route(
 		'traktivity-e2e/v1',
+		'/sync-state',
+		array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => 'traktivity_e2e_sync_state',
+			'permission_callback' => static function () {
+				return current_user_can( 'manage_options' );
+			},
+		)
+	);
+
+	register_rest_route(
+		'traktivity-e2e/v1',
 		'/reset',
 		array(
 			'methods'             => WP_REST_Server::CREATABLE,
@@ -106,6 +118,27 @@ add_action( 'rest_api_init', 'traktivity_e2e_register_routes' );
  */
 function traktivity_e2e_options() {
 	return new WP_REST_Response( (array) get_option( 'traktivity' ), 200 );
+}
+
+/**
+ * Report whether a full sync has been asked for.
+ *
+ * Triggering a sync schedules a cron event; the full_sync option is written
+ * later, by the callback that event runs. A test checking one or the other
+ * races cron, so both are reported and either one answers the question.
+ *
+ * @return WP_REST_Response Whether the event is scheduled, and the option.
+ */
+function traktivity_e2e_sync_state() {
+	$options = (array) get_option( 'traktivity' );
+
+	return new WP_REST_Response(
+		array(
+			'scheduled' => (bool) wp_next_scheduled( 'traktivity_full_sync' ),
+			'option'    => isset( $options['full_sync'] ) ? $options['full_sync'] : null,
+		),
+		200
+	);
 }
 
 /**

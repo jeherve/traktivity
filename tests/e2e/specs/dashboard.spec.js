@@ -131,10 +131,19 @@ test.describe( 'Traktivity dashboard', () => {
 			page.getByText( 'I am all set! What now?' )
 		).toBeVisible();
 
-		const options = await requestUtils.rest( {
-			path: '/traktivity-e2e/v1/options',
+		/*
+		 * Asking for a sync schedules a cron event, and the full_sync option
+		 * is written later by the callback that event runs. Checking only the
+		 * option races cron, which is slower on CI than it is locally, so
+		 * either answers the question: the sync was asked for.
+		 */
+		const sync = await requestUtils.rest( {
+			path: '/traktivity-e2e/v1/sync-state',
 		} );
-		expect( options.full_sync ).toBeTruthy();
+		expect(
+			sync.scheduled || Boolean( sync.option ),
+			'the wizard should have scheduled a full sync, or already run one'
+		).toBeTruthy();
 	} );
 
 	test( 'stores credentials exactly as they were typed', async ( {
