@@ -261,7 +261,8 @@ class Traktivity_Calls {
 	 *  Array containing information about the post image.
 	 *
 	 *      @int    int    id  Attachment ID for this image.
-	 *      @string string tag Image HTML tag of a large version of the image.
+	 *      @string string url URL of a large version of the image.
+	 *      @string string alt Alt text for the image.
 	 * }
 	 */
 	private function sideload_image( $url, $post_id, $title, $featured ) {
@@ -356,11 +357,18 @@ class Traktivity_Calls {
 					remove_filter( 'image_downsize', array( Jetpack_Photon::instance(), 'filter_image_downsize' ) );
 				}
 
-				// Create a div containing a large version of the image, to be added to the post if needed.
-				$post_image['tag'] = sprintf(
-					'<div class="poster-image">%s</div>',
-					wp_get_attachment_image( $post_image_id, 'large' )
-				);
+				/*
+				 * Give the attachment alt text if it has none. TMDb sends no
+				 * description with its images, so without this every event
+				 * image is published with alt="".
+				 */
+				if ( '' === (string) get_post_meta( $post_image_id, '_wp_attachment_image_alt', true ) ) {
+					update_post_meta( $post_image_id, '_wp_attachment_image_alt', $title );
+				}
+
+				// The URL of a large version of the image, for the post's image block.
+				$post_image['url'] = (string) wp_get_attachment_image_url( $post_image_id, 'large' );
+				$post_image['alt'] = (string) get_post_meta( $post_image_id, '_wp_attachment_image_alt', true );
 
 				// Re-enable Photon now that the image URL has been built.
 				if ( class_exists( '\Automattic\Jetpack\Image_CDN\Image_CDN' ) ) {
@@ -523,8 +531,8 @@ class Traktivity_Calls {
 					'post_date'    => $event->watched_at,
 					'tax_input'    => $taxonomies,
 					'meta_input'   => $meta,
-					'post_content' => esc_html( $post_content ),
-					'post_excerpt' => esc_html( $post_excerpt ),
+					'post_content' => $this->build_post_content( $post_content ),
+					'post_excerpt' => $post_excerpt,
 					'post_author'  => ( ! empty( $first_admin ) ? (int) $first_admin[0] : 0 ),
 				);
 
@@ -573,7 +581,7 @@ class Traktivity_Calls {
 						if ( ! empty( $post_image ) ) {
 							$post_with_image = array(
 								'ID'           => $post_id,
-								'post_content' => $post_image['tag'] . $post_content,
+								'post_content' => $this->build_post_content( $post_content, $post_image ),
 							);
 							wp_update_post( $post_with_image );
 						}
@@ -668,6 +676,71 @@ class Traktivity_Calls {
 				} // End loop for each taxonomy that was created.
 			} // End loop for each event.
 		} // End check for valid array of events.
+	}
+
+	/**
+	 * Build an event's post content as blocks.
+	 *
+	 * Events used to be stored as a bare div wrapping an image, followed by
+	 * unwrapped text, which the editor could only show as a single classic
+	 * block. Composing the same thing from core/image and core/paragraph makes
+	 * an event editable like anything else on the site.
+	 *
+	 * serialize_blocks() writes the block delimiters, rather than this building
+	 * the comment syntax by hand.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param string $synopsis Event synopsis, as plain text.
+	 * @param array  $image    Optional. Image details as returned by sideload_image().
+	 *
+	 * @return string Post content, as serialized blocks.
+	 */
+	private function build_post_content( $synopsis, $image = array() ) {
+		$blocks = array();
+
+		if ( ! empty( $image['id'] ) && ! empty( $image['url'] ) ) {
+			$figure = sprintf(
+				'<figure class="wp-block-image size-large"><img src="%1$s" alt="%2$s" class="wp-image-%3$d"/></figure>',
+				esc_url( $image['url'] ),
+				esc_attr( isset( $image['alt'] ) ? $image['alt'] : '' ),
+				(int) $image['id']
+			);
+
+			$blocks[] = array(
+				'blockName'    => 'core/image',
+				'attrs'        => array(
+					'id'              => (int) $image['id'],
+					'sizeSlug'        => 'large',
+					'linkDestination' => 'none',
+				),
+				'innerBlocks'  => array(),
+				'innerHTML'    => $figure,
+				'innerContent' => array( $figure ),
+			);
+		}
+
+		$synopsis = trim( (string) $synopsis );
+
+		if ( '' !== $synopsis ) {
+			/*
+			 * Only the three characters that have to be escaped in element
+			 * text. esc_html() would also turn every apostrophe into &#039;,
+			 * which the block editor does not do, so the stored markup would
+			 * differ from what saving the same post by hand produces.
+			 */
+			$paragraph = '<p>' . htmlspecialchars( $synopsis, ENT_NOQUOTES, 'UTF-8' ) . '</p>';
+
+			$blocks[] = array(
+				'blockName'    => 'core/paragraph',
+				'attrs'        => array(),
+				'innerBlocks'  => array(),
+				'innerHTML'    => $paragraph,
+				'innerContent' => array( $paragraph ),
+			);
+		}
+
+		return serialize_blocks( $blocks );
 	}
 
 	/**

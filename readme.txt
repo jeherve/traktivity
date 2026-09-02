@@ -79,6 +79,7 @@ Release date: September 2, 2026
 The setup screens now use the same components as the rest of the WordPress admin, so they look a little different. Everything the plugin does with your Trakt.tv data works the way it did before.
 
 * The connection screen now tells you that Trakt.tv requires a VIP account to create an API application. Trakt.tv made that change in the middle of 2026, and removed the applications belonging to free accounts, which is why some syncs stopped on their own.
+* New events are stored as blocks, an image block and a paragraph block, so they can be edited like any other post instead of arriving as one lump of classic content. Events saved by earlier versions are left as they are and keep working. The `poster-image` wrapper around event images is gone; if you styled it, style the image block instead.
 * Fixed the last step of the setup. The button offering to import everything you've watched moved you on to the dashboard without ever starting the import.
 * Your Trakt.tv and TMDb API keys are no longer part of the web address when the plugin checks them. Web addresses get written to server logs, so your keys were ending up in files you'd never think to look at.
 * Your credentials are now saved and checked once, when you submit the form. The plugin used to re-check them with Trakt.tv and TMDb on every keystroke, which could run you into their rate limits.
