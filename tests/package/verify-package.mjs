@@ -43,11 +43,39 @@ check(
 	'every entry sits under a single traktivity/ folder'
 );
 
-// Development files must not ship.
+/*
+ * An allowlist of shapes rather than a list of things to keep out. A new
+ * development file cannot be forgotten here: anything that is not plugin PHP,
+ * build output, the readme or the licence fails, whatever it is called.
+ */
+const allowed = [
+	/^[^/]+\.php$/, // Plugin PHP at the root.
+	/^widgets\/[^/]+\.php$/,
+	/^build\//,
+	/^readme\.txt$/,
+	/^LICENSE\.md$/,
+];
+const unexpected = entries
+	.map( ( entry ) => entry.replace( /^traktivity\//, '' ) )
+	.filter( ( entry ) => ! allowed.some( ( shape ) => shape.test( entry ) ) );
+check(
+	unexpected.length === 0,
+	`archive holds only production files${
+		unexpected.length ? `; unexpected: ${ unexpected.join( ', ' ) }` : ''
+	}`
+);
+
+// Named separately, so the most likely mistakes fail with an obvious message.
 const banned =
-	/(^|\/)(node_modules|vendor|src|tests|artifacts|\.github)\/|(^|\/)(package(-lock)?\.json|composer\.(json|lock)|README\.md|renovate\.json|jest\.config\.js|playwright\.config\.js|\.wp-env\.json|\.nvmrc|\.gitignore|\.svnignore)$|\.map$/;
+	/(^|\/)(node_modules|vendor|src|tests|artifacts|\.github)\/|(^|\/)(package(-lock)?\.json|composer\.(json|lock)|README\.md|renovate\.json|jest\.config\.js|playwright\.config\.js|\.nvmrc|\.gitignore)$|\.dist$|\.map$|^\.wp-env(\.[a-z]+)?\.json$|\.phpunit\.result\.cache$/;
 const leaked = entries.filter( ( entry ) =>
 	banned.test( entry.replace( /^traktivity\//, '' ) )
+);
+check(
+	leaked.length === 0,
+	`no development files ship${
+		leaked.length ? `: ${ leaked.join( ', ' ) }` : ''
+	}`
 );
 check(
 	leaked.length === 0,
