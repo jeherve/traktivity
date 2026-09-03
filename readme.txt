@@ -74,9 +74,9 @@ Needs WordPress 7.0 and PHP 7.4.
 = 3.0.1 =
 Release date: September 3, 2026
 
-* Fix a full synchronization importing only the most recent tenth of your Trakt.tv history before reporting itself complete. Trakt.tv is asked how many pages of history exist for a given page size, and Traktivity was asking at one size and then reading the pages at another.
-* Run a full synchronization in batches that pick up where the last one stopped, so a long history finishes instead of starting over whenever a run is cut short.
-* Existing sites can run a full synchronization again after updating, to bring in the events the earlier versions skipped. Events already imported are left alone.
+* Fix a full synchronization importing only the most recent tenth of your Trakt.tv history, after Trakt.tv changed their API to return 100 results per page by default instead of the documented 10.
+* Run a full synchronization in batches that resume, so a long history finishes instead of starting over when a run is cut short.
+* Let sites that already ran a full synchronization run one again after updating, to pick up the skipped events. Events already imported are left alone.
 
 = 3.0.0 =
 Release date: September 2, 2026
