@@ -16,8 +16,8 @@
 class FullSyncTest extends WP_UnitTestCase {
 
 	/**
-	 * Total events in the fake history. Large enough that a page size mix-up
-	 * leaves an obvious hole rather than an off-by-one.
+	 * Total events in the fake history. Enough to need more than one run at
+	 * Traktivity's batch size, so resuming gets exercised too.
 	 *
 	 * @var int
 	 */
@@ -196,6 +196,59 @@ class FullSyncTest extends WP_UnitTestCase {
 			1,
 			$limits,
 			'The sync mixed page sizes: ' . implode( ', ', $limits ) . '.'
+		);
+	}
+
+	/**
+	 * A run that is cut short resumes where it stopped.
+	 *
+	 * The sync runs on cron and can be killed at any point. It records how many
+	 * pages are left after each one, so the next run picks those up rather than
+	 * starting the whole history over.
+	 */
+	public function test_progress_survives_a_run_that_does_not_finish() {
+		do_action( 'traktivity_full_sync' );
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertSame(
+			'in_progress',
+			$options['full_sync']['status'],
+			'A history this size should take more than one run.'
+		);
+		$this->assertGreaterThan( 0, $options['full_sync']['pages'], 'Pages left should be recorded.' );
+
+		$after_first_run = $options['full_sync']['pages'];
+		$first_run_pages = wp_list_pluck( $this->requests, 'page' );
+
+		do_action( 'traktivity_full_sync' );
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertLessThan(
+			$after_first_run,
+			$options['full_sync']['pages'],
+			'The second run should have fewer pages left than the first.'
+		);
+
+		$second_run_pages = array_slice( wp_list_pluck( $this->requests, 'page' ), count( $first_run_pages ) );
+
+		$this->assertSame(
+			array(),
+			array_values( array_intersect( $first_run_pages, $second_run_pages ) ),
+			'The second run re-fetched pages the first run had already done.'
+		);
+	}
+
+	/**
+	 * An unfinished run queues the next one, so the sync finishes on its own.
+	 */
+	public function test_an_unfinished_run_schedules_the_next_one() {
+		do_action( 'traktivity_full_sync' );
+
+		$this->assertNotFalse(
+			wp_next_scheduled( 'traktivity_full_sync' ),
+			'A sync with pages left should have queued another run.'
 		);
 	}
 

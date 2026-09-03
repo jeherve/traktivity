@@ -34,6 +34,21 @@ class Traktivity_Calls {
 	private const SYNC_PAGE_SIZE = 100;
 
 	/**
+	 * Number of pages a single full sync run works through before handing off
+	 * to the next one.
+	 *
+	 * A large history takes far longer than any one request is allowed to live,
+	 * and every event costs a themoviedb.org lookup on top of the post insert.
+	 * Stopping at a batch boundary and queueing the next run keeps each run
+	 * short enough to finish.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @var int
+	 */
+	private const SYNC_PAGES_PER_RUN = 10;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -925,6 +940,8 @@ class Traktivity_Calls {
 		defined( 'WP_IMPORTING' ) || define( 'WP_IMPORTING', true );
 
 		// let's start looping, from the last page back to the first.
+		$processed = 0;
+
 		for ( $page = (int) $status['pages']; $page > 0; $page-- ) {
 			$this->publish_event(
 				array(
@@ -932,6 +949,24 @@ class Traktivity_Calls {
 					'limit' => self::SYNC_PAGE_SIZE,
 				)
 			);
+
+			/*
+			 * Record what is left after every page. This runs on cron and can
+			 * be cut short at any point, so without saving as we go a run that
+			 * does not reach the end throws away everything it fetched, and the
+			 * next one starts the history over.
+			 */
+			$status['pages'] = $page - 1;
+			$this->update_option( 'full_sync', $status );
+
+			// Enough for this run. Queue the next one to pick up the rest.
+			if ( ++$processed >= self::SYNC_PAGES_PER_RUN && $page > 1 ) {
+				if ( ! wp_next_scheduled( 'traktivity_full_sync' ) ) {
+					wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'traktivity_full_sync' );
+				}
+
+				return;
+			}
 		}
 
 		// We're done. Save options.
