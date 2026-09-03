@@ -45,6 +45,22 @@ class FullSyncTest extends WP_UnitTestCase {
 	private $served = array();
 
 	/**
+	 * Events the fake Trakt.tv holds. Defaults to a history big enough to need
+	 * more than one run; tests set it to zero to stand in for a fresh account.
+	 *
+	 * @var int
+	 */
+	private $history_size = self::HISTORY_SIZE;
+
+	/**
+	 * Page number the fake Trakt.tv refuses to serve, standing in for a
+	 * timeout or a rate limit part way through a run. Null serves every page.
+	 *
+	 * @var int|null
+	 */
+	private $failing_page = null;
+
+	/**
 	 * Point the plugin at a username and key, and swap Trakt.tv for the fake.
 	 */
 	public function set_up() {
@@ -58,8 +74,10 @@ class FullSyncTest extends WP_UnitTestCase {
 			)
 		);
 
-		$this->requests = array();
-		$this->served   = array();
+		$this->requests     = array();
+		$this->served       = array();
+		$this->history_size = self::HISTORY_SIZE;
+		$this->failing_page = null;
 
 		add_filter( 'pre_http_request', array( $this, 'fake_trakt' ), 10, 3 );
 	}
@@ -98,13 +116,25 @@ class FullSyncTest extends WP_UnitTestCase {
 			'limit' => $limit,
 		);
 
+		// Stand in for a page Trakt.tv could not serve on this attempt.
+		if ( null !== $this->failing_page && $page === $this->failing_page ) {
+			return array(
+				'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary( array() ),
+				'body'     => '',
+				'response' => array(
+					'code'    => 503,
+					'message' => 'Service Unavailable',
+				),
+			);
+		}
+
 		/*
 		 * Trakt.tv returns the history newest first, so page 1 holds the most
 		 * recent events. Hand back bare objects: the sync skips events with no
 		 * type, which keeps this about pagination rather than post creation.
 		 */
 		$offset = ( ( null === $page ? 1 : $page ) - 1 ) * $limit;
-		$end    = min( $offset + $limit, self::HISTORY_SIZE );
+		$end    = min( $offset + $limit, $this->history_size );
 		$body   = array();
 
 		for ( $i = $offset; $i < $end; $i++ ) {
@@ -121,9 +151,9 @@ class FullSyncTest extends WP_UnitTestCase {
 		 */
 		$headers = new WpOrg\Requests\Utility\CaseInsensitiveDictionary(
 			array(
-				'x-pagination-item-count' => (string) self::HISTORY_SIZE,
+				'x-pagination-item-count' => (string) $this->history_size,
 				'x-pagination-limit'      => (string) $limit,
-				'x-pagination-page-count' => (string) (int) ceil( self::HISTORY_SIZE / $limit ),
+				'x-pagination-page-count' => (string) (int) ceil( $this->history_size / $limit ),
 			)
 		);
 
@@ -171,12 +201,12 @@ class FullSyncTest extends WP_UnitTestCase {
 	public function test_sync_walks_the_entire_history() {
 		$this->sync_to_completion();
 
-		$missing = array_diff( range( 1, self::HISTORY_SIZE ), $this->served );
+		$missing = array_diff( range( 1, $this->history_size ), $this->served );
 
 		$this->assertSame(
 			array(),
 			array_values( $missing ),
-			sprintf( 'The sync never fetched %d of the %d events in the history.', count( $missing ), self::HISTORY_SIZE )
+			sprintf( 'The sync never fetched %d of the %d events in the history.', count( $missing ), $this->history_size )
 		);
 	}
 
@@ -250,6 +280,69 @@ class FullSyncTest extends WP_UnitTestCase {
 			wp_next_scheduled( 'traktivity_full_sync' ),
 			'A sync with pages left should have queued another run.'
 		);
+	}
+
+	/**
+	 * An account with nothing watched yet finishes, rather than asking
+	 * Trakt.tv for a page count on every run forever.
+	 *
+	 * A failed request and an empty history both used to arrive as a page count
+	 * of zero, and both were read as failure, so a fresh account could never
+	 * reach 'done'.
+	 */
+	public function test_an_empty_history_completes_the_sync() {
+		$this->history_size = 0;
+
+		do_action( 'traktivity_full_sync' );
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertSame( 'done', $options['full_sync']['status'] );
+		$this->assertSame( 0, $options['full_sync']['pages'] );
+	}
+
+	/**
+	 * A page Trakt.tv fails to serve is tried again, not stepped over.
+	 *
+	 * The sync records its progress as it goes, so it has to be sure a page
+	 * really arrived before counting it done. Otherwise one timeout drops a
+	 * whole page of events on the floor and the sync still finishes 'done',
+	 * which is the silent partial import this release is about.
+	 */
+	public function test_a_page_that_fails_to_load_is_not_skipped() {
+		$pages_total = (int) ceil( self::HISTORY_SIZE / 100 );
+
+		// Fail a page in the middle of the first run.
+		$this->failing_page = $pages_total - 3;
+
+		do_action( 'traktivity_full_sync' );
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertNotSame(
+			'done',
+			$options['full_sync']['status'] ?? '',
+			'A sync that could not read a page should not report itself finished.'
+		);
+		$this->assertSame(
+			$this->failing_page,
+			$options['full_sync']['pages'],
+			'The next run should start again at the page that failed.'
+		);
+
+		// Let it through, and the run that follows should pick up that page.
+		$this->failing_page = null;
+		$before             = count( $this->requests );
+
+		$this->sync_to_completion();
+
+		$retried = array_slice( wp_list_pluck( $this->requests, 'page' ), $before );
+
+		$this->assertContains( $pages_total - 3, $retried, 'The failed page was never requested again.' );
+
+		$missing = array_diff( range( 1, $this->history_size ), $this->served );
+
+		$this->assertSame( array(), array_values( $missing ), 'Events from the failed page never arrived.' );
 	}
 
 	/**

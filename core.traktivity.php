@@ -55,7 +55,7 @@ class Traktivity_Calls {
 	 */
 	public function __construct() {
 		// Check for new events and publish them every hour.
-		add_action( 'traktivity_publish', array( $this, 'publish_event' ) );
+		add_action( 'traktivity_publish', array( $this, 'publish_latest_events' ) );
 		if ( ! wp_next_scheduled( 'traktivity_publish' ) ) {
 			wp_schedule_event( time(), 'hourly', 'traktivity_publish' );
 		}
@@ -427,6 +427,10 @@ class Traktivity_Calls {
 	 *  @int int page  Number of page of results to be returned. Accepts integers.
 	 *  @int int limit Number of results to return per page. Accepts integers.
 	 * }
+	 *
+	 * @return bool Whether Trakt.tv returned a page of events. False means the
+	 *              request failed and nothing was read, which a caller walking
+	 *              the history has to tell apart from a page that held nothing.
 	 */
 	public function publish_event( $args = array() ) {
 		// Avoid timeouts during the data import process.
@@ -434,10 +438,16 @@ class Traktivity_Calls {
 
 		$trakt_events = $this->get_trakt_activity( $args, false );
 
+		/*
+		 * Whether Trakt.tv answered with a page at all. A caller walking the
+		 * history needs to tell that apart from a page that held no events.
+		 */
+		$fetched = is_array( $trakt_events );
+
 		/**
 		 * Only go through the event list if we have valid event array.
 		 */
-		if ( isset( $trakt_events ) && is_array( $trakt_events ) ) {
+		if ( $fetched ) {
 			foreach ( $trakt_events as $event ) {
 				// Avoid errors when no type is attached to the event.
 				if ( ! isset( $event->type ) ) {
@@ -710,6 +720,22 @@ class Traktivity_Calls {
 				} // End loop for each taxonomy that was created.
 			} // End loop for each event.
 		} // End check for valid array of events.
+
+		return $fetched;
+	}
+
+	/**
+	 * Look for new events on the hourly schedule.
+	 *
+	 * Whether Trakt.tv answered is reported by publish_event(), and an action
+	 * callback is not supposed to return anything, so the hook comes here.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @return void This is an action callback; WordPress discards any return value.
+	 */
+	public function publish_latest_events() {
+		$this->publish_event();
 	}
 
 	/**
@@ -881,6 +907,17 @@ class Traktivity_Calls {
 	}
 
 	/**
+	 * Queue the run that carries on from where this one stopped.
+	 *
+	 * @since 3.0.1
+	 */
+	private function schedule_next_run() {
+		if ( ! wp_next_scheduled( 'traktivity_full_sync' ) ) {
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'traktivity_full_sync' );
+		}
+	}
+
+	/**
 	 * Get all past Trakt.tv events from all Trakt.tv pages.
 	 *
 	 * @since 1.1.0
@@ -915,18 +952,29 @@ class Traktivity_Calls {
 		 * Let's get started by changing the status to 'in_progress', and get some data.
 		 */
 		if ( ! isset( $status['pages'] ) ) {
-			$pages = (int) $this->get_trakt_activity( array( 'limit' => self::SYNC_PAGE_SIZE ), true );
+			$pages = $this->get_trakt_activity( array( 'limit' => self::SYNC_PAGE_SIZE ), true );
 
 			/*
-			 * Trakt.tv reports how many pages of history there are, and the loop
-			 * below counts that number down. A failed request reports nothing,
-			 * and a count of zero counts down without ever reaching zero again.
-			 *
-			 * Stop without saving anything, so the next run asks Trakt.tv for
-			 * the count again rather than being left in progress with no pages
-			 * to fetch.
+			 * The request failed. Save nothing, so the next run asks Trakt.tv
+			 * for the count again rather than sitting in progress with no
+			 * pages to fetch.
+			 */
+			if ( null === $pages ) {
+				return;
+			}
+
+			$pages = (int) $pages;
+
+			/*
+			 * An account with nothing watched yet reports no pages. There is
+			 * nothing to walk, so record the sync as finished instead of
+			 * asking again on every run for a history that does not exist.
 			 */
 			if ( $pages < 1 ) {
+				$status['status'] = 'done';
+				$status['pages']  = 0;
+				$this->update_option( 'full_sync', $status );
+
 				return;
 			}
 
@@ -945,12 +993,24 @@ class Traktivity_Calls {
 		$processed = 0;
 
 		for ( $page = (int) $status['pages']; $page > 0; $page-- ) {
-			$this->publish_event(
+			$fetched = $this->publish_event(
 				array(
 					'page'  => $page,
 					'limit' => self::SYNC_PAGE_SIZE,
 				)
 			);
+
+			/*
+			 * Trakt.tv did not hand that page over, so leave the count where it
+			 * is and come back to the same page. Stepping over it would drop up
+			 * to a page of events for good, and the sync would still finish and
+			 * report itself done.
+			 */
+			if ( ! $fetched ) {
+				$this->schedule_next_run();
+
+				return;
+			}
 
 			/*
 			 * Record what is left after every page. This runs on cron and can
@@ -963,9 +1023,7 @@ class Traktivity_Calls {
 
 			// Enough for this run. Queue the next one to pick up the rest.
 			if ( ++$processed >= self::SYNC_PAGES_PER_RUN && $page > 1 ) {
-				if ( ! wp_next_scheduled( 'traktivity_full_sync' ) ) {
-					wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'traktivity_full_sync' );
-				}
+				$this->schedule_next_run();
 
 				return;
 			}
