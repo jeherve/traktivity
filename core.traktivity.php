@@ -899,11 +899,38 @@ class Traktivity_Calls {
 		}
 
 		// We're done. Save options.
-		$status['runtime'] = array(
-			'status' => 'done',
-			'items'  => 0,
+		$this->update_sync_status(
+			array(
+				'runtime' => array(
+					'status' => 'done',
+					'items'  => 0,
+				),
+			)
 		);
-		$this->update_option( 'full_sync', $status );
+	}
+
+	/**
+	 * Change some of the stored synchronization status, leaving the rest.
+	 *
+	 * The history sync and the recalculation of each show's total runtime both
+	 * keep their state in the 'full_sync' option, and each runs on its own cron
+	 * event, so the two can overlap. Writing back a copy of the option taken at
+	 * the start of a run would put back whatever the other job had recorded
+	 * since, rolling its progress backwards or dropping its completion. Read
+	 * the option again and change only the fields the caller owns.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @param array $fields Status fields to set.
+	 */
+	private function update_sync_status( $fields ) {
+		$status = $this->get_option( 'full_sync' );
+
+		if ( ! is_array( $status ) ) {
+			$status = array();
+		}
+
+		$this->update_option( 'full_sync', array_merge( $status, $fields ) );
 	}
 
 	/**
@@ -957,9 +984,13 @@ class Traktivity_Calls {
 			/*
 			 * The request failed. Save nothing, so the next run asks Trakt.tv
 			 * for the count again rather than sitting in progress with no
-			 * pages to fetch.
+			 * pages to fetch, and queue that run: this one came from a
+			 * single cron event, and with no status saved the dashboard has
+			 * nothing to resume from either.
 			 */
 			if ( null === $pages ) {
+				$this->schedule_next_run();
+
 				return;
 			}
 
@@ -971,18 +1002,26 @@ class Traktivity_Calls {
 			 * asking again on every run for a history that does not exist.
 			 */
 			if ( $pages < 1 ) {
-				$status['status'] = 'done';
-				$status['pages']  = 0;
-				$this->update_option( 'full_sync', $status );
+				$this->update_sync_status(
+					array(
+						'status' => 'done',
+						'pages'  => 0,
+					)
+				);
 
 				return;
 			}
 
-			$status['status'] = 'in_progress';
-			$status['pages']  = $pages;
+			// Where the loop below starts from on this first run.
+			$status['pages'] = $pages;
 
 			// Update our option.
-			$this->update_option( 'full_sync', $status );
+			$this->update_sync_status(
+				array(
+					'status' => 'in_progress',
+					'pages'  => $pages,
+				)
+			);
 		}
 
 		// Set WP_IMPORTING to avoid triggering things like subscription emails.
@@ -1018,8 +1057,7 @@ class Traktivity_Calls {
 			 * does not reach the end throws away everything it fetched, and the
 			 * next one starts the history over.
 			 */
-			$status['pages'] = $page - 1;
-			$this->update_option( 'full_sync', $status );
+			$this->update_sync_status( array( 'pages' => $page - 1 ) );
 
 			// Enough for this run. Queue the next one to pick up the rest.
 			if ( ++$processed >= self::SYNC_PAGES_PER_RUN && $page > 1 ) {
@@ -1030,9 +1068,12 @@ class Traktivity_Calls {
 		}
 
 		// We're done. Save options.
-		$status['status'] = 'done';
-		$status['pages']  = 0;
-		$this->update_option( 'full_sync', $status );
+		$this->update_sync_status(
+			array(
+				'status' => 'done',
+				'pages'  => 0,
+			)
+		);
 	}
 }
 new Traktivity_Calls();

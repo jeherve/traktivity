@@ -61,6 +61,23 @@ class FullSyncTest extends WP_UnitTestCase {
 	private $failing_page = null;
 
 	/**
+	 * Whether the fake Trakt.tv refuses the request that asks how many pages
+	 * of history there are.
+	 *
+	 * @var bool
+	 */
+	private $fail_page_count = false;
+
+	/**
+	 * Page number after which the runtime recalculation records itself as
+	 * finished, standing in for that job's cron event landing part way through
+	 * a history sync. Null leaves the two jobs to run apart.
+	 *
+	 * @var int|null
+	 */
+	private $runtime_finishes_on_page = null;
+
+	/**
 	 * Point the plugin at a username and key, and swap Trakt.tv for the fake.
 	 */
 	public function set_up() {
@@ -74,10 +91,12 @@ class FullSyncTest extends WP_UnitTestCase {
 			)
 		);
 
-		$this->requests     = array();
-		$this->served       = array();
-		$this->history_size = self::HISTORY_SIZE;
-		$this->failing_page = null;
+		$this->requests                 = array();
+		$this->served                   = array();
+		$this->history_size             = self::HISTORY_SIZE;
+		$this->failing_page             = null;
+		$this->fail_page_count          = false;
+		$this->runtime_finishes_on_page = null;
 
 		add_filter( 'pre_http_request', array( $this, 'fake_trakt' ), 10, 3 );
 	}
@@ -116,8 +135,24 @@ class FullSyncTest extends WP_UnitTestCase {
 			'limit' => $limit,
 		);
 
+		/*
+		 * Stand in for the other cron job finishing while this sync is part way
+		 * through, writing its own key into the shared option.
+		 */
+		if ( null !== $this->runtime_finishes_on_page && $page === $this->runtime_finishes_on_page ) {
+			$options                         = get_option( 'traktivity' );
+			$options['full_sync']['runtime'] = array(
+				'status' => 'done',
+				'items'  => 0,
+			);
+			update_option( 'traktivity', $options );
+		}
+
 		// Stand in for a page Trakt.tv could not serve on this attempt.
-		if ( null !== $this->failing_page && $page === $this->failing_page ) {
+		if (
+			( null === $page && $this->fail_page_count )
+			|| ( null !== $this->failing_page && $page === $this->failing_page )
+		) {
 			return array(
 				'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary( array() ),
 				'body'     => '',
@@ -343,6 +378,51 @@ class FullSyncTest extends WP_UnitTestCase {
 		$missing = array_diff( range( 1, $this->history_size ), $this->served );
 
 		$this->assertSame( array(), array_values( $missing ), 'Events from the failed page never arrived.' );
+	}
+
+	/**
+	 * A page count Trakt.tv could not give us gets asked for again.
+	 *
+	 * The sync runs on a one-shot cron event, so returning without queueing
+	 * another one ends it there. Nothing is saved in this case either, so the
+	 * dashboard sees no sync in progress and its own resume path never fires:
+	 * a synchronization the reader was told had started would just stop.
+	 */
+	public function test_a_failed_page_count_queues_another_run() {
+		$this->fail_page_count = true;
+
+		do_action( 'traktivity_full_sync' );
+
+		$this->assertNotFalse(
+			wp_next_scheduled( 'traktivity_full_sync' ),
+			'A sync that could not read the page count should have queued another run.'
+		);
+	}
+
+	/**
+	 * The runtime recalculation's progress survives a history sync.
+	 *
+	 * Both jobs keep their state in the same 'full_sync' option and each has
+	 * its own cron event, so they can overlap. Writing back a copy of the
+	 * option taken at the start of a run would put back whatever the other job
+	 * had recorded since, undoing finished work.
+	 */
+	public function test_a_history_sync_leaves_the_runtime_job_state_alone() {
+		$pages_total = (int) ceil( self::HISTORY_SIZE / 100 );
+
+		// The runtime job finishes while the history sync is mid-run.
+		$this->runtime_finishes_on_page = $pages_total - 2;
+
+		$this->sync_to_completion();
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertSame(
+			'done',
+			$options['full_sync']['runtime']['status'] ?? '',
+			'The history sync wrote over the runtime job\'s state.'
+		);
+		$this->assertSame( 'done', $options['full_sync']['status'] );
 	}
 
 	/**

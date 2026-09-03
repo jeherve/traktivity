@@ -1,6 +1,6 @@
 {
   "name": "traktivity",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Log your activity on Trakt.tv",
   "main": "traktivity.php",
   "files": [
