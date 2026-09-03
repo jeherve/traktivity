@@ -25,7 +25,9 @@ class Traktivity_Calls {
 	 * at another means the count describes pages we never fetch, and the sync
 	 * quietly imports a fraction of the history.
 	 *
-	 * 100 is Trakt.tv's own default, and its maximum.
+	 * 100 is what Trakt.tv falls back to when a request leaves the page size
+	 * out. Their maximum is 250, and a larger limit is silently clamped to it
+	 * rather than refused, so asking for more would not buy anything.
 	 *
 	 * @since 3.0.1
 	 *
