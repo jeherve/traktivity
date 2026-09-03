@@ -17,6 +17,23 @@ defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 class Traktivity_Calls {
 
 	/**
+	 * Number of events requested per page during a full sync.
+	 *
+	 * Trakt.tv reports how many pages of history exist for the page size the
+	 * request asked for, so the page count and the pages we then walk have to
+	 * use this same value. Asking for the count at one size and walking pages
+	 * at another means the count describes pages we never fetch, and the sync
+	 * quietly imports a fraction of the history.
+	 *
+	 * 100 is Trakt.tv's own default, and its maximum.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @var int
+	 */
+	private const SYNC_PAGE_SIZE = 100;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -881,7 +898,7 @@ class Traktivity_Calls {
 		 * Let's get started by changing the status to 'in_progress', and get some data.
 		 */
 		if ( ! isset( $status['pages'] ) ) {
-			$pages = (int) $this->get_trakt_activity( array(), true );
+			$pages = (int) $this->get_trakt_activity( array( 'limit' => self::SYNC_PAGE_SIZE ), true );
 
 			/*
 			 * Trakt.tv reports how many pages of history there are, and the loop
@@ -912,7 +929,7 @@ class Traktivity_Calls {
 			$this->publish_event(
 				array(
 					'page'  => $page,
-					'limit' => 10,
+					'limit' => self::SYNC_PAGE_SIZE,
 				)
 			);
 		}
