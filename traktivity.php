@@ -4,7 +4,7 @@
  * Plugin URI: https://wordpress.org/plugins/traktivity
  * Description: Log your activity on Trakt.tv
  * Author: Jeremy Herve
- * Version: 3.0.0
+ * Version: 3.0.1
  * Author URI: https://jeremy.hu
  * Requires at least: 7.0
  * Requires PHP: 7.4
@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-define( 'TRAKTIVITY__VERSION', '3.0.0' );
+define( 'TRAKTIVITY__VERSION', '3.0.1' );
 define( 'TRAKTIVITY__API_URL', 'https://api.trakt.tv' );
 define( 'TRAKTIVITY__API_VERSION', '2' );
 define( 'TRAKTIVITY__TMDB_API_URL', 'https://api.themoviedb.org' );
@@ -54,6 +54,8 @@ class Traktivity {
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		// Load plugin.
 		add_action( 'plugins_loaded', array( $this, 'load_plugin' ) );
+		// Run one-time routines after an update.
+		add_action( 'plugins_loaded', array( $this, 'maybe_upgrade' ) );
 		// Flush rewrite rewrite_rules.
 		add_action( 'add_option_traktivity_event', array( $this, 'flush_rules_on_enable' ) );
 		add_action( 'update_option_traktivity_event', array( $this, 'flush_rules_on_enable' ) );
@@ -66,6 +68,51 @@ class Traktivity {
 	 */
 	public function load_textdomain() {
 		load_plugin_textdomain( 'traktivity', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+	}
+
+	/**
+	 * Run one-time routines when the plugin is updated.
+	 *
+	 * The version the site last ran is recorded alongside the other settings,
+	 * so this can tell an update from a plain page load.
+	 *
+	 * @since 3.0.1
+	 */
+	public function maybe_upgrade() {
+		$options = get_option( 'traktivity' );
+
+		// Nothing configured yet, so there is nothing to bring forward.
+		if ( ! is_array( $options ) ) {
+			return;
+		}
+
+		$previous = isset( $options['version'] ) ? (string) $options['version'] : '0';
+
+		if ( version_compare( $previous, TRAKTIVITY__VERSION, '>=' ) ) {
+			return;
+		}
+
+		/*
+		 * Up to 3.0.1, a full synchronization asked Trakt.tv how many pages of
+		 * history there were at one page size and then walked those pages at
+		 * another, so it covered a tenth of the history and marked itself done.
+		 * Every site that ran it is sitting on a partial import that the
+		 * dashboard refuses to run again, so clear that status and let them.
+		 *
+		 * Events are keyed on their Trakt.tv ID and skipped if already present,
+		 * so the run that follows only fills in what is missing.
+		 *
+		 * Only the history keys go. The same option also tracks the separate
+		 * recalculation of each show's total runtime, under 'runtime', and that
+		 * one worked: clearing it too would report finished work as never run.
+		 */
+		if ( version_compare( $previous, '3.0.1', '<' ) && isset( $options['full_sync'] ) ) {
+			unset( $options['full_sync']['status'], $options['full_sync']['pages'] );
+		}
+
+		$options['version'] = TRAKTIVITY__VERSION;
+
+		update_option( 'traktivity', $options );
 	}
 
 	/**
