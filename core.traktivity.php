@@ -51,6 +51,21 @@ class Traktivity_Calls {
 	private const SYNC_PAGES_PER_RUN = 10;
 
 	/**
+	 * Times in a row a full sync will ask again after a request it could not
+	 * read, before it gives up and waits to be started by hand.
+	 *
+	 * Every failed request arrives the same way, so a key that has been revoked
+	 * or a username that no longer exists is indistinguishable from a timeout.
+	 * Without a ceiling, the one that is never going to succeed would have the
+	 * site asking Trakt.tv once a minute for as long as it stayed wrong.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @var int
+	 */
+	private const SYNC_MAX_ATTEMPTS = 5;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -179,7 +194,19 @@ class Traktivity_Calls {
 		}
 
 		if ( true === $test ) {
-			return (int) wp_remote_retrieve_header( $data, 'X-Pagination-Page-Count' );
+			$page_count = wp_remote_retrieve_header( $data, 'X-Pagination-Page-Count' );
+
+			/*
+			 * Trakt.tv sends this on every paginated response. Without it there
+			 * is no telling an account with nothing watched from a response we
+			 * cannot make sense of, and reading it as zero would end a sync as
+			 * complete with the history still sitting on Trakt.tv.
+			 */
+			if ( ! is_numeric( $page_count ) ) {
+				return null;
+			}
+
+			return (int) $page_count;
 		}
 
 		$response_body = json_decode( $data['body'] );
@@ -945,6 +972,30 @@ class Traktivity_Calls {
 	}
 
 	/**
+	 * Record a request we could not read, and ask again unless this has been
+	 * going on long enough to look permanent.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @param int $failures Requests already failed in a row before this one.
+	 */
+	private function note_failure_and_retry( $failures ) {
+		$failures = (int) $failures + 1;
+
+		$this->update_sync_status( array( 'failures' => $failures ) );
+
+		/*
+		 * Out of attempts. Leave the status where it is so the dashboard can
+		 * start the sync again, and stop asking in the meantime.
+		 */
+		if ( $failures >= self::SYNC_MAX_ATTEMPTS ) {
+			return;
+		}
+
+		$this->schedule_next_run();
+	}
+
+	/**
 	 * Get all past Trakt.tv events from all Trakt.tv pages.
 	 *
 	 * @since 1.1.0
@@ -974,6 +1025,8 @@ class Traktivity_Calls {
 			return;
 		}
 
+		$failures = isset( $status['failures'] ) ? (int) $status['failures'] : 0;
+
 		/**
 		 * If we have no page count yet, that means we never ran sync before.
 		 * Let's get started by changing the status to 'in_progress', and get some data.
@@ -989,7 +1042,7 @@ class Traktivity_Calls {
 			 * nothing to resume from either.
 			 */
 			if ( null === $pages ) {
-				$this->schedule_next_run();
+				$this->note_failure_and_retry( $failures );
 
 				return;
 			}
@@ -1018,8 +1071,9 @@ class Traktivity_Calls {
 			// Update our option.
 			$this->update_sync_status(
 				array(
-					'status' => 'in_progress',
-					'pages'  => $pages,
+					'status'   => 'in_progress',
+					'pages'    => $pages,
+					'failures' => 0,
 				)
 			);
 		}
@@ -1046,7 +1100,7 @@ class Traktivity_Calls {
 			 * report itself done.
 			 */
 			if ( ! $fetched ) {
-				$this->schedule_next_run();
+				$this->note_failure_and_retry( $failures );
 
 				return;
 			}
@@ -1057,7 +1111,14 @@ class Traktivity_Calls {
 			 * does not reach the end throws away everything it fetched, and the
 			 * next one starts the history over.
 			 */
-			$this->update_sync_status( array( 'pages' => $page - 1 ) );
+			$this->update_sync_status(
+				array(
+					'pages'    => $page - 1,
+					'failures' => 0,
+				)
+			);
+
+			$failures = 0;
 
 			// Enough for this run. Queue the next one to pick up the rest.
 			if ( ++$processed >= self::SYNC_PAGES_PER_RUN && $page > 1 ) {

@@ -78,6 +78,14 @@ class FullSyncTest extends WP_UnitTestCase {
 	private $runtime_finishes_on_page = null;
 
 	/**
+	 * Whether the fake Trakt.tv answers 200 but leaves the pagination header
+	 * off, standing in for a response we cannot make sense of.
+	 *
+	 * @var bool
+	 */
+	private $omit_page_count_header = false;
+
+	/**
 	 * Point the plugin at a username and key, and swap Trakt.tv for the fake.
 	 */
 	public function set_up() {
@@ -97,6 +105,7 @@ class FullSyncTest extends WP_UnitTestCase {
 		$this->failing_page             = null;
 		$this->fail_page_count          = false;
 		$this->runtime_finishes_on_page = null;
+		$this->omit_page_count_header   = false;
 
 		add_filter( 'pre_http_request', array( $this, 'fake_trakt' ), 10, 3 );
 	}
@@ -184,13 +193,17 @@ class FullSyncTest extends WP_UnitTestCase {
 		 * them in title case. Build the same structure a real request would,
 		 * so the test cannot pass on a casing the network would never produce.
 		 */
-		$headers = new WpOrg\Requests\Utility\CaseInsensitiveDictionary(
-			array(
-				'x-pagination-item-count' => (string) $this->history_size,
-				'x-pagination-limit'      => (string) $limit,
-				'x-pagination-page-count' => (string) (int) ceil( $this->history_size / $limit ),
-			)
+		$sent = array(
+			'x-pagination-item-count' => (string) $this->history_size,
+			'x-pagination-limit'      => (string) $limit,
+			'x-pagination-page-count' => (string) (int) ceil( $this->history_size / $limit ),
 		);
+
+		if ( $this->omit_page_count_header ) {
+			unset( $sent['x-pagination-page-count'] );
+		}
+
+		$headers = new WpOrg\Requests\Utility\CaseInsensitiveDictionary( $sent );
 
 		return array(
 			'headers'  => $headers,
@@ -426,8 +439,124 @@ class FullSyncTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A failed page-count request leaves no sync state behind, so the next run
-	 * asks Trakt.tv again instead of sitting in progress with nothing to fetch.
+	 * A response with no page count is a failure, not an empty history.
+	 *
+	 * Trakt.tv sends the count on every paginated response. Reading a missing
+	 * one as zero would end the sync as complete with the whole history still
+	 * sitting on Trakt.tv, which is the failure this release exists to fix.
+	 */
+	public function test_a_response_without_a_page_count_is_not_read_as_an_empty_history() {
+		$this->omit_page_count_header = true;
+
+		do_action( 'traktivity_full_sync' );
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertNotSame(
+			'done',
+			$options['full_sync']['status'] ?? '',
+			'A response we could not read was treated as a finished sync.'
+		);
+	}
+
+	/**
+	 * A request that keeps failing eventually stops asking.
+	 *
+	 * Every non-200 arrives here the same way, so a wrong API key or a
+	 * username that no longer exists looks exactly like a timeout. Queueing a
+	 * fresh run each time would leave the site asking Trakt.tv once a minute
+	 * for as long as the key stays wrong.
+	 */
+	public function test_a_request_that_keeps_failing_stops_being_retried() {
+		$this->fail_page_count = true;
+
+		for ( $attempt = 1; $attempt <= 20; $attempt++ ) {
+			$scheduled = wp_next_scheduled( 'traktivity_full_sync' );
+
+			if ( false !== $scheduled ) {
+				wp_unschedule_event( $scheduled, 'traktivity_full_sync' );
+			}
+
+			do_action( 'traktivity_full_sync' );
+
+			if ( false === wp_next_scheduled( 'traktivity_full_sync' ) ) {
+				break;
+			}
+		}
+
+		$this->assertFalse(
+			wp_next_scheduled( 'traktivity_full_sync' ),
+			'The sync kept queueing itself even though every request failed.'
+		);
+		$this->assertLessThan( 20, $attempt, 'It took too many attempts to give up.' );
+	}
+
+	/**
+	 * A page that comes good clears the failure count, so a later outage gets
+	 * a full set of attempts of its own rather than inheriting old ones.
+	 */
+	public function test_a_successful_page_clears_earlier_failures() {
+		$pages_total = (int) ceil( self::HISTORY_SIZE / 100 );
+
+		$this->failing_page = $pages_total;
+
+		do_action( 'traktivity_full_sync' );
+
+		$options = get_option( 'traktivity' );
+		$this->assertSame( 1, $options['full_sync']['failures'] ?? 0 );
+
+		$this->failing_page = null;
+
+		do_action( 'traktivity_full_sync' );
+
+		$options = get_option( 'traktivity' );
+		$this->assertSame( 0, $options['full_sync']['failures'] ?? -1 );
+	}
+
+	/**
+	 * Asking for a synchronization from the dashboard starts the attempts over.
+	 *
+	 * A sync that gave up because Trakt.tv kept refusing it would otherwise
+	 * carry that tally into the run the reader just asked for, and stop again
+	 * on the first hiccup rather than trying properly.
+	 */
+	public function test_starting_a_sync_by_hand_clears_the_failure_count() {
+		update_option(
+			'traktivity',
+			array(
+				'username'  => 'jeherve',
+				'api_key'   => 'test-key',
+				'full_sync' => array(
+					'status'   => 'in_progress',
+					'pages'    => 4,
+					'failures' => 5,
+				),
+			)
+		);
+
+		global $wp_rest_server;
+		$wp_rest_server = new WP_REST_Server();
+		do_action( 'rest_api_init', $wp_rest_server );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', '/traktivity/v1/sync' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertArrayNotHasKey( 'failures', $options['full_sync'] );
+		$this->assertSame( 4, $options['full_sync']['pages'], 'Progress so far should be left alone.' );
+	}
+
+	/**
+	 * A failed page-count request records no page count and no progress, so
+	 * the next run asks Trakt.tv again instead of sitting in progress with
+	 * nothing to fetch.
+	 *
+	 * The count of failed attempts is written, since that is what stops the
+	 * retries eventually, but it says nothing about a sync being under way.
 	 */
 	public function test_a_failed_page_count_request_does_not_start_a_sync() {
 		remove_filter( 'pre_http_request', array( $this, 'fake_trakt' ), 10 );
@@ -439,6 +568,7 @@ class FullSyncTest extends WP_UnitTestCase {
 
 		$options = get_option( 'traktivity' );
 
-		$this->assertArrayNotHasKey( 'full_sync', $options );
+		$this->assertArrayNotHasKey( 'pages', $options['full_sync'] );
+		$this->assertArrayNotHasKey( 'status', $options['full_sync'] );
 	}
 }

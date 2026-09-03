@@ -93,7 +93,7 @@ class Traktivity {
 		}
 
 		/*
-		 * Up to 3.0.1, a full synchronization asked Trakt.tv how many pages of
+		 * Before 3.0.1, a full synchronization asked Trakt.tv how many pages of
 		 * history there were at one page size and then walked those pages at
 		 * another, so it covered a tenth of the history and marked itself done.
 		 * Every site that ran it is sitting on a partial import that the
