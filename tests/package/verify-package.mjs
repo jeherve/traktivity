@@ -53,6 +53,7 @@ const allowed = [
 	/^widgets\/[^/]+\.php$/,
 	/^build\//,
 	/^assets\/[^/]+\.css$/,
+	/^templates\/[^/]+\.html$/,
 	/^readme\.txt$/,
 	/^LICENSE\.md$/,
 ];
@@ -116,6 +117,10 @@ for ( const required of [
 	'build/blocks/latest-watch/render.php',
 	'build/blocks/show-header/block.json',
 	'build/blocks/show-header/render.php',
+	'templates/single-traktivity_event.html',
+	'templates/archive-traktivity_event.html',
+	'templates/taxonomy-trakt_show.html',
+	'templates/taxonomy-traktivity.html',
 ] ) {
 	check( has( required ), `ships ${ required }` );
 }
