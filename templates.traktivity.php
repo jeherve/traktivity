@@ -275,6 +275,101 @@ class Traktivity_Templates {
 	}
 
 	/**
+	 * Which of our template slugs the active theme already covers.
+	 *
+	 * A theme's own template wins over ours, so offering to switch one on when
+	 * the theme already answers for it would be offering nothing. Asked once
+	 * for every slug rather than once per template.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @return string[] Slugs the theme provides.
+	 */
+	public static function theme_provided_slugs(): array {
+		if ( ! wp_is_block_theme() || ! function_exists( 'get_block_templates' ) ) {
+			return array();
+		}
+
+		$slugs = array_keys( self::available() );
+		$found = get_block_templates( array( 'slug__in' => $slugs ), 'wp_template' );
+		$ours  = array();
+
+		foreach ( $found as $template ) {
+			if ( 'theme' === $template->source ) {
+				$ours[] = $template->slug;
+			}
+		}
+
+		return array_values( array_unique( $ours ) );
+	}
+
+	/**
+	 * Everything the settings screen needs to describe what we can provide.
+	 *
+	 * Templates and parts in one list, each carrying the type the Site Editor
+	 * wants in a URL, so the dashboard does not have to know which is which.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function for_settings(): array {
+		$theme_provides = self::theme_provided_slugs();
+		$entries        = array();
+
+		foreach ( self::available() as $slug => $template ) {
+			$entries[] = array(
+				'slug'          => $slug,
+				'type'          => 'wp_template',
+				'title'         => $template['title'],
+				'description'   => $template['description'],
+				'enabled'       => self::is_enabled( $slug ),
+				'themeProvides' => in_array( $slug, $theme_provides, true ),
+			);
+		}
+
+		foreach ( self::available_parts() as $slug => $part ) {
+			$entries[] = array(
+				'slug'          => $slug,
+				'type'          => 'wp_template_part',
+				'title'         => $part['title'],
+				'description'   => $part['description'],
+				'enabled'       => self::is_enabled( $slug ),
+				'themeProvides' => false,
+			);
+		}
+
+		return $entries;
+	}
+
+	/**
+	 * Save which templates and parts are switched on.
+	 *
+	 * Only slugs this plugin knows about are stored, so a stale or invented
+	 * key cannot accumulate in the option.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param array $enabled Slug => boolean.
+	 *
+	 * @return array The stored value.
+	 */
+	public static function save_enabled( array $enabled ): array {
+		$known = array_merge( array_keys( self::available() ), array_keys( self::available_parts() ) );
+		$clean = array();
+
+		foreach ( $known as $slug ) {
+			if ( ! empty( $enabled[ $slug ] ) ) {
+				$clean[ $slug ] = true;
+			}
+		}
+
+		update_option( self::OPTION, $clean );
+
+		return $clean;
+	}
+
+	/**
 	 * The ID a template part is known by.
 	 *
 	 * Namespaced to the active theme on purpose. The moment someone edits one

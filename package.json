@@ -71,6 +71,7 @@
     "@wordpress/i18n": "^6.27.0",
     "@wordpress/jest-console": "^9.2.0",
     "@wordpress/scripts": "^34.2.0",
-    "@wordpress/server-side-render": "^6.30.0"
+    "@wordpress/server-side-render": "^6.30.0",
+    "@wordpress/url": "^4.54.0"
   }
 }
