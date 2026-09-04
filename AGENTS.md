@@ -56,8 +56,11 @@ precisely so parallel branches don't collide on them.
   checks PHP compatibility statically via `testVersion`, so a 7.4 runtime is
   not needed to catch a violation. Don't guard for functions that 7.0 already
   has.
-- Escape late, at output. Functions returning markup say so in their docblock,
-  and callers must not double-escape.
+- Escape late, at output. Accessors return unescaped plain text and callers
+  escape it; where a caller needs markup, it composes that itself from the
+  separate values the accessor already gives it. Don't add a flag that changes
+  whether a return value is escaped, because then the escaping rule depends on
+  an argument and every call site has to be read twice.
 
 ## The contracts
 

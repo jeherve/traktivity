@@ -78,25 +78,24 @@ function traktivity_get_event( int $post_id ): array {
  *
  * Episode titles mean nothing alone, so the show name and the episode code
  * are pulled back in from their separate taxonomies. Movies get their plain
- * title. The return is raw text unless $args['link'] is true, in which case it
- * carries a link and callers must not escape it again.
+ * title.
+ *
+ * Always plain text, never markup, so there is one escaping rule rather than
+ * one per argument: callers escape it. Anything wanting a linked show name
+ * builds that itself from the `show_name` and `show_link` keys on
+ * traktivity_get_event(), which are kept separate for exactly this reason.
  *
  * Not yet implemented: returns the plain post title. See issue #685.
  *
  * @since 3.1.0
  *
- * @param int   $post_id Event post ID.
- * @param array $args    {
- *     Optional. Formatting options.
+ * @param int  $post_id   Event post ID.
+ * @param bool $show_name Prefix the show name. Default true.
  *
- *     @type bool $show_name Include the show name. Default true.
- *     @type bool $link      Link the show name. Default false.
- * }
- *
- * @return string Composed title.
+ * @return string Composed title, unescaped plain text.
  */
-function traktivity_get_event_title( int $post_id, array $args = array() ): string {
-	unset( $args );
+function traktivity_get_event_title( int $post_id, bool $show_name = true ): string {
+	unset( $show_name );
 
 	return (string) get_the_title( $post_id );
 }
