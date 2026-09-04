@@ -6,6 +6,7 @@
   "files": [
     "assets",
     "build",
+    "templates",
     "widgets",
     "admin.traktivity.php",
     "blocks.traktivity.php",
