@@ -127,6 +127,15 @@ class Traktivity {
 		require_once TRAKTIVITY__PLUGIN_DIR . 'rest.traktivity.php';
 		require_once TRAKTIVITY__PLUGIN_DIR . 'content.traktivity.php';
 		require_once TRAKTIVITY__PLUGIN_DIR . 'stats.traktivity.php';
+		require_once TRAKTIVITY__PLUGIN_DIR . 'helpers.traktivity.php';
+
+		/*
+		 * Wired ahead of the code that fills them, so the 3.1.0 blocks and
+		 * templates work lands in a file that already exists rather than
+		 * every branch editing this list and conflicting with the others.
+		 */
+		require_once TRAKTIVITY__PLUGIN_DIR . 'blocks.traktivity.php';
+		require_once TRAKTIVITY__PLUGIN_DIR . 'templates.traktivity.php';
 
 		// Settings panel.
 		if ( is_admin() ) {

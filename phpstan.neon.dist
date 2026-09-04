@@ -1,5 +1,10 @@
 parameters:
 	level: 5
+	# PHPDoc is a claim, not a guarantee. tests/php/ContractsTest.php asserts at
+	# runtime that the documented shapes in helpers.traktivity.php are actually
+	# honoured, and with this on PHPStan reads those assertions as tautologies
+	# because it takes the docblock as proof of the very thing under test.
+	treatPhpDocTypesAsCertain: false
 	paths:
 		- .
 	excludePaths:
