@@ -1,0 +1,49 @@
+/**
+ * Event Card.
+ *
+ * The frame and the missing-artwork placeholder come from the shared
+ * stylesheet; everything here is the card itself.
+ */
+
+.traktivity-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+}
+
+.traktivity-card__link {
+	display: block;
+	text-decoration: none;
+}
+
+.traktivity-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25em;
+}
+
+.traktivity-card__show {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	letter-spacing: 0.06em;
+	margin: 0;
+	text-transform: uppercase;
+}
+
+.traktivity-card__title {
+	margin: 0;
+}
+
+.traktivity-card__code {
+	opacity: 0.7;
+	white-space: nowrap;
+}
+
+.traktivity-card__excerpt {
+	margin: 0;
+}
+
+.traktivity-card__meta {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	margin: 0;
+	opacity: 0.75;
+}

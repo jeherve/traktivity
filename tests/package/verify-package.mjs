@@ -95,6 +95,15 @@ for ( const required of [
 	'build/style-index.css',
 	// Shared by several blocks; a block.json naming the handle needs it present.
 	'assets/blocks-shared.css',
+	/*
+	 * A block entry and the dashboard entry are easy to lose at the same time:
+	 * wp-scripts builds either the blocks it finds or the default src/index.js,
+	 * never both, so one of these disappearing is the signal that the entry
+	 * list in webpack.config.js needs looking at.
+	 */
+	'build/blocks/event-card/block.json',
+	'build/blocks/event-card/render.php',
+	'build/blocks/event-card/style-index.css',
 ] ) {
 	check( has( required ), `ships ${ required }` );
 }

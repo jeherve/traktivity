@@ -15,6 +15,11 @@ src/blocks/event-card/
 That builds to `build/blocks/event-card/`, and `Traktivity_Blocks` registers
 whatever it finds there.
 
+`webpack.config.js` exists because of one of these: wp-scripts builds either the
+blocks it finds or the default `src/index.js`, never both, so the dashboard entry
+has to be put back by hand. Adding a block does not need that file changed, but
+deleting it would take the dashboard bundle with it.
+
 Two things the build decides for you, both verified rather than assumed:
 
 - The stylesheet comes out as `style-index.css`, because webpack names it after
@@ -22,6 +27,10 @@ Two things the build decides for you, both verified rather than assumed:
   `"style": [ "traktivity-shared", "file:./style-index.css" ]`, not `style.css`.
 - `render.php` is copied across as-is, so `"render": "file:./render.php"` works
   from the built directory.
+
+`Traktivity_Blocks::frame()` renders artwork inside a fixed-ratio frame and falls
+back to `Traktivity_Blocks::placeholder()` when there is none, which is the
+normal case often enough to matter. Use them rather than writing an `<img>`.
 
 `traktivity-shared` carries the media frame and the missing-artwork placeholder,
 which four blocks reuse. List it first, then the block's own stylesheet; a page

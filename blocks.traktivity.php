@@ -175,6 +175,71 @@ class Traktivity_Blocks {
 
 		return $registered;
 	}
+
+	/**
+	 * Render the blank frame used wherever artwork is missing.
+	 *
+	 * TMDb does not have an image for everything, so a meaningful share of events
+	 * and shows will never get one. This is a normal state rather than an error
+	 * state, and it should read as a deliberate blank rather than a broken image.
+	 *
+	 * The title is printed next to this frame by every caller, so repeating it
+	 * inside only overflows the smaller cards. The frame carries the title as its
+	 * accessible name and shows a short label instead.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param string $title  Title of the show, film or episode.
+	 * @param string $aspect Either 'landscape' or 'poster'.
+	 *
+	 * @return string HTML.
+	 */
+	public static function placeholder( string $title, string $aspect = 'landscape' ): string {
+		return sprintf(
+			'<div class="traktivity-frame traktivity-frame--%1$s traktivity-frame--empty" role="img" aria-label="%2$s"><span class="traktivity-frame__label">%3$s</span></div>',
+			esc_attr( 'poster' === $aspect ? 'poster' : 'landscape' ),
+			/* translators: %s: title of the show, film or episode. */
+			esc_attr( sprintf( __( '%s, no artwork available', 'traktivity' ), $title ) ),
+			esc_html__( 'No artwork', 'traktivity' )
+		);
+	}
+
+	/**
+	 * Render an image inside a fixed-ratio frame, falling back to the placeholder.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param int    $image_id Attachment ID.
+	 * @param string $title    Title, used as alt text and in the placeholder label.
+	 * @param string $aspect   Either 'landscape' or 'poster'.
+	 *
+	 * @return string HTML.
+	 */
+	public static function frame( int $image_id, string $title, string $aspect = 'landscape' ): string {
+		if ( $image_id < 1 ) {
+			return self::placeholder( $title, $aspect );
+		}
+
+		$image = wp_get_attachment_image(
+			$image_id,
+			'poster' === $aspect ? 'medium_large' : 'large',
+			false,
+			array(
+				'alt'     => $title,
+				'loading' => 'lazy',
+			)
+		);
+
+		if ( '' === $image ) {
+			return self::placeholder( $title, $aspect );
+		}
+
+		return sprintf(
+			'<div class="traktivity-frame traktivity-frame--%1$s">%2$s</div>',
+			esc_attr( 'poster' === $aspect ? 'poster' : 'landscape' ),
+			$image
+		);
+	}
 }
 
 Traktivity_Blocks::init();
