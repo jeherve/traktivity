@@ -54,6 +54,7 @@ const allowed = [
 	/^build\//,
 	/^assets\/[^/]+\.css$/,
 	/^templates\/[^/]+\.html$/,
+	/^templates\/parts\/[^/]+\.html$/,
 	/^readme\.txt$/,
 	/^LICENSE\.md$/,
 ];
@@ -121,6 +122,8 @@ for ( const required of [
 	'templates/archive-traktivity_event.html',
 	'templates/taxonomy-trakt_show.html',
 	'templates/taxonomy-traktivity.html',
+	'templates/parts/traktivity-recent-watches.html',
+	'templates/parts/traktivity-watch-stats.html',
 ] ) {
 	check( has( required ), `ships ${ required }` );
 }

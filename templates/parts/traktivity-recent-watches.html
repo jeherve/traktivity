@@ -1,0 +1,11 @@
+<!-- wp:heading -->
+<h2 class="wp-block-heading">{{RECENT_TITLE}}</h2>
+<!-- /wp:heading -->
+
+<!-- wp:query {"queryId":10,"query":{"perPage":8,"pages":1,"offset":0,"postType":"traktivity_event","order":"desc","orderBy":"date","inherit":false},"layout":{"type":"default"}} -->
+<div class="wp-block-query">
+	<!-- wp:post-template {"layout":{"type":"grid","columnCount":4}} -->
+		<!-- wp:traktivity/event-card /-->
+	<!-- /wp:post-template -->
+</div>
+<!-- /wp:query -->
