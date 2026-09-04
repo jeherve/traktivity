@@ -114,6 +114,8 @@ for ( const required of [
 	'build/blocks/top-shows/render.php',
 	'build/blocks/latest-watch/block.json',
 	'build/blocks/latest-watch/render.php',
+	'build/blocks/show-header/block.json',
+	'build/blocks/show-header/render.php',
 ] ) {
 	check( has( required ), `ships ${ required }` );
 }
