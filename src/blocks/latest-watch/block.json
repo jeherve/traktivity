@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "traktivity/latest-watch",
+	"title": "Latest Watch",
+	"category": "traktivity",
+	"icon": "format-video",
+	"description": "The most recent thing watched, shown large.",
+	"textdomain": "traktivity",
+	"attributes": {
+		"kicker": { "type": "string", "default": "" },
+		"type": { "type": "string", "default": "any" },
+		"preferWithImage": { "type": "boolean", "default": true },
+		"headingLevel": { "type": "number", "default": 2 }
+	},
+	"supports": {
+		"html": false,
+		"reusable": false,
+		"align": [ "wide", "full" ],
+		"color": {
+			"background": true,
+			"text": true,
+			"link": true
+		},
+		"spacing": { "margin": true, "padding": true, "blockGap": true },
+		"typography": { "fontSize": true, "lineHeight": true }
+	},
+	"editorScript": "file:./index.js",
+	"style": [ "traktivity-shared", "file:./style-index.css" ],
+	"render": "file:./render.php"
+}
