@@ -169,16 +169,21 @@ class ContractsTest extends WP_UnitTestCase {
 	 *
 	 * Callers test the array rather than picking through the stored value, so
 	 * a partial result would push that shape-checking back out to them.
-	 *
-	 * Marked incomplete rather than quietly passing: the accessor is still a
-	 * stub that only ever returns the empty case, which
-	 * test_show_accessors_handle_a_missing_term() covers. Issue #687 fills the
-	 * function in and has to extend this to a show that has an image.
 	 */
 	public function test_show_poster_populated_shape() {
-		$this->markTestIncomplete(
-			'Needs issue #687. Expected keys, in order: id, url, alt.'
+		$term = self::factory()->term->create_and_get( array( 'taxonomy' => 'trakt_show' ) );
+
+		update_term_meta(
+			$term->term_id,
+			'show_poster',
+			array(
+				'id'  => 12,
+				'url' => 'https://example.com/still.jpg',
+				'alt' => 'Some Show',
+			)
 		);
+
+		$this->assertSame( array( 'id', 'url', 'alt' ), array_keys( traktivity_get_show_poster( $term->term_id ) ) );
 	}
 
 	/**

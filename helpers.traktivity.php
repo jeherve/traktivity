@@ -322,6 +322,94 @@ function traktivity_get_event_links( int $post_id ): array {
 }
 
 /**
+ * Register the term meta the sync stores against each show.
+ *
+ * Registering it puts the values in the REST API and gives them a schema, so
+ * a block editor or an external client can read a show the same way the
+ * plugin's own blocks do. The sync wrote all of this long before it was
+ * registered, so these describe existing data rather than introducing it.
+ *
+ * @since 3.1.0
+ */
+function traktivity_register_show_meta(): void {
+	register_term_meta(
+		'trakt_show',
+		'show_runtime',
+		array(
+			'type'              => 'integer',
+			'description'       => __( 'Total number of minutes logged against this show.', 'traktivity' ),
+			'single'            => true,
+			'default'           => 0,
+			'show_in_rest'      => true,
+			'sanitize_callback' => 'absint',
+			'auth_callback'     => '__return_false',
+		)
+	);
+
+	register_term_meta(
+		'trakt_show',
+		'show_network',
+		array(
+			'type'              => 'string',
+			'description'       => __( 'Network the show airs on.', 'traktivity' ),
+			'single'            => true,
+			'default'           => '',
+			'show_in_rest'      => true,
+			'sanitize_callback' => 'sanitize_text_field',
+			'auth_callback'     => '__return_false',
+		)
+	);
+
+	register_term_meta(
+		'trakt_show',
+		'show_poster',
+		array(
+			'type'          => 'object',
+			'description'   => __( 'Image for the show, as stored by the sync.', 'traktivity' ),
+			'single'        => true,
+			'show_in_rest'  => array(
+				'schema' => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'id'  => array( 'type' => 'integer' ),
+						'url' => array(
+							'type'   => 'string',
+							'format' => 'uri',
+						),
+						'alt' => array( 'type' => 'string' ),
+					),
+				),
+			),
+			'auth_callback' => '__return_false',
+		)
+	);
+
+	register_term_meta(
+		'trakt_show',
+		'show_external_ids',
+		array(
+			'type'          => 'object',
+			'description'   => __( 'Trakt.tv, IMDb and TMDb IDs for the show.', 'traktivity' ),
+			'single'        => true,
+			'show_in_rest'  => array(
+				'schema' => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'trakt' => array( 'type' => array( 'integer', 'string' ) ),
+						'imdb'  => array( 'type' => 'string' ),
+						'tmdb'  => array( 'type' => array( 'integer', 'string' ) ),
+					),
+				),
+			),
+			'auth_callback' => '__return_false',
+		)
+	);
+}
+add_action( 'init', 'traktivity_register_show_meta' );
+
+/**
  * Read the image stored against a show.
  *
  * Despite the meta key, this is a 16:9 still from TMDb rather than a 2:3
@@ -330,27 +418,36 @@ function traktivity_get_event_links( int $post_id ): array {
  * Returns an empty array when the show has no image, so callers can test the
  * result rather than picking through the stored value's shape.
  *
- * Not yet implemented: returns an empty array. See issue #687.
- *
  * @since 3.1.0
  *
  * @param int $term_id trakt_show term ID.
  *
  * @return array Empty when the show has no image. Otherwise an 'id' attachment
- *               ID, a 'url' and an 'alt' string, in that order. The shape is
- *               pinned by tests/php/ContractsTest.php rather than by this
- *               annotation, which stays loose while the body is a stub.
+ *               ID, a 'url' and an 'alt' string, in that order.
  */
 function traktivity_get_show_poster( int $term_id ): array {
-	unset( $term_id );
+	$poster = get_term_meta( $term_id, 'show_poster', true );
 
-	return array();
+	/*
+	 * The sync stores whatever sideload_image() handed back, which is an empty
+	 * array when the download failed and can be a partial one when the
+	 * attachment was made but the URL lookup came back empty. Normalising here
+	 * means callers go straight to $poster['id'] rather than each repeating
+	 * this.
+	 */
+	if ( ! is_array( $poster ) || empty( $poster['id'] ) ) {
+		return array();
+	}
+
+	return array(
+		'id'  => (int) $poster['id'],
+		'url' => isset( $poster['url'] ) ? (string) $poster['url'] : '',
+		'alt' => isset( $poster['alt'] ) ? (string) $poster['alt'] : '',
+	);
 }
 
 /**
  * Read the network a show airs on.
- *
- * Not yet implemented: returns an empty string. See issue #687.
  *
  * @since 3.1.0
  *
@@ -359,15 +456,11 @@ function traktivity_get_show_poster( int $term_id ): array {
  * @return string Network name, or an empty string.
  */
 function traktivity_get_show_network( int $term_id ): string {
-	unset( $term_id );
-
-	return '';
+	return (string) get_term_meta( $term_id, 'show_network', true );
 }
 
 /**
  * Read the total time logged against a show, in minutes.
- *
- * Not yet implemented: returns 0. See issue #687.
  *
  * @since 3.1.0
  *
@@ -376,17 +469,14 @@ function traktivity_get_show_network( int $term_id ): string {
  * @return int Minutes watched.
  */
 function traktivity_get_show_runtime( int $term_id ): int {
-	unset( $term_id );
-
-	return 0;
+	return (int) get_term_meta( $term_id, 'show_runtime', true );
 }
 
 /**
  * Build the external references stored against a show.
  *
- * Same shape as traktivity_get_event_links().
- *
- * Not yet implemented: returns an empty array. See issue #687.
+ * Same shape as traktivity_get_event_links(). These always point at the show
+ * rather than at an episode, since a term has no episode to be precise about.
  *
  * @since 3.1.0
  *
@@ -395,7 +485,36 @@ function traktivity_get_show_runtime( int $term_id ): int {
  * @return array<string, array{label: string, url: string}> External links.
  */
 function traktivity_get_show_links( int $term_id ): array {
-	unset( $term_id );
+	$ids = get_term_meta( $term_id, 'show_external_ids', true );
 
-	return array();
+	if ( ! is_array( $ids ) ) {
+		return array();
+	}
+
+	$links = array();
+
+	if ( ! empty( $ids['trakt'] ) ) {
+		$links['trakt'] = traktivity_build_link(
+			'trakt',
+			add_query_arg( 'id_type', 'show', 'https://trakt.tv/search/trakt/' . rawurlencode( (string) $ids['trakt'] ) )
+		);
+	}
+
+	if ( ! empty( $ids['imdb'] ) ) {
+		$links['imdb'] = traktivity_build_link( 'imdb', 'https://www.imdb.com/title/' . rawurlencode( (string) $ids['imdb'] ) . '/' );
+	}
+
+	if ( ! empty( $ids['tmdb'] ) ) {
+		$links['tmdb'] = traktivity_build_link( 'tmdb', 'https://www.themoviedb.org/tv/' . rawurlencode( (string) $ids['tmdb'] ) );
+	}
+
+	/**
+	 * Filter the external references for one show.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param array $links   External references, keyed by service.
+	 * @param int   $term_id trakt_show term ID.
+	 */
+	return (array) apply_filters( 'traktivity_show_links', $links, $term_id );
 }
