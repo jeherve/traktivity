@@ -10,6 +10,7 @@ import { __ } from '@wordpress/i18n';
  */
 import RecentEvents from './RecentEvents';
 import StatsOverview from './stats/StatsOverview';
+import SyncHistory from './SyncHistory';
 import SyncShowTime from './SyncShowTime';
 
 /**
@@ -21,14 +22,21 @@ import SyncShowTime from './SyncShowTime';
  * @return {Element} The dashboard.
  */
 export default function Dashboard( { sync, launchSync } ) {
-	const pagesLeft = sync.pages;
+	const historyImported = sync.status === 'done';
 
 	useEffect( () => {
 		/*
-		 * Pick a sync back up if it was interrupted with pages still to go.
-		 * A sync started from step 4 is kicked off there, not here.
+		 * Pick a sync back up if it was left part way through. A sync started
+		 * from step 4 is kicked off there, not here.
+		 *
+		 * This follows the recorded status rather than the pages left to go,
+		 * since a sync that stopped before it ever read a page count has none
+		 * recorded, and so does one whose stale status was cleared on update.
+		 * Both of those read as zero pages, which is also what a finished sync
+		 * reads as, so the count cannot tell them apart. Neither starts on its
+		 * own; the card below is how they get going again.
 		 */
-		if ( pagesLeft !== 0 ) {
+		if ( sync.status === 'in_progress' ) {
 			launchSync();
 		}
 		// Only ever run this on mount; launchSync is stable and re-running it
@@ -83,6 +91,12 @@ export default function Dashboard( { sync, launchSync } ) {
 			</Card>
 			<StatsOverview />
 			<RecentEvents />
+			{ ! historyImported && (
+				<SyncHistory
+					sync={ sync }
+					launchHistorySync={ () => launchSync() }
+				/>
+			) }
 			<SyncShowTime
 				sync={ sync }
 				launchRuntimeSync={ () => launchSync( 'total_runtime' ) }
