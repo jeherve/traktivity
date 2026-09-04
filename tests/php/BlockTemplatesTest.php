@@ -242,7 +242,7 @@ class BlockTemplatesTest extends WP_UnitTestCase {
 		$previous = $GLOBALS['wp_the_query'];
 
 		$GLOBALS['wp_the_query'] = $query;
-		Traktivity_Templates::order_show_archive( $query );
+		Traktivity_Templates::shape_archive_query( $query );
 		$GLOBALS['wp_the_query'] = $previous;
 
 		$this->assertSame( 'ASC', $query->get( 'order' ) );
@@ -256,10 +256,77 @@ class BlockTemplatesTest extends WP_UnitTestCase {
 		$previous = $GLOBALS['wp_the_query'];
 
 		$GLOBALS['wp_the_query'] = $query;
-		Traktivity_Templates::order_show_archive( $query );
+		Traktivity_Templates::shape_archive_query( $query );
 		$GLOBALS['wp_the_query'] = $previous;
 
 		$this->assertSame( '', $query->get( 'order' ) );
+	}
+
+	/**
+	 * Our archives show the number of entries their markup declares.
+	 *
+	 * A Query Loop with inherit set takes its page size from the main query,
+	 * so the perPage in the template is ignored and the site's "Blog pages
+	 * show at most" wins. At the default of ten that leaves a four-column grid
+	 * two and a half rows tall.
+	 */
+	public function test_archive_page_size_follows_the_template() {
+		$this->enable( array( 'archive-traktivity_event', 'taxonomy-trakt_show' ) );
+
+		$archive             = new WP_Query();
+		$archive->is_archive = true;
+		$archive->set( 'post_type', 'traktivity_event' );
+		$archive->is_post_type_archive = true;
+
+		$previous                = $GLOBALS['wp_the_query'];
+		$GLOBALS['wp_the_query'] = $archive;
+		Traktivity_Templates::shape_archive_query( $archive );
+
+		$series                  = $this->series_archive_query( 'paged-series' );
+		$GLOBALS['wp_the_query'] = $series;
+		Traktivity_Templates::shape_archive_query( $series );
+		$GLOBALS['wp_the_query'] = $previous;
+
+		$this->assertSame( 24, $archive->get( 'posts_per_page' ) );
+		$this->assertSame( 48, $series->get( 'posts_per_page' ) );
+	}
+
+	/**
+	 * The page size is filterable, so a site can hand control back to itself.
+	 */
+	public function test_archive_page_size_is_filterable() {
+		$this->enable( array( 'archive-traktivity_event' ) );
+
+		add_filter( 'traktivity_archive_posts_per_page', static fn() => 5 );
+
+		$archive                       = new WP_Query();
+		$archive->is_archive           = true;
+		$archive->is_post_type_archive = true;
+		$archive->set( 'post_type', 'traktivity_event' );
+
+		$previous                = $GLOBALS['wp_the_query'];
+		$GLOBALS['wp_the_query'] = $archive;
+		Traktivity_Templates::shape_archive_query( $archive );
+		$GLOBALS['wp_the_query'] = $previous;
+
+		$this->assertSame( 5, $archive->get( 'posts_per_page' ) );
+	}
+
+	/**
+	 * An archive whose template is off keeps the site's own page size.
+	 */
+	public function test_page_size_untouched_when_the_template_is_off() {
+		$archive                       = new WP_Query();
+		$archive->is_archive           = true;
+		$archive->is_post_type_archive = true;
+		$archive->set( 'post_type', 'traktivity_event' );
+
+		$previous                = $GLOBALS['wp_the_query'];
+		$GLOBALS['wp_the_query'] = $archive;
+		Traktivity_Templates::shape_archive_query( $archive );
+		$GLOBALS['wp_the_query'] = $previous;
+
+		$this->assertSame( '', $archive->get( 'posts_per_page' ) );
 	}
 
 	/**
@@ -279,6 +346,6 @@ class BlockTemplatesTest extends WP_UnitTestCase {
 	 */
 	public function test_registration_is_hooked() {
 		$this->assertNotFalse( has_action( 'init', array( 'Traktivity_Templates', 'register_templates' ) ) );
-		$this->assertNotFalse( has_action( 'pre_get_posts', array( 'Traktivity_Templates', 'order_show_archive' ) ) );
+		$this->assertNotFalse( has_action( 'pre_get_posts', array( 'Traktivity_Templates', 'shape_archive_query' ) ) );
 	}
 }

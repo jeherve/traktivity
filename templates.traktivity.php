@@ -42,7 +42,7 @@ class Traktivity_Templates {
 	public static function init(): void {
 		add_action( 'init', array( __CLASS__, 'register_templates' ), 20 );
 		add_filter( 'get_block_template', array( __CLASS__, 'provide_template_part' ), 10, 3 );
-		add_action( 'pre_get_posts', array( __CLASS__, 'order_show_archive' ) );
+		add_action( 'pre_get_posts', array( __CLASS__, 'shape_archive_query' ) );
 	}
 
 	/**
@@ -200,37 +200,87 @@ class Traktivity_Templates {
 	}
 
 	/**
-	 * Read a single series' archive oldest first.
+	 * Shape the archive queries our templates inherit.
 	 *
-	 * A series is a run, watched in order, so newest-first is simply the wrong
-	 * way round for it. Only applied while our own series template is in use,
-	 * since a theme's template is entitled to its own ordering.
+	 * Two things the templates cannot do for themselves.
+	 *
+	 * A Query Loop with `inherit` set takes its page size from the main query,
+	 * which means from the site's "Blog pages show at most" setting rather than
+	 * from the `perPage` in the template. At the default of ten that leaves a
+	 * four-column grid two and a half rows tall, so the number the template
+	 * declares is set here instead of being quietly ignored.
+	 *
+	 * And a single series reads oldest first, because a series is a run watched
+	 * in order and newest-first is the wrong way round for it.
+	 *
+	 * Both apply only while our own template is in use. A theme's template is
+	 * entitled to its own ordering and its own page size.
 	 *
 	 * @since 3.1.0
 	 *
 	 * @param WP_Query $query The query about to run.
 	 */
-	public static function order_show_archive( $query ): void {
-		if (
-			! $query instanceof WP_Query
-			|| is_admin()
-			|| ! $query->is_main_query()
-			|| ! $query->is_tax( 'trakt_show' )
-			|| ! self::is_enabled( 'taxonomy-trakt_show' )
-		) {
+	public static function shape_archive_query( $query ): void {
+		if ( ! $query instanceof WP_Query || is_admin() || ! $query->is_main_query() ) {
 			return;
 		}
 
+		if ( $query->is_tax( 'trakt_show' ) && self::is_enabled( 'taxonomy-trakt_show' ) ) {
+			/**
+			 * Filter the order a single series' archive reads in.
+			 *
+			 * @since 3.1.0
+			 *
+			 * @param string $order Either ASC or DESC. Defaults to ASC.
+			 */
+			$order = (string) apply_filters( 'traktivity_show_archive_order', 'ASC' );
+
+			$query->set( 'order', 'DESC' === strtoupper( $order ) ? 'DESC' : 'ASC' );
+			$query->set( 'posts_per_page', self::posts_per_page( 'taxonomy-trakt_show', 48 ) );
+
+			return;
+		}
+
+		if ( $query->is_post_type_archive( 'traktivity_event' ) && self::is_enabled( 'archive-traktivity_event' ) ) {
+			$query->set( 'posts_per_page', self::posts_per_page( 'archive-traktivity_event', 24 ) );
+
+			return;
+		}
+
+		foreach ( array( 'trakt_genre', 'trakt_year', 'trakt_type' ) as $taxonomy ) {
+			if ( $query->is_tax( $taxonomy ) && self::is_enabled( 'taxonomy-' . $taxonomy ) ) {
+				$query->set( 'posts_per_page', self::posts_per_page( 'taxonomy-' . $taxonomy, 24 ) );
+
+				return;
+			}
+		}
+	}
+
+	/**
+	 * How many entries one of our archives shows per page.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param string $slug    Template slug the number belongs to.
+	 * @param int    $default_count What the template's own markup declares.
+	 *
+	 * @return int Entries per page.
+	 */
+	private static function posts_per_page( string $slug, int $default_count ): int {
 		/**
-		 * Filter the order a single series' archive reads in.
+		 * Filter how many entries one of Traktivity's archives shows per page.
+		 *
+		 * Return the site's own setting to hand control back to it:
+		 * `get_option( 'posts_per_page' )`.
 		 *
 		 * @since 3.1.0
 		 *
-		 * @param string $order Either ASC or DESC. Defaults to ASC.
+		 * @param int    $default_count Entries per page.
+		 * @param string $slug          Template slug.
 		 */
-		$order = (string) apply_filters( 'traktivity_show_archive_order', 'ASC' );
+		$number = (int) apply_filters( 'traktivity_archive_posts_per_page', $default_count, $slug );
 
-		$query->set( 'order', 'DESC' === strtoupper( $order ) ? 'DESC' : 'ASC' );
+		return $number > 0 ? $number : $default_count;
 	}
 
 	/**
