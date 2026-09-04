@@ -1,0 +1,48 @@
+/**
+ * Watch Stats.
+ *
+ * Two layouts, because this has to work as a full-width band on a homepage and
+ * as a narrow list in a sidebar.
+ */
+
+.traktivity-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--style--block-gap, 1.5em);
+}
+
+.traktivity-stats--row {
+	flex-direction: row;
+}
+
+.traktivity-stats--stack {
+	flex-direction: column;
+}
+
+.traktivity-stats__cell {
+	display: flex;
+	flex-direction: column;
+}
+
+.traktivity-stats--row .traktivity-stats__cell {
+	flex: 1 1 auto;
+}
+
+.traktivity-stats--stack .traktivity-stats__cell {
+	align-items: baseline;
+	flex-direction: row;
+	gap: 0.5em;
+	justify-content: space-between;
+}
+
+.traktivity-stats__value {
+	font-size: var(--wp--preset--font-size--x-large, 2rem);
+	line-height: 1.1;
+}
+
+.traktivity-stats__label {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	letter-spacing: 0.08em;
+	opacity: 0.7;
+	text-transform: uppercase;
+}
