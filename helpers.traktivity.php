@@ -54,12 +54,34 @@ function traktivity_empty_event_context(): array {
 }
 
 /**
+ * Read the first term attached to a post in a taxonomy.
+ *
+ * Every one of these taxonomies is many-to-many in the database, but the sync
+ * only ever attaches one show, one season and one episode to an event, so the
+ * first term is the term.
+ *
+ * @since 3.1.0
+ *
+ * @param int    $post_id  Post ID.
+ * @param string $taxonomy Taxonomy name.
+ *
+ * @return WP_Term|null First term, or null when there is none.
+ */
+function traktivity_first_term( int $post_id, string $taxonomy ) {
+	$terms = get_the_terms( $post_id, $taxonomy );
+
+	if ( is_wp_error( $terms ) || empty( $terms ) ) {
+		return null;
+	}
+
+	return $terms[0];
+}
+
+/**
  * Collect everything needed to describe one watch event.
  *
  * `type` is either 'tv' or 'movie'. `episode_code` is a composed 'S3E2' for
  * TV events that carry both numbers, and an empty string otherwise.
- *
- * Not yet implemented: returns the empty shape. See issue #684.
  *
  * @since 3.1.0
  *
@@ -68,9 +90,70 @@ function traktivity_empty_event_context(): array {
  * @return array Event context, in the shape of traktivity_empty_event_context().
  */
 function traktivity_get_event( int $post_id ): array {
-	unset( $post_id );
+	$context = traktivity_empty_event_context();
 
-	return traktivity_empty_event_context();
+	if ( $post_id < 1 || 'traktivity_event' !== get_post_type( $post_id ) ) {
+		return $context;
+	}
+
+	/*
+	 * Type comes from the meta rather than the trakt_type term. The sync names
+	 * that term with a translated string, so its slug is 'movie' on an English
+	 * site and something else entirely on a French one. The ID meta keys are
+	 * the same in every language.
+	 */
+	$is_movie = '' !== (string) get_post_meta( $post_id, 'trakt_movie_id', true );
+
+	$permalink = get_permalink( $post_id );
+	$year      = traktivity_first_term( $post_id, 'trakt_year' );
+
+	$context['type']        = $is_movie ? 'movie' : 'tv';
+	$context['title']       = (string) get_the_title( $post_id );
+	$context['permalink']   = is_string( $permalink ) ? $permalink : '';
+	$context['watched']     = (string) get_the_date( '', $post_id );
+	$context['watched_iso'] = (string) get_the_date( 'c', $post_id );
+	$context['runtime']     = (int) get_post_meta( $post_id, 'trakt_runtime', true );
+	$context['year']        = null === $year ? '' : $year->name;
+	$context['image_id']    = (int) get_post_thumbnail_id( $post_id );
+
+	if ( ! $is_movie ) {
+		$show = traktivity_first_term( $post_id, 'trakt_show' );
+
+		if ( null !== $show ) {
+			$show_link = get_term_link( $show );
+
+			$context['show_name'] = $show->name;
+			$context['show_link'] = is_wp_error( $show_link ) ? '' : $show_link;
+		}
+
+		$season  = traktivity_first_term( $post_id, 'trakt_season' );
+		$episode = traktivity_first_term( $post_id, 'trakt_episode' );
+
+		$context['season']  = null === $season ? 0 : (int) $season->name;
+		$context['episode'] = null === $episode ? 0 : (int) $episode->name;
+
+		/*
+		 * Both terms have to be there, rather than both being above zero.
+		 * Season 0 is where a show's specials live, so 'S0E5' is a real
+		 * episode code and testing for a positive number would drop it.
+		 */
+		if ( null !== $season && null !== $episode ) {
+			$context['episode_code'] = sprintf( 'S%dE%d', $context['season'], $context['episode'] );
+		}
+	}
+
+	/**
+	 * Filter the context describing a single watch event.
+	 *
+	 * Keys documented in traktivity_empty_event_context() are relied on by the
+	 * plugin's own blocks, so add to the array rather than removing from it.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param array $context Event context.
+	 * @param int   $post_id Event post ID.
+	 */
+	return (array) apply_filters( 'traktivity_event_context', $context, $post_id );
 }
 
 /**
