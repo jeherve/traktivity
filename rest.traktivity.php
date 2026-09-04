@@ -369,6 +369,17 @@ class Traktivity_Api {
 			);
 		}
 
+		/*
+		 * Someone asking for a synchronization is a fresh start, so clear the
+		 * count of requests that failed in a row. A sync that gave up because
+		 * Trakt.tv kept refusing it would otherwise carry that tally into this
+		 * attempt and stop again on the first hiccup.
+		 */
+		if ( isset( $options['full_sync']['failures'] ) ) {
+			unset( $options['full_sync']['failures'] );
+			update_option( 'traktivity', $options );
+		}
+
 		// Return an error if Synchronization is currently in progress. Let's let it finish.
 		if (
 			isset( $options['full_sync'], $options['full_sync']['status'] )

@@ -35,6 +35,84 @@ class PluginTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A site that last ran a version whose full sync only ever imported part
+	 * of the history gets that sync's status cleared, so the dashboard offers
+	 * to run it again rather than reporting a partial import as complete.
+	 */
+	public function test_upgrade_clears_a_full_sync_status_from_before_3_0_1() {
+		update_option(
+			'traktivity',
+			array(
+				'username'  => 'jeherve',
+				'full_sync' => array(
+					'status' => 'done',
+					'pages'  => 0,
+				),
+			)
+		);
+
+		Traktivity::get_instance()->maybe_upgrade();
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertArrayNotHasKey( 'status', $options['full_sync'] );
+		$this->assertArrayNotHasKey( 'pages', $options['full_sync'] );
+		$this->assertSame( 'jeherve', $options['username'], 'The rest of the settings should be left alone.' );
+		$this->assertSame( TRAKTIVITY__VERSION, $options['version'] );
+	}
+
+	/**
+	 * The same option tracks the separate recalculation of each show's total
+	 * runtime. That one was never broken, so clearing the history sync has to
+	 * leave it be, or finished work gets reported as never run.
+	 */
+	public function test_upgrade_keeps_the_total_runtime_status() {
+		update_option(
+			'traktivity',
+			array(
+				'full_sync' => array(
+					'status'  => 'done',
+					'pages'   => 0,
+					'runtime' => array(
+						'status' => 'done',
+						'items'  => 0,
+					),
+				),
+			)
+		);
+
+		Traktivity::get_instance()->maybe_upgrade();
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertSame( 'done', $options['full_sync']['runtime']['status'] );
+		$this->assertArrayNotHasKey( 'status', $options['full_sync'], 'The history sync status should still be cleared.' );
+	}
+
+	/**
+	 * Having run the routine once, a plain page load leaves a sync that is
+	 * genuinely finished alone.
+	 */
+	public function test_upgrade_leaves_a_current_install_alone() {
+		update_option(
+			'traktivity',
+			array(
+				'version'   => TRAKTIVITY__VERSION,
+				'full_sync' => array(
+					'status' => 'done',
+					'pages'  => 0,
+				),
+			)
+		);
+
+		Traktivity::get_instance()->maybe_upgrade();
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertSame( 'done', $options['full_sync']['status'] );
+	}
+
+	/**
 	 * Events are exposed to the REST API, which the dashboard's recent list
 	 * reads through /wp/v2/traktivity_event.
 	 */

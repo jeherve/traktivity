@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Movies, Log
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -70,6 +70,13 @@ There is more discussion in [issue #678](https://github.com/jeherve/traktivity/i
 Needs WordPress 7.0 and PHP 7.4.
 
 == Changelog ==
+
+= 3.0.1 =
+Release date: September 3, 2026
+
+* Fix a full synchronization importing only the most recent tenth of your Trakt.tv history, after Trakt.tv changed their API to return 100 results per page by default instead of the documented 10.
+* Run a full synchronization in batches that resume, so a long history finishes instead of starting over when a run is cut short.
+* Let sites that already ran a full synchronization run one again after updating, to pick up the skipped events. Events already imported are left alone.
 
 = 3.0.0 =
 Release date: September 2, 2026

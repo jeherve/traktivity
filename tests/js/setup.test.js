@@ -80,7 +80,15 @@ describe( 'Setup', () => {
 	} );
 
 	it( 'resumes an interrupted sync on load', async () => {
-		resetSettings( { step: '5', syncPages: '4' } );
+		/*
+		 * Pages left are only ever recorded alongside an in-progress status, so
+		 * that is what a sync cut short actually looks like on disk.
+		 */
+		resetSettings( {
+			step: '5',
+			syncStatus: 'in_progress',
+			syncPages: '4',
+		} );
 
 		render( <Setup /> );
 

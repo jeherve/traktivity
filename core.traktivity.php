@@ -17,11 +17,75 @@ defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 class Traktivity_Calls {
 
 	/**
+	 * Number of events requested per page during a full sync.
+	 *
+	 * Trakt.tv reports how many pages of history exist for the page size the
+	 * request asked for, so the page count and the pages we then walk have to
+	 * use this same value. Asking for the count at one size and walking pages
+	 * at another means the count describes pages we never fetch, and the sync
+	 * quietly imports a fraction of the history.
+	 *
+	 * 100 is what Trakt.tv falls back to when a request leaves the page size
+	 * out. Their maximum is 250, and a larger limit is silently clamped to it
+	 * rather than refused, so asking for more would not buy anything.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @var int
+	 */
+	private const SYNC_PAGE_SIZE = 100;
+
+	/**
+	 * Number of pages a single full sync run works through before handing off
+	 * to the next one.
+	 *
+	 * A large history takes far longer than any one request is allowed to live,
+	 * and every event costs a themoviedb.org lookup on top of the post insert.
+	 * Stopping at a batch boundary and queueing the next run keeps each run
+	 * short enough to finish.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @var int
+	 */
+	private const SYNC_PAGES_PER_RUN = 10;
+
+	/**
+	 * Times in a row a full sync will ask again after a request it could not
+	 * read, before it gives up and waits to be started by hand.
+	 *
+	 * Every failed request arrives the same way, so a key that has been revoked
+	 * or a username that no longer exists is indistinguishable from a timeout.
+	 * Without a ceiling, the one that is never going to succeed would have the
+	 * site asking Trakt.tv once a minute for as long as it stayed wrong.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @var int
+	 */
+	private const SYNC_MAX_ATTEMPTS = 5;
+
+	/**
+	 * How long a sync can go without recording progress before the hourly
+	 * check treats it as stalled and puts it back on the schedule.
+	 *
+	 * WordPress clears a single event before running its callback, so a run
+	 * that dies part way through, on a fatal error or a worker being cut off,
+	 * leaves a sync in progress with nothing queued to carry it on. Long enough
+	 * that a run still working is never mistaken for a dead one.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @var int
+	 */
+	private const SYNC_STALLED_AFTER = 15 * MINUTE_IN_SECONDS;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
 		// Check for new events and publish them every hour.
-		add_action( 'traktivity_publish', array( $this, 'publish_event' ) );
+		add_action( 'traktivity_publish', array( $this, 'publish_latest_events' ) );
 		if ( ! wp_next_scheduled( 'traktivity_publish' ) ) {
 			wp_schedule_event( time(), 'hourly', 'traktivity_publish' );
 		}
@@ -145,7 +209,19 @@ class Traktivity_Calls {
 		}
 
 		if ( true === $test ) {
-			return (int) wp_remote_retrieve_header( $data, 'X-Pagination-Page-Count' );
+			$page_count = wp_remote_retrieve_header( $data, 'X-Pagination-Page-Count' );
+
+			/*
+			 * Trakt.tv sends this on every paginated response. Without it there
+			 * is no telling an account with nothing watched from a response we
+			 * cannot make sense of, and reading it as zero would end a sync as
+			 * complete with the history still sitting on Trakt.tv.
+			 */
+			if ( ! is_numeric( $page_count ) ) {
+				return null;
+			}
+
+			return (int) $page_count;
 		}
 
 		$response_body = json_decode( $data['body'] );
@@ -393,6 +469,10 @@ class Traktivity_Calls {
 	 *  @int int page  Number of page of results to be returned. Accepts integers.
 	 *  @int int limit Number of results to return per page. Accepts integers.
 	 * }
+	 *
+	 * @return bool Whether Trakt.tv returned a page of events. False means the
+	 *              request failed and nothing was read, which a caller walking
+	 *              the history has to tell apart from a page that held nothing.
 	 */
 	public function publish_event( $args = array() ) {
 		// Avoid timeouts during the data import process.
@@ -400,10 +480,16 @@ class Traktivity_Calls {
 
 		$trakt_events = $this->get_trakt_activity( $args, false );
 
+		/*
+		 * Whether Trakt.tv answered with a page at all. A caller walking the
+		 * history needs to tell that apart from a page that held no events.
+		 */
+		$fetched = is_array( $trakt_events );
+
 		/**
 		 * Only go through the event list if we have valid event array.
 		 */
-		if ( isset( $trakt_events ) && is_array( $trakt_events ) ) {
+		if ( $fetched ) {
 			foreach ( $trakt_events as $event ) {
 				// Avoid errors when no type is attached to the event.
 				if ( ! isset( $event->type ) ) {
@@ -676,6 +762,58 @@ class Traktivity_Calls {
 				} // End loop for each taxonomy that was created.
 			} // End loop for each event.
 		} // End check for valid array of events.
+
+		return $fetched;
+	}
+
+	/**
+	 * Look for new events on the hourly schedule.
+	 *
+	 * Whether Trakt.tv answered is reported by publish_event(), and an action
+	 * callback is not supposed to return anything, so the hook comes here.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @return void This is an action callback; WordPress discards any return value.
+	 */
+	public function publish_latest_events() {
+		$this->publish_event();
+
+		$this->resume_a_stalled_sync();
+	}
+
+	/**
+	 * Put a sync that stopped without finishing back on the schedule.
+	 *
+	 * A run cut off part way through leaves its progress recorded but nothing
+	 * queued to carry on from it, and the dashboard only picks one up when
+	 * somebody opens it. Ride along with the hourly check for new events so a
+	 * sync gets going again on its own.
+	 *
+	 * @since 3.0.1
+	 */
+	private function resume_a_stalled_sync() {
+		$status = $this->get_option( 'full_sync' );
+
+		if (
+			! is_array( $status )
+			|| ! isset( $status['status'] )
+			|| 'in_progress' !== $status['status']
+		) {
+			return;
+		}
+
+		/*
+		 * Still making progress, so there is a run working through the history
+		 * right now and a second one would only duplicate its requests.
+		 */
+		$updated = isset( $status['updated'] ) ? (int) $status['updated'] : 0;
+
+		if ( $updated > time() - self::SYNC_STALLED_AFTER ) {
+			return;
+		}
+
+		$this->schedule_next_run();
 	}
 
 	/**
@@ -839,11 +977,73 @@ class Traktivity_Calls {
 		}
 
 		// We're done. Save options.
-		$status['runtime'] = array(
-			'status' => 'done',
-			'items'  => 0,
+		$this->update_sync_status(
+			array(
+				'runtime' => array(
+					'status' => 'done',
+					'items'  => 0,
+				),
+			)
 		);
-		$this->update_option( 'full_sync', $status );
+	}
+
+	/**
+	 * Change some of the stored synchronization status, leaving the rest.
+	 *
+	 * The history sync and the recalculation of each show's total runtime both
+	 * keep their state in the 'full_sync' option, and each runs on its own cron
+	 * event, so the two can overlap. Writing back a copy of the option taken at
+	 * the start of a run would put back whatever the other job had recorded
+	 * since, rolling its progress backwards or dropping its completion. Read
+	 * the option again and change only the fields the caller owns.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @param array $fields Status fields to set.
+	 */
+	private function update_sync_status( $fields ) {
+		$status = $this->get_option( 'full_sync' );
+
+		if ( ! is_array( $status ) ) {
+			$status = array();
+		}
+
+		$this->update_option( 'full_sync', array_merge( $status, $fields ) );
+	}
+
+	/**
+	 * Queue the run that carries on from where this one stopped.
+	 *
+	 * @since 3.0.1
+	 */
+	private function schedule_next_run() {
+		if ( ! wp_next_scheduled( 'traktivity_full_sync' ) ) {
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'traktivity_full_sync' );
+		}
+	}
+
+	/**
+	 * Record a request we could not read, and ask again unless this has been
+	 * going on long enough to look permanent.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @param int $failures Requests already failed in a row before this one.
+	 */
+	private function note_failure_and_retry( $failures ) {
+		$failures = (int) $failures + 1;
+
+		$this->update_sync_status( array( 'failures' => $failures ) );
+
+		/*
+		 * Out of attempts. Leave the status where it is so the dashboard can
+		 * start the sync again, and stop asking in the meantime.
+		 */
+		if ( $failures >= self::SYNC_MAX_ATTEMPTS ) {
+			return;
+		}
+
+		$this->schedule_next_run();
 	}
 
 	/**
@@ -876,31 +1076,61 @@ class Traktivity_Calls {
 			return;
 		}
 
+		$failures = isset( $status['failures'] ) ? (int) $status['failures'] : 0;
+
 		/**
 		 * If we have no page count yet, that means we never ran sync before.
 		 * Let's get started by changing the status to 'in_progress', and get some data.
 		 */
 		if ( ! isset( $status['pages'] ) ) {
-			$pages = (int) $this->get_trakt_activity( array(), true );
+			$pages = $this->get_trakt_activity( array( 'limit' => self::SYNC_PAGE_SIZE ), true );
 
 			/*
-			 * Trakt.tv reports how many pages of history there are, and the loop
-			 * below counts that number down. A failed request reports nothing,
-			 * and a count of zero counts down without ever reaching zero again.
-			 *
-			 * Stop without saving anything, so the next run asks Trakt.tv for
-			 * the count again rather than being left in progress with no pages
-			 * to fetch.
+			 * The request failed. Save nothing, so the next run asks Trakt.tv
+			 * for the count again rather than sitting in progress with no
+			 * pages to fetch, and queue that run: this one came from a
+			 * single cron event, and with no status saved the dashboard has
+			 * nothing to resume from either.
 			 */
-			if ( $pages < 1 ) {
+			if ( null === $pages ) {
+				$this->note_failure_and_retry( $failures );
+
 				return;
 			}
 
-			$status['status'] = 'in_progress';
-			$status['pages']  = $pages;
+			$pages = (int) $pages;
+
+			/*
+			 * An account with nothing watched yet reports no pages. There is
+			 * nothing to walk, so record the sync as finished instead of
+			 * asking again on every run for a history that does not exist.
+			 */
+			if ( $pages < 1 ) {
+				$this->update_sync_status(
+					array(
+						'status' => 'done',
+						'pages'  => 0,
+					)
+				);
+
+				return;
+			}
+
+			// Where the loop below starts from on this first run.
+			$status['pages'] = $pages;
 
 			// Update our option.
-			$this->update_option( 'full_sync', $status );
+			$this->update_sync_status(
+				array(
+					'status'   => 'in_progress',
+					'pages'    => $pages,
+					'failures' => 0,
+					'updated'  => time(),
+				)
+			);
+
+			// That request worked, so whatever failed before it is behind us.
+			$failures = 0;
 		}
 
 		// Set WP_IMPORTING to avoid triggering things like subscription emails.
@@ -908,19 +1138,59 @@ class Traktivity_Calls {
 		defined( 'WP_IMPORTING' ) || define( 'WP_IMPORTING', true );
 
 		// let's start looping, from the last page back to the first.
+		$processed = 0;
+
 		for ( $page = (int) $status['pages']; $page > 0; $page-- ) {
-			$this->publish_event(
+			$fetched = $this->publish_event(
 				array(
 					'page'  => $page,
-					'limit' => 10,
+					'limit' => self::SYNC_PAGE_SIZE,
 				)
 			);
+
+			/*
+			 * Trakt.tv did not hand that page over, so leave the count where it
+			 * is and come back to the same page. Stepping over it would drop up
+			 * to a page of events for good, and the sync would still finish and
+			 * report itself done.
+			 */
+			if ( ! $fetched ) {
+				$this->note_failure_and_retry( $failures );
+
+				return;
+			}
+
+			/*
+			 * Record what is left after every page. This runs on cron and can
+			 * be cut short at any point, so without saving as we go a run that
+			 * does not reach the end throws away everything it fetched, and the
+			 * next one starts the history over.
+			 */
+			$this->update_sync_status(
+				array(
+					'pages'    => $page - 1,
+					'failures' => 0,
+					'updated'  => time(),
+				)
+			);
+
+			$failures = 0;
+
+			// Enough for this run. Queue the next one to pick up the rest.
+			if ( ++$processed >= self::SYNC_PAGES_PER_RUN && $page > 1 ) {
+				$this->schedule_next_run();
+
+				return;
+			}
 		}
 
 		// We're done. Save options.
-		$status['status'] = 'done';
-		$status['pages']  = 0;
-		$this->update_option( 'full_sync', $status );
+		$this->update_sync_status(
+			array(
+				'status' => 'done',
+				'pages'  => 0,
+			)
+		);
 	}
 }
 new Traktivity_Calls();
