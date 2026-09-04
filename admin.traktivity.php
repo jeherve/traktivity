@@ -136,6 +136,18 @@ function traktivity_dashboard_scripts( $hook ) {
 		 * into "3 days, 4 hours" needs _n() for each unit.
 		 */
 		'totalTimeWatched' => $summary['runtime'],
+
+		/*
+		 * Everything the display section needs. The stylesheet is here because
+		 * a Site Editor link has to name a template by its theme-namespaced ID,
+		 * and the block-theme flag because those links go nowhere useful
+		 * otherwise.
+		 */
+		'templates'        => Traktivity_Templates::for_settings(),
+		'isBlockTheme'     => wp_is_block_theme(),
+		'themeStylesheet'  => get_stylesheet(),
+		'siteEditorUrl'    => admin_url( 'site-editor.php' ),
+		'hasEvents'        => $summary['entries'] > 0,
 	);
 
 	/*

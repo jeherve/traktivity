@@ -105,6 +105,43 @@ class Traktivity_Api {
 		);
 
 		/**
+		 * Read which block templates and parts are switched on.
+		 *
+		 * @since 3.1.0
+		 */
+		register_rest_route(
+			'traktivity/v1',
+			'/templates',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_templates' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+			)
+		);
+
+		/**
+		 * Switch block templates and parts on or off.
+		 *
+		 * @since 3.1.0
+		 */
+		register_rest_route(
+			'traktivity/v1',
+			'/templates',
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'post_templates' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+				'args'                => array(
+					'enabled' => array(
+						'type'        => 'object',
+						'required'    => true,
+						'description' => __( 'Template slugs mapped to whether they are switched on.', 'traktivity' ),
+					),
+				),
+			)
+		);
+
+		/**
 		 * Traktivity Stats Info.
 		 *
 		 * @since 2.2.0
@@ -495,7 +532,63 @@ class Traktivity_Api {
 	}
 
 	/**
-	 * Get stats from the Stats option.
+	 * Read which block templates and parts are switched on.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return WP_REST_Response $response What the plugin can provide, and its state.
+	 */
+	public function get_templates( $request ) {
+		unset( $request );
+
+		return new WP_REST_Response(
+			array(
+				'templates'       => Traktivity_Templates::for_settings(),
+				'isBlockTheme'    => wp_is_block_theme(),
+				'themeStylesheet' => get_stylesheet(),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Switch block templates and parts on or off.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return WP_REST_Response $response The stored state.
+	 */
+	public function post_templates( $request ) {
+		$enabled = $request->get_param( 'enabled' );
+
+		if ( ! is_array( $enabled ) ) {
+			return new WP_REST_Response(
+				array(
+					'code'    => 400,
+					'message' => esc_html__( 'The list of templates was not readable.', 'traktivity' ),
+				),
+				400
+			);
+		}
+
+		/*
+		 * Unknown slugs are dropped rather than stored, so a stale key from an
+		 * older version cannot accumulate in the option.
+		 */
+		Traktivity_Templates::save_enabled( $enabled );
+
+		return new WP_REST_Response(
+			array( 'templates' => Traktivity_Templates::for_settings() ),
+			200
+		);
+	}
+
+	/**
+	 * Get Traktivity stats.
 	 *
 	 * @since 2.2.0
 	 *
