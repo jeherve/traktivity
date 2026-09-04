@@ -83,6 +83,34 @@ describe( 'Dashboard', () => {
 		).not.toBeInTheDocument();
 	} );
 
+	/*
+	 * launchSync() swallows a failed request without touching the sync status,
+	 * so a component that only ever sets its own pending flag would leave the
+	 * button stuck after one bad request, with no way back but a page reload.
+	 */
+	it( 'lets you try again when starting the import failed', async () => {
+		const user = userEvent.setup();
+
+		resetSettings();
+
+		const launchSync = jest.fn( () => Promise.resolve() );
+
+		render(
+			<Dashboard
+				sync={ { status: '', pages: 0, runtime: '' } }
+				launchSync={ launchSync }
+			/>
+		);
+
+		const button = screen.getByRole( 'button', {
+			name: 'Import past history',
+		} );
+
+		await user.click( button );
+
+		expect( button ).toBeEnabled();
+	} );
+
 	it( 'shows the import as running while one is under way', () => {
 		renderDashboard( { status: 'in_progress', pages: 4 } );
 

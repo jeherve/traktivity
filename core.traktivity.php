@@ -66,6 +66,21 @@ class Traktivity_Calls {
 	private const SYNC_MAX_ATTEMPTS = 5;
 
 	/**
+	 * How long a sync can go without recording progress before the hourly
+	 * check treats it as stalled and puts it back on the schedule.
+	 *
+	 * WordPress clears a single event before running its callback, so a run
+	 * that dies part way through, on a fatal error or a worker being cut off,
+	 * leaves a sync in progress with nothing queued to carry it on. Long enough
+	 * that a run still working is never mistaken for a dead one.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @var int
+	 */
+	private const SYNC_STALLED_AFTER = 15 * MINUTE_IN_SECONDS;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -763,6 +778,42 @@ class Traktivity_Calls {
 	 */
 	public function publish_latest_events() {
 		$this->publish_event();
+
+		$this->resume_a_stalled_sync();
+	}
+
+	/**
+	 * Put a sync that stopped without finishing back on the schedule.
+	 *
+	 * A run cut off part way through leaves its progress recorded but nothing
+	 * queued to carry on from it, and the dashboard only picks one up when
+	 * somebody opens it. Ride along with the hourly check for new events so a
+	 * sync gets going again on its own.
+	 *
+	 * @since 3.0.1
+	 */
+	private function resume_a_stalled_sync() {
+		$status = $this->get_option( 'full_sync' );
+
+		if (
+			! is_array( $status )
+			|| ! isset( $status['status'] )
+			|| 'in_progress' !== $status['status']
+		) {
+			return;
+		}
+
+		/*
+		 * Still making progress, so there is a run working through the history
+		 * right now and a second one would only duplicate its requests.
+		 */
+		$updated = isset( $status['updated'] ) ? (int) $status['updated'] : 0;
+
+		if ( $updated > time() - self::SYNC_STALLED_AFTER ) {
+			return;
+		}
+
+		$this->schedule_next_run();
 	}
 
 	/**
@@ -1074,8 +1125,12 @@ class Traktivity_Calls {
 					'status'   => 'in_progress',
 					'pages'    => $pages,
 					'failures' => 0,
+					'updated'  => time(),
 				)
 			);
+
+			// That request worked, so whatever failed before it is behind us.
+			$failures = 0;
 		}
 
 		// Set WP_IMPORTING to avoid triggering things like subscription emails.
@@ -1115,6 +1170,7 @@ class Traktivity_Calls {
 				array(
 					'pages'    => $page - 1,
 					'failures' => 0,
+					'updated'  => time(),
 				)
 			);
 

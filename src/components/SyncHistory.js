@@ -51,7 +51,17 @@ export default function SyncHistory( { sync, launchHistorySync } ) {
 					isBusy={ running }
 					onClick={ () => {
 						setLaunched( true );
-						launchHistorySync();
+
+						/*
+						 * Let go of the pending flag either way. A request that
+						 * fails leaves the sync status untouched, so holding on
+						 * to it would keep the button stuck with nothing to
+						 * clear it but a page reload. One that works reports a
+						 * status, and that is what keeps the button disabled.
+						 */
+						Promise.resolve( launchHistorySync() ).finally( () =>
+							setLaunched( false )
+						);
 					} }
 				>
 					{ __( 'Import past history', 'traktivity' ) }

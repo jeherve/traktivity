@@ -31,6 +31,13 @@ class FullSyncTest extends WP_UnitTestCase {
 	private const TRAKT_DEFAULT_LIMIT = 100;
 
 	/**
+	 * Mirrors the plugin's own ceiling on requests failed in a row.
+	 *
+	 * @var int
+	 */
+	private const MAX_ATTEMPTS = 5;
+
+	/**
 	 * Every history request the sync made, as `array( page, limit )` pairs.
 	 *
 	 * @var array<int, array{page: int|null, limit: int}>
@@ -548,6 +555,94 @@ class FullSyncTest extends WP_UnitTestCase {
 
 		$this->assertArrayNotHasKey( 'failures', $options['full_sync'] );
 		$this->assertSame( 4, $options['full_sync']['pages'], 'Progress so far should be left alone.' );
+	}
+
+	/**
+	 * Failures are counted per run of bad luck, not for the life of the sync.
+	 *
+	 * The count that matters is how many requests failed in a row. A page count
+	 * that comes good ends the previous streak, so a page failing right after
+	 * it starts a new one rather than inheriting attempts already spent.
+	 */
+	public function test_a_page_count_that_succeeds_ends_the_previous_streak() {
+		update_option(
+			'traktivity',
+			array(
+				'username'  => 'jeherve',
+				'api_key'   => 'test-key',
+				'full_sync' => array( 'failures' => self::MAX_ATTEMPTS - 1 ),
+			)
+		);
+
+		// The count works, then the very first page does not.
+		$this->failing_page = (int) ceil( self::HISTORY_SIZE / 100 );
+
+		do_action( 'traktivity_full_sync' );
+
+		$options = get_option( 'traktivity' );
+
+		$this->assertSame(
+			1,
+			$options['full_sync']['failures'],
+			'The failed page should have started a new streak, not continued the old one.'
+		);
+		$this->assertNotFalse(
+			wp_next_scheduled( 'traktivity_full_sync' ),
+			'With attempts left, the sync should have queued another run.'
+		);
+	}
+
+	/**
+	 * A run killed part way through gets picked back up on its own.
+	 *
+	 * WordPress clears a single event before running it, so a run that dies
+	 * mid-batch leaves a sync in progress with nothing queued to carry it on.
+	 * The hourly check for new events notices and puts it back on the schedule,
+	 * rather than leaving it until someone opens the dashboard.
+	 */
+	public function test_the_hourly_check_picks_up_a_sync_that_stalled() {
+		update_option(
+			'traktivity',
+			array(
+				'username'  => 'jeherve',
+				'api_key'   => 'test-key',
+				'full_sync' => array(
+					'status'  => 'in_progress',
+					'pages'   => 6,
+					'updated' => time() - HOUR_IN_SECONDS,
+				),
+			)
+		);
+
+		do_action( 'traktivity_publish' );
+
+		$this->assertNotFalse(
+			wp_next_scheduled( 'traktivity_full_sync' ),
+			'A sync left in progress with nothing queued should have been picked back up.'
+		);
+	}
+
+	/**
+	 * A sync that is simply still working is left alone, so the hourly check
+	 * does not put a second run alongside one already going.
+	 */
+	public function test_the_hourly_check_leaves_a_working_sync_alone() {
+		update_option(
+			'traktivity',
+			array(
+				'username'  => 'jeherve',
+				'api_key'   => 'test-key',
+				'full_sync' => array(
+					'status'  => 'in_progress',
+					'pages'   => 6,
+					'updated' => time(),
+				),
+			)
+		);
+
+		do_action( 'traktivity_publish' );
+
+		$this->assertFalse( wp_next_scheduled( 'traktivity_full_sync' ) );
 	}
 
 	/**
