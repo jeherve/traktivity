@@ -1,7 +1,7 @@
 === Traktivity ===
 Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Movies, Log
-Stable tag: 3.0.1
+Stable tag: 3.1.0
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -15,7 +15,7 @@ This plugin allows you to log your watched TV series on Trakt.tv.
 
 **You need a Trakt.tv VIP account to set this up.** The plugin reads your watch history through the Trakt.tv API, and since the middle of 2026 only VIP accounts can create the API application that key comes from. If you already had a key before that change, it should keep working. See the FAQ below for the details. :(
 
-Right now it only logs data. In the next version you will get ways to display that data on your site.
+Since 3.1.0 it also gives you ways to show that data. Seven blocks, default templates for your entries and archives, and a handful of editable parts you can drop wherever you like. All of it is off until you switch it on, from Traktivity > Dashboard.
 
 **Questions, problems?**
 
@@ -66,10 +66,44 @@ There is more discussion in [issue #678](https://github.com/jeherve/traktivity/i
 
 == Upgrade Notice ==
 
+= 3.1.0 =
+Adds blocks and templates for showing your watch history. Nothing changes on your site until you switch them on.
+
 = 3.0.0 =
 Needs WordPress 7.0 and PHP 7.4.
 
 == Changelog ==
+
+= 3.1.0 =
+Release date: September 4, 2026
+
+Traktivity has always logged your watch history and done almost nothing with it. This release is about showing it.
+
+**Blocks**
+
+* Add seven blocks, grouped under Traktivity in the inserter: Event Card, Event Title, Event Details, Watch Stats, Top Series, Latest Watch and Series Header.
+* Event Card and Event Title put an episode's series name and season and episode numbers back into its title, so a listing reads as something other than a column of episode names.
+* Top Series orders your series by how many episodes you have logged, which a Query Loop cannot do. Set it to zero to get a full A to Z index instead.
+* Latest Watch prefers the most recent entry that actually has artwork, since TMDb does not have an image for everything.
+
+**Templates**
+
+* Add default block templates for a single entry, the full archive, a series, and the genre, year and type archives.
+* Add five editable template parts: recently watched, last watched, watch totals, a series index, and a compact list for a sidebar.
+* Everything is off until you switch it on, from Traktivity > Dashboard. Your own theme's templates always win.
+* Read a single series' archive oldest first, since a series is a run watched in order.
+
+**For developers**
+
+* Add accessors for reading a watch event, its title and its external links, and for reading what is stored against a series. See `helpers.traktivity.php`.
+* Add `Traktivity_Stats::get_summary()` for the headline totals.
+* Register the term meta stored against each series, so it appears in the REST API.
+
+**Fixes**
+
+* Recount the total time watched when an entry is deleted. It used to only ever be added to, so deleting an entry left the total too high with no way to correct it.
+* Attach a season term to specials, which land in season 0. Nothing has ever recorded a season for them. Entries synced before this update keep their missing season; re-syncing does not revisit them.
+* Show the episode details in the Recently Watched widget on sites not running in English, where they were silently dropped.
 
 = 3.0.1 =
 Release date: September 3, 2026

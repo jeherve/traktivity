@@ -4,7 +4,8 @@ Log your activity on Trakt.tv. The released plugin lives on
 [wordpress.org](https://wordpress.org/plugins/traktivity/); `readme.txt` is the
 copy that ships there.
 
-This file covers working on the plugin.
+This file covers working on the plugin. `AGENTS.md` covers the conventions a
+change has to follow, and `src/blocks/README.md` covers adding a block.
 
 ## Requirements
 
