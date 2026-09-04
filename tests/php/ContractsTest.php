@@ -204,7 +204,7 @@ class ContractsTest extends WP_UnitTestCase {
 	 * A stats summary always carries the full documented key set.
 	 */
 	public function test_stats_summary_shape() {
-		$expected = array( 'minutes', 'hours', 'runtime', 'entries', 'episodes', 'films', 'shows', 'since' );
+		$expected = array( 'minutes', 'hours', 'runtime', 'entries', 'episodes', 'films', 'shows', 'since', 'since_iso' );
 		$actual   = array_keys( Traktivity_Stats::get_summary() );
 
 		sort( $expected );
@@ -223,7 +223,7 @@ class ContractsTest extends WP_UnitTestCase {
 			$this->assertIsInt( $summary[ $key ], "Stats summary '{$key}' should be an integer." );
 		}
 
-		foreach ( array( 'runtime', 'since' ) as $key ) {
+		foreach ( array( 'runtime', 'since', 'since_iso' ) as $key ) {
 			$this->assertIsString( $summary[ $key ], "Stats summary '{$key}' should be a string." );
 		}
 	}

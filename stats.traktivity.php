@@ -127,36 +127,211 @@ class Traktivity_Stats {
 	 *
 	 * @return array{
 	 *     minutes: int, hours: int, runtime: string, entries: int,
-	 *     episodes: int, films: int, shows: int, since: string
+	 *     episodes: int, films: int, shows: int, since: string, since_iso: string
 	 * } Empty summary.
 	 */
 	public static function empty_summary() {
 		return array(
-			'minutes'  => 0,
-			'hours'    => 0,
-			'runtime'  => '',
-			'entries'  => 0,
-			'episodes' => 0,
-			'films'    => 0,
-			'shows'    => 0,
-			'since'    => '',
+			'minutes'   => 0,
+			'hours'     => 0,
+			'runtime'   => '',
+			'entries'   => 0,
+			'episodes'  => 0,
+			'films'     => 0,
+			'shows'     => 0,
+			'since'     => '',
+			'since_iso' => '',
 		);
+	}
+
+	/**
+	 * Name of the transient holding the cached summary.
+	 *
+	 * @var string
+	 */
+	const SUMMARY_TRANSIENT = 'traktivity_stats_summary';
+
+	/**
+	 * Whether the cache has already been dropped this request.
+	 *
+	 * A sync inserts hundreds of events in one request, each firing save_post.
+	 * Without this, every one of them would drop the cache and force the
+	 * running total to be recounted.
+	 *
+	 * @var bool
+	 */
+	private static $flushed_this_request = false;
+
+	/**
+	 * Count published events matching an ID meta key.
+	 *
+	 * Counting through the trakt_type taxonomy looks tempting and is wrong:
+	 * the sync names those terms with a translated string, so the 'movie' slug
+	 * only exists on an English site. The ID meta keys are the same in every
+	 * language, and match how traktivity_get_event() decides an event's type,
+	 * so the counts here agree with what a block renders.
+	 *
+	 * @since 3.1.0
+	 *
+	 * Counting is a plain query rather than wp_count_posts(), which reads a
+	 * cache that is not reliably dropped when a post is deleted: right after
+	 * wp_delete_post() it still reports the old total, while the query below
+	 * reports the real one. Since the figures here are cached for half a day
+	 * anyway, there is nothing to gain by reading a stale cache faster.
+	 *
+	 * @param string $meta_key Meta key that must exist, or an empty string to
+	 *                         count every published event.
+	 *
+	 * @return int Number of published events.
+	 */
+	private static function count_events( $meta_key = '' ) {
+		$args = array(
+			'post_type'              => 'traktivity_event',
+			'post_status'            => 'publish',
+			'posts_per_page'         => 1,
+			'fields'                 => 'ids',
+			'ignore_sticky_posts'    => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		);
+
+		if ( '' !== $meta_key ) {
+			$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- One indexed meta key, and the result is cached for half a day.
+				array(
+					'key'     => $meta_key,
+					'compare' => 'EXISTS',
+				),
+			);
+		}
+
+		$query = new WP_Query( $args );
+
+		return (int) $query->found_posts;
 	}
 
 	/**
 	 * Headline figures for everything logged.
 	 *
-	 * `runtime` is the `convert_time()` string, ready to print. `since` is the
-	 * date of the oldest event, formatted for display.
+	 * `runtime` is the convert_time() string, ready to print. `since` is the
+	 * date of the oldest event in the site's own date format, with `since_iso`
+	 * alongside it for anything that needs to reformat or sort.
 	 *
-	 * Not yet implemented: returns the empty shape. See issue #688.
+	 * These change only when a sync runs, so the whole set is cached rather
+	 * than recomputed per request.
 	 *
 	 * @since 3.1.0
 	 *
 	 * @return array Summary, in the shape of empty_summary().
 	 */
 	public static function get_summary() {
-		return self::empty_summary();
+		$cached = get_transient( self::SUMMARY_TRANSIENT );
+
+		if ( is_array( $cached ) ) {
+			return $cached;
+		}
+
+		$minutes = self::total_time_watched();
+		$shows   = wp_count_terms(
+			array(
+				'taxonomy'   => 'trakt_show',
+				'hide_empty' => true,
+			)
+		);
+
+		$oldest = get_posts(
+			array(
+				'post_type'      => 'traktivity_event',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'orderby'        => 'date',
+				'order'          => 'ASC',
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+			)
+		);
+
+		$summary = array(
+			'minutes'   => $minutes,
+			'hours'     => (int) floor( $minutes / 60 ),
+			'runtime'   => self::convert_time( $minutes ),
+			'entries'   => self::count_events(),
+			'episodes'  => self::count_events( 'trakt_show_id' ),
+			'films'     => self::count_events( 'trakt_movie_id' ),
+			'shows'     => is_wp_error( $shows ) ? 0 : (int) $shows,
+			'since'     => empty( $oldest ) ? '' : (string) get_the_date( '', $oldest[0] ),
+			'since_iso' => empty( $oldest ) ? '' : (string) get_the_date( 'c', $oldest[0] ),
+		);
+
+		/**
+		 * Filter the headline figures for the site.
+		 *
+		 * Keys documented in empty_summary() are read by the plugin's own
+		 * blocks, so add to the array rather than removing from it.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param array $summary Stats summary.
+		 */
+		$summary = (array) apply_filters( 'traktivity_stats_summary', $summary );
+
+		set_transient( self::SUMMARY_TRANSIENT, $summary, 12 * HOUR_IN_SECONDS );
+
+		return $summary;
+	}
+
+	/**
+	 * Drop the cached figures so the next read recounts.
+	 *
+	 * The running total is reset rather than adjusted. Adjusting it means
+	 * getting every path right forever, and a counter that is only ever nudged
+	 * drifts as soon as one path is missed; deleting an event used to do
+	 * exactly that, with no way to force a recount short of deleting the
+	 * option by hand. A recount is one indexed query.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param bool $force Flush again even if this request already has.
+	 */
+	public static function flush( $force = false ) {
+		if ( self::$flushed_this_request && ! $force ) {
+			return;
+		}
+
+		self::$flushed_this_request = true;
+
+		delete_transient( self::SUMMARY_TRANSIENT );
+
+		$stats = get_option( 'traktivity_stats' );
+
+		if ( is_array( $stats ) && isset( $stats['total_time_watched'] ) ) {
+			unset( $stats['total_time_watched'] );
+			update_option( 'traktivity_stats', $stats );
+		}
+	}
+
+	/**
+	 * Reset the once-per-request guard.
+	 *
+	 * Tests only: PHPUnit runs many requests' worth of work in one process, so
+	 * without this the second flush in a suite would be a no-op.
+	 *
+	 * @since 3.1.0
+	 */
+	public static function reset_flush_guard() {
+		self::$flushed_this_request = false;
+	}
+
+	/**
+	 * Drop the cached figures when an event is added, changed or removed.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public static function flush_on_event_change( $post_id ) {
+		if ( 'traktivity_event' === get_post_type( $post_id ) ) {
+			self::flush();
+		}
 	}
 
 	/**
@@ -216,3 +391,6 @@ class Traktivity_Stats {
 		return 0;
 	}
 }
+
+add_action( 'save_post', array( 'Traktivity_Stats', 'flush_on_event_change' ) );
+add_action( 'deleted_post', array( 'Traktivity_Stats', 'flush_on_event_change' ) );

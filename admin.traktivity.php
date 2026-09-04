@@ -116,7 +116,7 @@ function traktivity_dashboard_scripts( $hook ) {
 	);
 
 	$options = (array) get_option( 'traktivity' );
-	$stats   = (array) get_option( 'traktivity_stats' );
+	$summary = Traktivity_Stats::get_summary();
 
 	/*
 	 * Data only. Every user-facing string lives in the JavaScript, wrapped in
@@ -135,7 +135,7 @@ function traktivity_dashboard_scripts( $hook ) {
 		 * Formatted here rather than in JavaScript: turning a minute count
 		 * into "3 days, 4 hours" needs _n() for each unit.
 		 */
-		'totalTimeWatched' => isset( $stats['total_time_watched'] ) ? Traktivity_Stats::convert_time( $stats['total_time_watched'] ) : '',
+		'totalTimeWatched' => $summary['runtime'],
 	);
 
 	/*

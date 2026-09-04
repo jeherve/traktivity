@@ -14,3 +14,8 @@ parameters:
 			- build/*
 	bootstrapFiles:
 		- tests/phpstan/bootstrap.php
+	# PHPStan sizes its worker pool from the CPU count, and on a CI runner that
+	# put enough workers in flight to exhaust the memory limit mid-analysis.
+	# The plugin is small enough that two workers cost no real wall-clock time.
+	parallel:
+		maximumNumberOfProcesses: 2
