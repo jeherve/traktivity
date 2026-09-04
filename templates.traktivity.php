@@ -42,6 +42,7 @@ class Traktivity_Templates {
 	public static function init(): void {
 		add_action( 'init', array( __CLASS__, 'register_templates' ), 20 );
 		add_filter( 'get_block_template', array( __CLASS__, 'provide_template_part' ), 10, 3 );
+		add_filter( 'get_block_templates', array( __CLASS__, 'list_template_parts' ), 10, 3 );
 		add_action( 'pre_get_posts', array( __CLASS__, 'shape_archive_query' ) );
 	}
 
@@ -439,6 +440,88 @@ class Traktivity_Templates {
 	}
 
 	/**
+	 * Build the WP_Block_Template object for one of our parts.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param string $slug Part slug.
+	 * @param array  $part Part definition.
+	 *
+	 * @return WP_Block_Template|null Null when the markup is unreadable.
+	 */
+	private static function build_part( string $slug, array $part ) {
+		$content = self::content( $part['file'] );
+
+		if ( '' === $content ) {
+			return null;
+		}
+
+		$template                 = new WP_Block_Template();
+		$template->id             = self::part_id( $slug );
+		$template->theme          = get_stylesheet();
+		$template->slug           = $slug;
+		$template->type           = 'wp_template_part';
+		$template->area           = 'uncategorized';
+		$template->source         = 'plugin';
+		$template->status         = 'publish';
+		$template->has_theme_file = false;
+		$template->is_custom      = true;
+		$template->title          = $part['title'];
+		$template->description    = $part['description'];
+		$template->content        = $content;
+
+		return $template;
+	}
+
+	/**
+	 * Add our parts to the lists the editor reads.
+	 *
+	 * The single-template filter answers for one ID, which is enough to render
+	 * a part and to open it from a direct link, and not enough for anything to
+	 * find it: the Site Editor's parts list and the Template Part block's
+	 * picker both read the collection rather than asking for IDs one at a
+	 * time. Without this the parts are editable but unplaceable, which makes
+	 * them close to useless.
+	 *
+	 * Anything already in the list wins, so a part the site owner has edited
+	 * and saved is not shadowed by ours.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param WP_Block_Template[] $query_result  Templates found so far.
+	 * @param array               $query         Arguments the caller asked for.
+	 * @param string              $template_type Either wp_template or wp_template_part.
+	 *
+	 * @return WP_Block_Template[]
+	 */
+	public static function list_template_parts( $query_result, $query, $template_type ) {
+		if ( 'wp_template_part' !== $template_type || ! wp_is_block_theme() ) {
+			return $query_result;
+		}
+
+		$existing = wp_list_pluck( (array) $query_result, 'slug' );
+		$wanted   = isset( $query['slug__in'] ) ? (array) $query['slug__in'] : array();
+
+		foreach ( self::available_parts() as $slug => $part ) {
+			if ( in_array( $slug, $existing, true ) || ! self::is_enabled( $slug ) ) {
+				continue;
+			}
+
+			if ( ! empty( $wanted ) && ! in_array( $slug, $wanted, true ) ) {
+				continue;
+			}
+
+			$template = self::build_part( $slug, $part );
+
+			if ( null !== $template ) {
+				$query_result[] = $template;
+			}
+		}
+
+		return $query_result;
+	}
+
+	/**
 	 * Hand back one of our parts when nothing else claims that ID.
 	 *
 	 * @since 3.1.0
@@ -459,27 +542,9 @@ class Traktivity_Templates {
 				continue;
 			}
 
-			$content = self::content( $part['file'] );
+			$template = self::build_part( $slug, $part );
 
-			if ( '' === $content ) {
-				return $block_template;
-			}
-
-			$template                 = new WP_Block_Template();
-			$template->id             = $id;
-			$template->theme          = get_stylesheet();
-			$template->slug           = $slug;
-			$template->type           = 'wp_template_part';
-			$template->area           = 'uncategorized';
-			$template->source         = 'plugin';
-			$template->status         = 'publish';
-			$template->has_theme_file = false;
-			$template->is_custom      = true;
-			$template->title          = $part['title'];
-			$template->description    = $part['description'];
-			$template->content        = $content;
-
-			return $template;
+			return null === $template ? $block_template : $template;
 		}
 
 		return $block_template;

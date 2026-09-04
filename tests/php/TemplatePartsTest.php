@@ -155,6 +155,94 @@ class TemplatePartsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Enabled parts appear in the lists the editor reads.
+	 *
+	 * Answering for a single ID is enough to render a part and to open it from
+	 * a direct link, and not enough for anything to find it: the Site Editor's
+	 * parts list and the Template Part block's picker both read the
+	 * collection. Without this the parts are editable but unplaceable.
+	 */
+	public function test_enabled_parts_are_listed() {
+		if ( ! $this->use_block_theme() ) {
+			$this->markTestSkipped( 'No block theme available to switch to.' );
+		}
+
+		$this->enable( array( 'traktivity-watch-stats', 'traktivity-series-index' ) );
+
+		$listed = Traktivity_Templates::list_template_parts( array(), array(), 'wp_template_part' );
+		$slugs  = wp_list_pluck( $listed, 'slug' );
+
+		$this->assertContains( 'traktivity-watch-stats', $slugs );
+		$this->assertContains( 'traktivity-series-index', $slugs );
+		$this->assertNotContains( 'traktivity-recent-watches', $slugs, 'A part that is off should not be listed.' );
+	}
+
+	/**
+	 * A part already in the list is not added a second time.
+	 *
+	 * Once someone edits one, WordPress has its own copy, and ours must not
+	 * shadow it.
+	 */
+	public function test_existing_parts_are_not_duplicated() {
+		if ( ! $this->use_block_theme() ) {
+			$this->markTestSkipped( 'No block theme available to switch to.' );
+		}
+
+		$this->enable( array( 'traktivity-watch-stats' ) );
+
+		$saved         = new WP_Block_Template();
+		$saved->slug   = 'traktivity-watch-stats';
+		$saved->source = 'custom';
+
+		$listed = Traktivity_Templates::list_template_parts( array( $saved ), array(), 'wp_template_part' );
+		$slugs  = wp_list_pluck( $listed, 'slug' );
+
+		$this->assertSame( 1, count( array_keys( $slugs, 'traktivity-watch-stats', true ) ) );
+		$this->assertSame( 'custom', $listed[0]->source );
+	}
+
+	/**
+	 * A slug filter is honoured, so a targeted lookup stays targeted.
+	 */
+	public function test_listing_honours_a_slug_filter() {
+		if ( ! $this->use_block_theme() ) {
+			$this->markTestSkipped( 'No block theme available to switch to.' );
+		}
+
+		$this->enable( array( 'traktivity-watch-stats', 'traktivity-series-index' ) );
+
+		$listed = Traktivity_Templates::list_template_parts(
+			array(),
+			array( 'slug__in' => array( 'traktivity-series-index' ) ),
+			'wp_template_part'
+		);
+
+		$this->assertSame( array( 'traktivity-series-index' ), wp_list_pluck( $listed, 'slug' ) );
+	}
+
+	/**
+	 * Whole templates and classic themes are left alone.
+	 */
+	public function test_listing_leaves_other_requests_alone() {
+		$this->enable( array( 'traktivity-watch-stats' ) );
+
+		$this->assertSame( array(), Traktivity_Templates::list_template_parts( array(), array(), 'wp_template' ) );
+
+		add_filter( 'wp_is_block_theme', '__return_false' );
+		$classic = Traktivity_Templates::list_template_parts( array(), array(), 'wp_template_part' );
+		remove_filter( 'wp_is_block_theme', '__return_false' );
+
+		$this->assertSame( array(), $classic );
+	}
+
+	/**
+	 * The listing filter is wired up.
+	 */
+	public function test_listing_filter_is_hooked() {
+		$this->assertNotFalse( has_filter( 'get_block_templates', array( 'Traktivity_Templates', 'list_template_parts' ) ) );
+	}
+
+	/**
 	 * A part that is switched off is not provided.
 	 */
 	public function test_disabled_part_is_not_provided() {
