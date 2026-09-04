@@ -86,15 +86,23 @@ $traktivity_kicker = isset( $attributes['kicker'] ) ? (string) $attributes['kick
 $traktivity_wrapper = get_block_wrapper_attributes( array( 'class' => 'traktivity-hero' ) );
 ?>
 <section <?php echo $traktivity_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Prepared by get_block_wrapper_attributes(). ?>>
-	<?php if ( '' !== $traktivity_kicker ) : ?>
-		<p class="traktivity-hero__kicker"><?php echo esc_html( $traktivity_kicker ); ?></p>
-	<?php endif; ?>
-
 	<a class="traktivity-hero__link" href="<?php echo esc_url( $traktivity_event['permalink'] ); ?>" tabindex="-1" aria-hidden="true">
 		<?php echo Traktivity_Blocks::frame( $traktivity_event['image_id'], $traktivity_event['title'], 'landscape' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in Traktivity_Blocks::frame(). ?>
 	</a>
 
+	<?php
+	/*
+	 * The kicker belongs inside the body rather than beside it. The wrapper is
+	 * a two-column grid, so a third child at this level takes a cell of its
+	 * own: the kicker sat next to the image and pushed everything else onto a
+	 * second row, leaving a hole where the text should have been.
+	 */
+	?>
 	<div class="traktivity-hero__body">
+		<?php if ( '' !== $traktivity_kicker ) : ?>
+			<p class="traktivity-hero__kicker"><?php echo esc_html( $traktivity_kicker ); ?></p>
+		<?php endif; ?>
+
 		<?php if ( '' !== $traktivity_event['show_name'] && '' !== $traktivity_event['show_link'] ) : ?>
 			<p class="traktivity-hero__show">
 				<a href="<?php echo esc_url( $traktivity_event['show_link'] ); ?>"><?php echo esc_html( $traktivity_event['show_name'] ); ?></a>
