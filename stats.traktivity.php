@@ -116,6 +116,50 @@ class Traktivity_Stats {
 	}
 
 	/**
+	 * The shape every stats summary carries.
+	 *
+	 * Returned in full on any site, so a caller can read a key without
+	 * checking it exists. A site that has never synced reports zeroes and an
+	 * empty `since`, which is how a block tells "nothing logged yet" from
+	 * "nothing to show".
+	 *
+	 * @since 3.1.0
+	 *
+	 * @return array{
+	 *     minutes: int, hours: int, runtime: string, entries: int,
+	 *     episodes: int, films: int, shows: int, since: string
+	 * } Empty summary.
+	 */
+	public static function empty_summary() {
+		return array(
+			'minutes'  => 0,
+			'hours'    => 0,
+			'runtime'  => '',
+			'entries'  => 0,
+			'episodes' => 0,
+			'films'    => 0,
+			'shows'    => 0,
+			'since'    => '',
+		);
+	}
+
+	/**
+	 * Headline figures for everything logged.
+	 *
+	 * `runtime` is the `convert_time()` string, ready to print. `since` is the
+	 * date of the oldest event, formatted for display.
+	 *
+	 * Not yet implemented: returns the empty shape. See issue #688.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @return array Summary, in the shape of empty_summary().
+	 */
+	public static function get_summary() {
+		return self::empty_summary();
+	}
+
+	/**
 	 * Create an option where we store the Total time spent in front of a screen.
 	 *
 	 * @since 2.2.0
