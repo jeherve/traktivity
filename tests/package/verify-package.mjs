@@ -108,6 +108,8 @@ for ( const required of [
 	'build/blocks/event-title/render.php',
 	'build/blocks/event-details/block.json',
 	'build/blocks/event-details/render.php',
+	'build/blocks/watch-stats/block.json',
+	'build/blocks/watch-stats/render.php',
 ] ) {
 	check( has( required ), `ships ${ required }` );
 }
