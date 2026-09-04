@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "traktivity/event-details",
+	"title": "Event Details",
+	"category": "traktivity",
+	"icon": "info-outline",
+	"description": "Series, season, genre, runtime and external links for one watch event.",
+	"textdomain": "traktivity",
+	"usesContext": [ "postId", "postType" ],
+	"attributes": {
+		"showTaxonomies": { "type": "boolean", "default": true },
+		"showRuntime": { "type": "boolean", "default": true },
+		"showLinks": { "type": "boolean", "default": true }
+	},
+	"supports": {
+		"html": false,
+		"reusable": false,
+		"color": {
+			"background": true,
+			"text": true,
+			"link": true
+		},
+		"spacing": { "margin": true, "padding": true },
+		"typography": { "fontSize": true, "lineHeight": true }
+	},
+	"editorScript": "file:./index.js",
+	"style": [ "traktivity-shared", "file:./style-index.css" ],
+	"render": "file:./render.php"
+}
