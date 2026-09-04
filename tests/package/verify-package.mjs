@@ -104,6 +104,8 @@ for ( const required of [
 	'build/blocks/event-card/block.json',
 	'build/blocks/event-card/render.php',
 	'build/blocks/event-card/style-index.css',
+	'build/blocks/event-title/block.json',
+	'build/blocks/event-title/render.php',
 ] ) {
 	check( has( required ), `ships ${ required }` );
 }
