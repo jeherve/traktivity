@@ -41,6 +41,7 @@ class Traktivity_Templates {
 	 */
 	public static function init(): void {
 		add_action( 'init', array( __CLASS__, 'register_templates' ), 20 );
+		add_filter( 'get_block_template', array( __CLASS__, 'provide_template_part' ), 10, 3 );
 		add_action( 'pre_get_posts', array( __CLASS__, 'order_show_archive' ) );
 	}
 
@@ -133,7 +134,13 @@ class Traktivity_Templates {
 	 * @return string Block markup, or an empty string when unreadable.
 	 */
 	public static function content( string $file ): string {
-		$path = TRAKTIVITY__PLUGIN_DIR . 'templates/' . basename( $file );
+		/*
+		 * basename() on the file, so a name cannot walk out of the directory,
+		 * and the subdirectory is chosen here rather than taken from the
+		 * caller.
+		 */
+		$directory = 0 === strpos( $file, 'parts/' ) ? 'templates/parts/' : 'templates/';
+		$path      = TRAKTIVITY__PLUGIN_DIR . $directory . basename( $file );
 
 		if ( ! is_readable( $path ) ) {
 			return '';
@@ -147,6 +154,9 @@ class Traktivity_Templates {
 			array(
 				'{{ARCHIVE_TITLE}}' => esc_html__( 'Everything watched', 'traktivity' ),
 				'{{NO_RESULTS}}'    => esc_html__( 'Nothing logged here yet.', 'traktivity' ),
+				'{{RECENT_TITLE}}'  => esc_html__( 'Recently watched', 'traktivity' ),
+				'{{LATEST_TITLE}}'  => esc_html__( 'Last watched', 'traktivity' ),
+				'{{INDEX_TITLE}}'   => esc_html__( 'Every series', 'traktivity' ),
 			)
 		);
 	}
@@ -221,6 +231,113 @@ class Traktivity_Templates {
 		$order = (string) apply_filters( 'traktivity_show_archive_order', 'ASC' );
 
 		$query->set( 'order', 'DESC' === strtoupper( $order ) ? 'DESC' : 'ASC' );
+	}
+
+	/**
+	 * The editable template parts this plugin can provide.
+	 *
+	 * Keyed by part slug. Unlike the templates above, these have no automatic
+	 * placement: nothing renders them until a site owner adds core's Template
+	 * Part block to a template and picks one. See issue #699.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @return array<string, array{file: string, title: string, description: string}>
+	 */
+	public static function available_parts(): array {
+		return array(
+			'traktivity-recent-watches' => array(
+				'file'        => 'parts/traktivity-recent-watches.html',
+				'title'       => __( 'Recently watched', 'traktivity' ),
+				'description' => __( 'The last few things you watched, as a grid of cards.', 'traktivity' ),
+			),
+			'traktivity-latest-watch'   => array(
+				'file'        => 'parts/traktivity-latest-watch.html',
+				'title'       => __( 'Last watched, large', 'traktivity' ),
+				'description' => __( 'The most recent thing you watched, shown large.', 'traktivity' ),
+			),
+			'traktivity-watch-stats'    => array(
+				'file'        => 'parts/traktivity-watch-stats.html',
+				'title'       => __( 'Watch totals', 'traktivity' ),
+				'description' => __( 'Hours, entries, episodes, films and series, as a band.', 'traktivity' ),
+			),
+			'traktivity-series-index'   => array(
+				'file'        => 'parts/traktivity-series-index.html',
+				'title'       => __( 'Every series, A to Z', 'traktivity' ),
+				'description' => __( 'A full index of every series you have logged.', 'traktivity' ),
+			),
+			'traktivity-recent-compact' => array(
+				'file'        => 'parts/traktivity-recent-compact.html',
+				'title'       => __( 'Recently watched, compact', 'traktivity' ),
+				'description' => __( 'A short text list, for a sidebar or a footer.', 'traktivity' ),
+			),
+		);
+	}
+
+	/**
+	 * The ID a template part is known by.
+	 *
+	 * Namespaced to the active theme on purpose. The moment someone edits one
+	 * of these in the Site Editor, WordPress saves a real wp_template_part
+	 * post under that ID, get_block_template() stops coming back empty, and
+	 * the filter below quietly steps aside. The site owner gets an editable
+	 * default with nothing to migrate.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param string $slug Part slug.
+	 *
+	 * @return string
+	 */
+	public static function part_id( string $slug ): string {
+		return get_stylesheet() . '//' . $slug;
+	}
+
+	/**
+	 * Hand back one of our parts when nothing else claims that ID.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param WP_Block_Template|null $block_template Template found so far.
+	 * @param string                 $id             Template ID being asked for.
+	 * @param string                 $template_type  Either wp_template or wp_template_part.
+	 *
+	 * @return WP_Block_Template|null
+	 */
+	public static function provide_template_part( $block_template, $id, $template_type ) {
+		if ( ! empty( $block_template ) || 'wp_template_part' !== $template_type || ! wp_is_block_theme() ) {
+			return $block_template;
+		}
+
+		foreach ( self::available_parts() as $slug => $part ) {
+			if ( self::part_id( $slug ) !== $id || ! self::is_enabled( $slug ) ) {
+				continue;
+			}
+
+			$content = self::content( $part['file'] );
+
+			if ( '' === $content ) {
+				return $block_template;
+			}
+
+			$template                 = new WP_Block_Template();
+			$template->id             = $id;
+			$template->theme          = get_stylesheet();
+			$template->slug           = $slug;
+			$template->type           = 'wp_template_part';
+			$template->area           = 'uncategorized';
+			$template->source         = 'plugin';
+			$template->status         = 'publish';
+			$template->has_theme_file = false;
+			$template->is_custom      = true;
+			$template->title          = $part['title'];
+			$template->description    = $part['description'];
+			$template->content        = $content;
+
+			return $template;
+		}
+
+		return $block_template;
 	}
 }
 
