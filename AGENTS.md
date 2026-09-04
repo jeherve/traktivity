@@ -30,7 +30,8 @@ Plugin PHP sits at the root, named `<area>.traktivity.php`:
 | `templates.traktivity.php` | Block templates and template parts |
 | `admin.traktivity.php` | Dashboard page, admin only |
 | `widgets/` | The legacy classic widget |
-| `src/` | Dashboard React app, and block sources |
+| `src/` | Dashboard React app, and block sources under `src/blocks/` |
+| `assets/` | Static CSS that is not built, such as the shared block styles |
 | `tests/` | `php/`, `js/`, `e2e/`, `package/` |
 
 Those names look unusual because they are baked into the wordpress.org SVN
@@ -41,6 +42,15 @@ that reason. Follow the pattern rather than fixing it.
 milestone needs is already required, including the ones still empty. The same
 goes for the `files` allowlist in `package.json`. Both were wired up front
 precisely so parallel branches don't collide on them.
+
+## Blocks
+
+One directory per block under `src/blocks/`, built to `build/blocks/<name>/`.
+`Traktivity_Blocks` registers whatever the build produced, so adding a block is
+adding a directory. `src/blocks/README.md` has the details, including the two
+build behaviours worth knowing: the stylesheet is emitted as `style-index.css`
+rather than `style.css`, and `block.json` should list the `traktivity-shared`
+handle before its own stylesheet.
 
 ## Conventions
 

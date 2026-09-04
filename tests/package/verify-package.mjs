@@ -52,6 +52,7 @@ const allowed = [
 	/^[^/]+\.php$/, // Plugin PHP at the root.
 	/^widgets\/[^/]+\.php$/,
 	/^build\//,
+	/^assets\/[^/]+\.css$/,
 	/^readme\.txt$/,
 	/^LICENSE\.md$/,
 ];
@@ -92,6 +93,8 @@ for ( const required of [
 	'build/index.js',
 	'build/index.asset.php',
 	'build/style-index.css',
+	// Shared by several blocks; a block.json naming the handle needs it present.
+	'assets/blocks-shared.css',
 ] ) {
 	check( has( required ), `ships ${ required }` );
 }

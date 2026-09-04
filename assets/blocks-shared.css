@@ -1,0 +1,59 @@
+/**
+ * Presentation shared by more than one Traktivity block.
+ *
+ * The media frame and the missing-artwork placeholder are used by the event
+ * card, the latest watch, the top shows grid and the show header, so they live
+ * here rather than being repeated in four block stylesheets.
+ *
+ * Everything here leans on theme.json values, so a theme restyles these by
+ * changing its own presets rather than by out-specifying this file. There are
+ * deliberately no colours beyond the placeholder's, which needs to be visible
+ * against any background.
+ */
+
+.traktivity-frame {
+	overflow: hidden;
+	position: relative;
+	width: 100%;
+}
+
+.traktivity-frame img {
+	display: block;
+	height: 100%;
+	object-fit: cover;
+	width: 100%;
+}
+
+.traktivity-frame--landscape {
+	aspect-ratio: 16 / 9;
+}
+
+.traktivity-frame--poster {
+	aspect-ratio: 2 / 3;
+}
+
+/*
+ * TMDb does not have artwork for everything, so a meaningful share of events
+ * and shows will never get an image. This is a normal state rather than an
+ * error one, and it should read as a deliberate blank rather than a failure.
+ */
+.traktivity-frame--empty {
+	align-items: center;
+	background: currentcolor;
+	display: flex;
+	justify-content: center;
+	opacity: 0.08;
+}
+
+.traktivity-frame__label {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	letter-spacing: 0.08em;
+	padding: 0.5em;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.traktivity-sep {
+	opacity: 0.5;
+	padding: 0 0.35em;
+}
