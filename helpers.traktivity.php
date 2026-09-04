@@ -159,16 +159,13 @@ function traktivity_get_event( int $post_id ): array {
 /**
  * Compose a title that identifies what was watched.
  *
- * Episode titles mean nothing alone, so the show name and the episode code
- * are pulled back in from their separate taxonomies. Movies get their plain
- * title.
+ * Episode titles mean nothing alone, so the show name and the episode code are
+ * pulled back in from their separate taxonomies. Movies get their plain title.
  *
  * Always plain text, never markup, so there is one escaping rule rather than
  * one per argument: callers escape it. Anything wanting a linked show name
  * builds that itself from the `show_name` and `show_link` keys on
  * traktivity_get_event(), which are kept separate for exactly this reason.
- *
- * Not yet implemented: returns the plain post title. See issue #685.
  *
  * @since 3.1.0
  *
@@ -178,9 +175,52 @@ function traktivity_get_event( int $post_id ): array {
  * @return string Composed title, unescaped plain text.
  */
 function traktivity_get_event_title( int $post_id, bool $show_name = true ): string {
-	unset( $show_name );
+	$event = traktivity_get_event( $post_id );
 
-	return (string) get_the_title( $post_id );
+	if ( '' === $event['title'] ) {
+		return (string) get_the_title( $post_id );
+	}
+
+	/*
+	 * Built from whatever is actually there. An event missing its season term
+	 * still has a show worth naming, and one missing its show still has an
+	 * episode code worth printing, so each part is dropped on its own rather
+	 * than the whole thing falling back to the bare episode name.
+	 */
+	$prefix = array();
+
+	if ( $show_name && '' !== $event['show_name'] ) {
+		$prefix[] = $event['show_name'];
+	}
+
+	if ( '' !== $event['episode_code'] ) {
+		$prefix[] = $event['episode_code'];
+	}
+
+	if ( empty( $prefix ) ) {
+		return $event['title'];
+	}
+
+	$title = sprintf(
+		/* translators: 1: show name and/or episode code, e.g. "Some Show: S3E2". 2: episode title. */
+		_x( '%1$s: %2$s', 'Composed title for one watched episode', 'traktivity' ),
+		implode( ' ', $prefix ),
+		$event['title']
+	);
+
+	/**
+	 * Filter the composed title for one watch event.
+	 *
+	 * Plain text in, plain text out. Returning markup here breaks callers,
+	 * which escape the result on the way to the page.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param string $title   Composed title.
+	 * @param array  $event   Event context, from traktivity_get_event().
+	 * @param int    $post_id Event post ID.
+	 */
+	return (string) apply_filters( 'traktivity_event_title_text', $title, $event, $post_id );
 }
 
 /**
