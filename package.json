@@ -4,6 +4,7 @@
   "description": "Log your activity on Trakt.tv",
   "main": "traktivity.php",
   "files": [
+    "assets",
     "build",
     "widgets",
     "admin.traktivity.php",
