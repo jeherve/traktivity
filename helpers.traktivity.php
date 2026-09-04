@@ -224,13 +224,43 @@ function traktivity_get_event_title( int $post_id, bool $show_name = true ): str
 }
 
 /**
+ * Build one external reference.
+ *
+ * Shared by the event and show link builders so a URL template lives in one
+ * place. IDs come from a third-party API, so they are encoded on the way into
+ * a URL whatever they turn out to contain.
+ *
+ * @since 3.1.0
+ *
+ * @param string $service Service key: 'trakt', 'imdb' or 'tmdb'.
+ * @param string $url     Full URL.
+ *
+ * @return array{label: string, url: string} One reference.
+ */
+function traktivity_build_link( string $service, string $url ): array {
+	$labels = array(
+		'trakt' => __( 'Trakt', 'traktivity' ),
+		'imdb'  => __( 'IMDb', 'traktivity' ),
+		'tmdb'  => __( 'TMDb', 'traktivity' ),
+	);
+
+	return array(
+		'label' => isset( $labels[ $service ] ) ? $labels[ $service ] : $service,
+		'url'   => $url,
+	);
+}
+
+/**
  * Build the external references stored against an event.
  *
  * Keyed by service ('trakt', 'imdb', 'tmdb'), each value an array with 'label'
  * and 'url'. A service with no stored ID is absent rather than present and
  * empty, so callers can iterate the result directly.
  *
- * Not yet implemented: returns an empty array. See issue #686.
+ * Which ID a service gets depends on the event type, and on how precise a link
+ * that service supports. IMDb has a page per episode, so TV events link
+ * straight to it. TMDb needs the season and episode numbers in the path to do
+ * the same, so it deep-links when they are known and falls back to the show.
  *
  * @since 3.1.0
  *
@@ -239,9 +269,56 @@ function traktivity_get_event_title( int $post_id, bool $show_name = true ): str
  * @return array<string, array{label: string, url: string}> External links.
  */
 function traktivity_get_event_links( int $post_id ): array {
-	unset( $post_id );
+	$event = traktivity_get_event( $post_id );
 
-	return array();
+	if ( '' === $event['type'] ) {
+		return array();
+	}
+
+	$is_movie = 'movie' === $event['type'];
+	$links    = array();
+
+	$trakt_id = (string) get_post_meta( $post_id, $is_movie ? 'trakt_movie_id' : 'trakt_show_id', true );
+	if ( '' !== $trakt_id ) {
+		$links['trakt'] = traktivity_build_link(
+			'trakt',
+			add_query_arg(
+				'id_type',
+				$is_movie ? 'movie' : 'show',
+				'https://trakt.tv/search/trakt/' . rawurlencode( $trakt_id )
+			)
+		);
+	}
+
+	$imdb_id = (string) get_post_meta( $post_id, $is_movie ? 'imdb_movie_id' : 'imdb_episode_id', true );
+	if ( '' !== $imdb_id ) {
+		$links['imdb'] = traktivity_build_link( 'imdb', 'https://www.imdb.com/title/' . rawurlencode( $imdb_id ) . '/' );
+	}
+
+	$tmdb_id = (string) get_post_meta( $post_id, $is_movie ? 'tmdb_movie_id' : 'tmdb_show_id', true );
+	if ( '' !== $tmdb_id ) {
+		$tmdb_url = 'https://www.themoviedb.org/' . ( $is_movie ? 'movie' : 'tv' ) . '/' . rawurlencode( $tmdb_id );
+
+		if ( ! $is_movie && '' !== $event['episode_code'] ) {
+			$tmdb_url .= sprintf( '/season/%1$d/episode/%2$d', $event['season'], $event['episode'] );
+		}
+
+		$links['tmdb'] = traktivity_build_link( 'tmdb', $tmdb_url );
+	}
+
+	/**
+	 * Filter the external references for one watch event.
+	 *
+	 * Entries are rendered as links, so anything added here needs a 'label'
+	 * and a 'url'.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param array $links   External references, keyed by service.
+	 * @param int   $post_id Event post ID.
+	 * @param array $event   Event context, from traktivity_get_event().
+	 */
+	return (array) apply_filters( 'traktivity_event_links', $links, $post_id, $event );
 }
 
 /**
