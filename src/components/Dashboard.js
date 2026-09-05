@@ -12,6 +12,7 @@ import RecentEvents from './RecentEvents';
 import StatsOverview from './stats/StatsOverview';
 import SyncHistory from './SyncHistory';
 import SyncShowTime from './SyncShowTime';
+import TemplateSettings from './templates/TemplateSettings';
 
 /**
  * Step 5: the dashboard shown once setup is complete.
@@ -90,6 +91,7 @@ export default function Dashboard( { sync, launchSync } ) {
 				</CardBody>
 			</Card>
 			<StatsOverview />
+			<TemplateSettings />
 			<RecentEvents />
 			{ ! historyImported && (
 				<SyncHistory

@@ -1,0 +1,36 @@
+/**
+ * Event Details.
+ *
+ * A definition list, so the label and value pairing is in the markup rather
+ * than only in the styling. The grid is what makes it read as a table.
+ */
+
+.traktivity-details {
+	display: grid;
+	gap: 0.5em 1.5em;
+	margin: 0;
+}
+
+.traktivity-details__row {
+	display: grid;
+	gap: 0.25em 1.5em;
+	grid-template-columns: minmax(6em, 10em) 1fr;
+}
+
+.traktivity-details dt {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	letter-spacing: 0.06em;
+	opacity: 0.7;
+	text-transform: uppercase;
+}
+
+.traktivity-details dd {
+	margin: 0;
+}
+
+@media (max-width: 480px) {
+
+	.traktivity-details__row {
+		grid-template-columns: 1fr;
+	}
+}

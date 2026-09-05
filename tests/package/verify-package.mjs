@@ -52,6 +52,9 @@ const allowed = [
 	/^[^/]+\.php$/, // Plugin PHP at the root.
 	/^widgets\/[^/]+\.php$/,
 	/^build\//,
+	/^assets\/[^/]+\.css$/,
+	/^templates\/[^/]+\.html$/,
+	/^templates\/parts\/[^/]+\.html$/,
 	/^readme\.txt$/,
 	/^LICENSE\.md$/,
 ];
@@ -77,12 +80,6 @@ check(
 		leaked.length ? `: ${ leaked.join( ', ' ) }` : ''
 	}`
 );
-check(
-	leaked.length === 0,
-	`no development files ship${
-		leaked.length ? `: ${ leaked.join( ', ' ) }` : ''
-	}`
-);
 
 // The files WordPress needs to boot the plugin and its dashboard.
 for ( const required of [
@@ -92,6 +89,46 @@ for ( const required of [
 	'build/index.js',
 	'build/index.asset.php',
 	'build/style-index.css',
+	// Shared by several blocks; a block.json naming the handle needs it present.
+	'assets/blocks-shared.css',
+	/*
+	 * A block entry and the dashboard entry are easy to lose at the same time:
+	 * wp-scripts builds either the blocks it finds or the default src/index.js,
+	 * never both, so one of these disappearing is the signal that the entry
+	 * list in webpack.config.js needs looking at.
+	 */
+	/*
+	 * Every block.json names its own style-index.css, so a block shipped
+	 * without one registers a handle pointing at nothing and renders unstyled
+	 * rather than failing loudly.
+	 */
+	'build/blocks/event-card/block.json',
+	'build/blocks/event-card/render.php',
+	'build/blocks/event-card/style-index.css',
+	'build/blocks/event-title/block.json',
+	'build/blocks/event-title/render.php',
+	'build/blocks/event-title/style-index.css',
+	'build/blocks/event-details/block.json',
+	'build/blocks/event-details/render.php',
+	'build/blocks/event-details/style-index.css',
+	'build/blocks/watch-stats/block.json',
+	'build/blocks/watch-stats/render.php',
+	'build/blocks/watch-stats/style-index.css',
+	'build/blocks/top-shows/block.json',
+	'build/blocks/top-shows/render.php',
+	'build/blocks/top-shows/style-index.css',
+	'build/blocks/latest-watch/block.json',
+	'build/blocks/latest-watch/render.php',
+	'build/blocks/latest-watch/style-index.css',
+	'build/blocks/show-header/block.json',
+	'build/blocks/show-header/render.php',
+	'build/blocks/show-header/style-index.css',
+	'templates/single-traktivity_event.html',
+	'templates/archive-traktivity_event.html',
+	'templates/taxonomy-trakt_show.html',
+	'templates/taxonomy-traktivity.html',
+	'templates/parts/traktivity-recent-watches.html',
+	'templates/parts/traktivity-recent-compact.html',
 ] ) {
 	check( has( required ), `ships ${ required }` );
 }

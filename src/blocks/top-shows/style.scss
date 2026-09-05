@@ -1,0 +1,42 @@
+/**
+ * Top Series.
+ *
+ * The column count comes through as a custom property so the same stylesheet
+ * serves every setting, and auto-fit keeps it from breaking on a phone.
+ */
+
+.traktivity-shows {
+	display: grid;
+	gap: var(--wp--style--block-gap, 1.5em);
+	grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+}
+
+@media (min-width: 782px) {
+
+	.traktivity-shows {
+		grid-template-columns: repeat(var(--traktivity-columns, 4), 1fr);
+	}
+}
+
+.traktivity-show {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25em;
+}
+
+.traktivity-show__link {
+	display: block;
+	margin-bottom: 0.25em;
+	text-decoration: none;
+}
+
+.traktivity-show__title {
+	margin: 0;
+}
+
+.traktivity-show__count,
+.traktivity-show__network {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	margin: 0;
+	opacity: 0.75;
+}

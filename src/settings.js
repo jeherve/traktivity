@@ -13,6 +13,18 @@
  *   syncPages: string,
  *   syncRuntime: string,
  *   totalTimeWatched: string,
+ *   templates: Array<{
+ *     slug: string,
+ *     type: string,
+ *     title: string,
+ *     description: string,
+ *     enabled: boolean,
+ *     themeProvides: boolean,
+ *   }>,
+ *   isBlockTheme: boolean,
+ *   themeStylesheet: string,
+ *   siteEditorUrl: string,
+ *   hasEvents: boolean,
  * }}
  */
 export default window.traktivityDashboard || {};
