@@ -49,7 +49,8 @@ class Traktivity_Placements {
 	 * The placements the plugin offers.
 	 *
 	 * `block` placements travel as hooked blocks and name a registered block,
-	 * an anchor to sit against, and where relative to it. `part` placements are
+	 * an anchor to sit against, where relative to it, and any attributes the
+	 * inserted block needs. `part` placements are
 	 * rendered by the plugin at the named action, because their markup is a
 	 * query loop rather than a single block.
 	 *
@@ -65,6 +66,7 @@ class Traktivity_Placements {
 				'anchor'      => 'core/query',
 				'position'    => 'before',
 				'context'     => 'archive-traktivity_event',
+				'attributes'  => array( 'align' => 'wide' ),
 				'title'       => __( 'Totals above the archive', 'traktivity' ),
 				'description' => __( 'Hours, entries, episodes, films and series, at the top of your archive.', 'traktivity' ),
 			),
@@ -74,6 +76,7 @@ class Traktivity_Placements {
 				'anchor'      => 'core/query',
 				'position'    => 'before',
 				'context'     => 'archive-traktivity_event',
+				'attributes'  => array( 'align' => 'wide' ),
 				'title'       => __( 'Last watched, above the archive', 'traktivity' ),
 				'description' => __( 'The most recent thing you watched, shown large above the list.', 'traktivity' ),
 			),
@@ -83,6 +86,7 @@ class Traktivity_Placements {
 				'anchor'      => 'core/post-content',
 				'position'    => 'after',
 				'context'     => 'single-traktivity_event',
+				'attributes'  => array(),
 				'title'       => __( 'Series you watch most, after an entry', 'traktivity' ),
 				'description' => __( 'A grid of your most-watched series at the end of every entry.', 'traktivity' ),
 			),
@@ -206,6 +210,34 @@ class Traktivity_Placements {
 			4
 		);
 
+		if ( empty( $placement['attributes'] ) ) {
+			return;
+		}
+
+		/*
+		 * hooked_block_types only names a block, so the one that lands has no
+		 * attributes. The archive placements need align=wide, which the
+		 * template used to set by hand; without it a content-width band sits
+		 * above a wide grid.
+		 */
+		add_filter(
+			'hooked_block_' . $placement['block'],
+			static function ( $hooked_block, $hooked_block_type, $relative_position, $anchor_block ) use ( $placement ) {
+				if ( $anchor_block['blockName'] !== $placement['anchor'] || $relative_position !== $placement['position'] ) {
+					return $hooked_block;
+				}
+
+				$hooked_block['attrs'] = array_merge(
+					isset( $hooked_block['attrs'] ) ? (array) $hooked_block['attrs'] : array(),
+					$placement['attributes']
+				);
+
+				return $hooked_block;
+			},
+			10,
+			4
+		);
+
 		unset( $slug );
 	}
 
@@ -241,14 +273,14 @@ class Traktivity_Placements {
 	/**
 	 * Whether the template a hooked block is being offered to is the one wanted.
 	 *
-	 * A template part or pattern arrives here too, and an array turns up on
-	 * themes that do not hand over a WP_Block_Template at all, so the queried
-	 * template is checked by slug and the array case falls back to asking
-	 * WordPress what is being viewed.
+	 * An array turns up on themes that do not hand over a WP_Block_Template at
+	 * all, so that case falls back to asking WordPress what is being viewed.
+	 * A WP_Post arrives for a navigation menu, which none of these placements
+	 * anchors to, so anything that is neither is simply not ours.
 	 *
 	 * @since 3.1.0
 	 *
-	 * @param WP_Block_Template|WP_Post|array $context The template the anchor block belongs to.
+	 * @param WP_Block_Template|WP_Post|array $context The template, part or menu the anchor block belongs to.
 	 * @param string                          $wanted  Template slug the placement asked for.
 	 *
 	 * @return bool

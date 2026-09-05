@@ -193,6 +193,39 @@ class PlacementsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * An archive placement asks for the width the archive is laid out at.
+	 *
+	 * The hooked_block_types filter only names a block, so the one that lands
+	 * carries no attributes. Without this a content-width band sits above a
+	 * wide grid, which the template used to avoid by setting align by hand.
+	 */
+	public function test_archive_placement_is_wide() {
+		if ( ! $this->use_block_theme() ) {
+			$this->markTestSkipped( 'No block theme available to switch to.' );
+		}
+
+		$this->enable( array( 'traktivity-totals-on-archive' ) );
+		Traktivity_Placements::register_placements();
+
+		// Built from the block name, the way core builds it, slash and dash included.
+		$block = 'traktivity/watch-stats';
+		$hook  = 'hooked_block_' . $block;
+
+		$hooked = apply_filters(
+			$hook,
+			array(
+				'blockName' => $block,
+				'attrs'     => array(),
+			),
+			$block,
+			'before',
+			array( 'blockName' => 'core/query' )
+		);
+
+		$this->assertSame( 'wide', $hooked['attrs']['align'] );
+	}
+
+	/**
 	 * A placement that is off hooks nothing.
 	 */
 	public function test_disabled_placement_hooks_nothing() {
