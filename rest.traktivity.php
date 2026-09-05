@@ -144,6 +144,12 @@ class Traktivity_Api {
 		/**
 		 * Traktivity Stats Info.
 		 *
+		 * Behind the same capability as the rest of the namespace. This route
+		 * hands back the traktivity_stats option as it stands, and it was
+		 * public only because '__return_true' was the quickest way to silence
+		 * the notice WordPress 5.5 started printing for a route with no
+		 * permission callback.
+		 *
 		 * @since 2.2.0
 		 */
 		register_rest_route(
@@ -152,7 +158,7 @@ class Traktivity_Api {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_stats' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( $this, 'permissions_check' ),
 			)
 		);
 	}

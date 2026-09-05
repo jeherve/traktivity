@@ -104,6 +104,7 @@ Traktivity has always logged your watch history and done almost nothing with it.
 * Recount the total time watched when an entry is deleted. It used to only ever be added to, so deleting an entry left the total too high with no way to correct it.
 * Attach a season term to specials, which land in season 0. Nothing has ever recorded a season for them. Entries synced before this update keep their missing season; re-syncing does not revisit them.
 * Show the episode details in the Recently Watched widget on sites not running in English, where they were silently dropped.
+* Ask for the same permissions on the `traktivity/v1/stats` endpoint as on every other endpoint the plugin registers. It answered anyone who asked, so your watch totals were readable without logging in even on a site showing none of this. Anything of yours reading that endpoint now needs to authenticate.
 
 = 3.0.1 =
 Release date: September 3, 2026
