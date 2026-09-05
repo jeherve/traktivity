@@ -23,11 +23,14 @@ const TEMPLATE = {
 	themeProvides: false,
 };
 
-const PART = {
-	slug: 'traktivity-watch-stats',
-	type: 'wp_template_part',
-	title: 'Watch totals',
-	description: 'Hours, entries, episodes, films and series, as a band.',
+const PLACEMENT = {
+	slug: 'traktivity-totals-on-archive',
+	type: 'placement',
+	editSlug: '',
+	editType: '',
+	title: 'Totals above the archive',
+	description:
+		'Hours, entries, episodes, films and series, at the top of your archive.',
 	enabled: false,
 	themeProvides: false,
 };
@@ -43,7 +46,7 @@ function withSettings( overrides = {} ) {
 		hasEvents: true,
 		themeStylesheet: 'twentytwentyfour',
 		siteEditorUrl: 'http://example.org/wp-admin/site-editor.php',
-		templates: [ TEMPLATE, PART ],
+		templates: [ TEMPLATE, PLACEMENT ],
 		...overrides,
 	} );
 }
@@ -68,16 +71,18 @@ describe( 'TemplateSettings', () => {
 		render( <TemplateSettings /> );
 
 		expect( screen.getByText( 'Everything watched' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Watch totals' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Totals above the archive' )
+		).toBeInTheDocument();
 	} );
 
-	it( 'says a template part has to be placed by hand', () => {
+	it( 'says the plugin does the placing, and it can be moved after', () => {
 		withSettings();
 
 		render( <TemplateSettings /> );
 
 		expect(
-			screen.getByText( /add a Template Part block wherever you want it/ )
+			screen.getByText( /Traktivity puts this on the page for you/ )
 		).toBeInTheDocument();
 	} );
 
@@ -121,7 +126,7 @@ describe( 'TemplateSettings', () => {
 	it( 'saves a change', async () => {
 		withSettings();
 		apiFetch.mockResolvedValue( {
-			templates: [ { ...TEMPLATE, enabled: true }, PART ],
+			templates: [ { ...TEMPLATE, enabled: true }, PLACEMENT ],
 		} );
 
 		render( <TemplateSettings /> );
@@ -135,7 +140,7 @@ describe( 'TemplateSettings', () => {
 					data: {
 						enabled: {
 							'archive-traktivity_event': true,
-							'traktivity-watch-stats': false,
+							'traktivity-totals-on-archive': false,
 						},
 					},
 				} )
@@ -160,7 +165,7 @@ describe( 'TemplateSettings', () => {
 	it( 'only offers an edit link once the change is saved', async () => {
 		withSettings();
 		apiFetch.mockResolvedValue( {
-			templates: [ { ...TEMPLATE, enabled: true }, PART ],
+			templates: [ { ...TEMPLATE, enabled: true }, PLACEMENT ],
 		} );
 
 		render( <TemplateSettings /> );

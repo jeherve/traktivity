@@ -136,6 +136,7 @@ class Traktivity {
 		 */
 		require_once TRAKTIVITY__PLUGIN_DIR . 'blocks.traktivity.php';
 		require_once TRAKTIVITY__PLUGIN_DIR . 'templates.traktivity.php';
+		require_once TRAKTIVITY__PLUGIN_DIR . 'placements.traktivity.php';
 
 		// Settings panel.
 		if ( is_admin() ) {

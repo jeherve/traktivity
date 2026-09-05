@@ -28,6 +28,7 @@ Plugin PHP sits at the root, named `<area>.traktivity.php`:
 | `helpers.traktivity.php` | Shared accessors for event and show data |
 | `blocks.traktivity.php` | Block registration |
 | `templates.traktivity.php` | Block templates and template parts |
+| `placements.traktivity.php` | Where the plugin puts its own blocks and parts |
 | `admin.traktivity.php` | Dashboard page, admin only |
 | `widgets/` | The legacy classic widget |
 | `src/` | Dashboard React app, and block sources under `src/blocks/` |
@@ -38,10 +39,14 @@ Those names look unusual because they are baked into the wordpress.org SVN
 layout. `phpcs.xml.dist` turns `WordPress.Files.FileName` off deliberately for
 that reason. Follow the pattern rather than fixing it.
 
-**Do not edit `Traktivity::load_plugin()` for 3.1.0 work.** Every file that
-milestone needs is already required, including the ones still empty. The same
-goes for the `files` allowlist in `package.json`. Both were wired up front
-precisely so parallel branches don't collide on them.
+**Think twice before editing `Traktivity::load_plugin()` or the `files`
+allowlist in `package.json`.** Both were wired up front for the 3.1.0 files so
+parallel branches would not collide on them, so a branch that only fills in an
+already-required file must leave them alone.
+
+A genuinely new file is the exception, and it does have to be added to both. Say
+so in the pull request when you do, since it is the one place two branches can
+still conflict.
 
 ## Blocks
 

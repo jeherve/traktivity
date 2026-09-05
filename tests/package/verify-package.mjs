@@ -123,7 +123,7 @@ for ( const required of [
 	'templates/taxonomy-trakt_show.html',
 	'templates/taxonomy-traktivity.html',
 	'templates/parts/traktivity-recent-watches.html',
-	'templates/parts/traktivity-watch-stats.html',
+	'templates/parts/traktivity-recent-compact.html',
 ] ) {
 	check( has( required ), `ships ${ required }` );
 }

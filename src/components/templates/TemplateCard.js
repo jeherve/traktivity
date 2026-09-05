@@ -82,7 +82,16 @@ export default function TemplateCard( {
 					{ template.type === 'wp_template_part' && (
 						<p className="traktivity-template-card__note">
 							{ __(
-								'Nothing places this for you. Switch it on, then add a Template Part block wherever you want it.',
+								'This is the layout a placement below uses. Editing it here changes wherever that placement appears.',
+								'traktivity'
+							) }
+						</p>
+					) }
+
+					{ template.type === 'placement' && (
+						<p className="traktivity-template-card__note">
+							{ __(
+								'Traktivity puts this on the page for you. You can move or remove it afterwards in the Site Editor.',
 								'traktivity'
 							) }
 						</p>

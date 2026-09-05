@@ -58,7 +58,23 @@ class TemplatePartsTest extends WP_UnitTestCase {
 	 *
 	 * @param string[] $slugs Part slugs to enable.
 	 */
-	private function enable( array $slugs ) {
+	/**
+	 * Switch on the placements that need the given parts.
+	 *
+	 * A part has no switch of its own: it backs a placement, and is provided
+	 * exactly when that placement is on.
+	 *
+	 * @param string[] $parts Part slugs to make available.
+	 */
+	private function enable( array $parts ) {
+		$slugs = array();
+
+		foreach ( Traktivity_Placements::available() as $slug => $placement ) {
+			if ( 'part' === $placement['type'] && in_array( $placement['part'], $parts, true ) ) {
+				$slugs[] = $slug;
+			}
+		}
+
 		update_option( Traktivity_Templates::OPTION, array_fill_keys( $slugs, true ) );
 	}
 
@@ -129,8 +145,8 @@ class TemplatePartsTest extends WP_UnitTestCase {
 	 */
 	public function test_part_id_is_namespaced_to_the_theme() {
 		$this->assertSame(
-			get_stylesheet() . '//traktivity-watch-stats',
-			Traktivity_Templates::part_id( 'traktivity-watch-stats' )
+			get_stylesheet() . '//traktivity-recent-compact',
+			Traktivity_Templates::part_id( 'traktivity-recent-compact' )
 		);
 	}
 
@@ -142,16 +158,16 @@ class TemplatePartsTest extends WP_UnitTestCase {
 			$this->markTestSkipped( 'No block theme available to switch to.' );
 		}
 
-		$this->enable( array( 'traktivity-watch-stats' ) );
+		$this->enable( array( 'traktivity-recent-compact' ) );
 
-		$id   = Traktivity_Templates::part_id( 'traktivity-watch-stats' );
+		$id   = Traktivity_Templates::part_id( 'traktivity-recent-compact' );
 		$part = Traktivity_Templates::provide_template_part( null, $id, 'wp_template_part' );
 
 		$this->assertInstanceOf( 'WP_Block_Template', $part );
-		$this->assertSame( 'traktivity-watch-stats', $part->slug );
+		$this->assertSame( 'traktivity-recent-compact', $part->slug );
 		$this->assertSame( 'plugin', $part->source );
 		$this->assertFalse( $part->has_theme_file );
-		$this->assertStringContainsString( 'traktivity/watch-stats', $part->content );
+		$this->assertStringContainsString( 'traktivity/event-card', $part->content );
 	}
 
 	/**
@@ -167,14 +183,13 @@ class TemplatePartsTest extends WP_UnitTestCase {
 			$this->markTestSkipped( 'No block theme available to switch to.' );
 		}
 
-		$this->enable( array( 'traktivity-watch-stats', 'traktivity-series-index' ) );
+		$this->enable( array( 'traktivity-recent-watches', 'traktivity-recent-compact' ) );
 
 		$listed = Traktivity_Templates::list_template_parts( array(), array(), 'wp_template_part' );
 		$slugs  = wp_list_pluck( $listed, 'slug' );
 
-		$this->assertContains( 'traktivity-watch-stats', $slugs );
-		$this->assertContains( 'traktivity-series-index', $slugs );
-		$this->assertNotContains( 'traktivity-recent-watches', $slugs, 'A part that is off should not be listed.' );
+		$this->assertContains( 'traktivity-recent-compact', $slugs );
+		$this->assertContains( 'traktivity-recent-watches', $slugs );
 	}
 
 	/**
@@ -188,16 +203,16 @@ class TemplatePartsTest extends WP_UnitTestCase {
 			$this->markTestSkipped( 'No block theme available to switch to.' );
 		}
 
-		$this->enable( array( 'traktivity-watch-stats' ) );
+		$this->enable( array( 'traktivity-recent-compact' ) );
 
 		$saved         = new WP_Block_Template();
-		$saved->slug   = 'traktivity-watch-stats';
+		$saved->slug   = 'traktivity-recent-compact';
 		$saved->source = 'custom';
 
 		$listed = Traktivity_Templates::list_template_parts( array( $saved ), array(), 'wp_template_part' );
 		$slugs  = wp_list_pluck( $listed, 'slug' );
 
-		$this->assertSame( 1, count( array_keys( $slugs, 'traktivity-watch-stats', true ) ) );
+		$this->assertSame( 1, count( array_keys( $slugs, 'traktivity-recent-compact', true ) ) );
 		$this->assertSame( 'custom', $listed[0]->source );
 	}
 
@@ -209,22 +224,22 @@ class TemplatePartsTest extends WP_UnitTestCase {
 			$this->markTestSkipped( 'No block theme available to switch to.' );
 		}
 
-		$this->enable( array( 'traktivity-watch-stats', 'traktivity-series-index' ) );
+		$this->enable( array( 'traktivity-recent-watches', 'traktivity-recent-compact' ) );
 
 		$listed = Traktivity_Templates::list_template_parts(
 			array(),
-			array( 'slug__in' => array( 'traktivity-series-index' ) ),
+			array( 'slug__in' => array( 'traktivity-recent-compact' ) ),
 			'wp_template_part'
 		);
 
-		$this->assertSame( array( 'traktivity-series-index' ), wp_list_pluck( $listed, 'slug' ) );
+		$this->assertSame( array( 'traktivity-recent-compact' ), wp_list_pluck( $listed, 'slug' ) );
 	}
 
 	/**
 	 * Whole templates and classic themes are left alone.
 	 */
 	public function test_listing_leaves_other_requests_alone() {
-		$this->enable( array( 'traktivity-watch-stats' ) );
+		$this->enable( array( 'traktivity-recent-compact' ) );
 
 		$this->assertSame( array(), Traktivity_Templates::list_template_parts( array(), array(), 'wp_template' ) );
 
@@ -246,7 +261,7 @@ class TemplatePartsTest extends WP_UnitTestCase {
 	 * A part that is switched off is not provided.
 	 */
 	public function test_disabled_part_is_not_provided() {
-		$id = Traktivity_Templates::part_id( 'traktivity-watch-stats' );
+		$id = Traktivity_Templates::part_id( 'traktivity-recent-compact' );
 
 		$this->assertNull( Traktivity_Templates::provide_template_part( null, $id, 'wp_template_part' ) );
 	}
@@ -258,16 +273,16 @@ class TemplatePartsTest extends WP_UnitTestCase {
 	 * the filter is handed a template and hands it straight back.
 	 */
 	public function test_an_existing_template_wins() {
-		$this->enable( array( 'traktivity-watch-stats' ) );
+		$this->enable( array( 'traktivity-recent-compact' ) );
 
 		$existing          = new WP_Block_Template();
-		$existing->slug    = 'traktivity-watch-stats';
+		$existing->slug    = 'traktivity-recent-compact';
 		$existing->source  = 'custom';
 		$existing->content = 'Edited by the site owner.';
 
 		$provided = Traktivity_Templates::provide_template_part(
 			$existing,
-			Traktivity_Templates::part_id( 'traktivity-watch-stats' ),
+			Traktivity_Templates::part_id( 'traktivity-recent-compact' ),
 			'wp_template_part'
 		);
 
@@ -279,7 +294,7 @@ class TemplatePartsTest extends WP_UnitTestCase {
 	 * An unrelated ID is left alone.
 	 */
 	public function test_other_ids_are_left_alone() {
-		$this->enable( array( 'traktivity-watch-stats' ) );
+		$this->enable( array( 'traktivity-recent-compact' ) );
 
 		$this->assertNull(
 			Traktivity_Templates::provide_template_part( null, get_stylesheet() . '//header', 'wp_template_part' )
@@ -290,12 +305,12 @@ class TemplatePartsTest extends WP_UnitTestCase {
 	 * A whole template asking for the same ID is left alone.
 	 */
 	public function test_whole_templates_are_left_alone() {
-		$this->enable( array( 'traktivity-watch-stats' ) );
+		$this->enable( array( 'traktivity-recent-compact' ) );
 
 		$this->assertNull(
 			Traktivity_Templates::provide_template_part(
 				null,
-				Traktivity_Templates::part_id( 'traktivity-watch-stats' ),
+				Traktivity_Templates::part_id( 'traktivity-recent-compact' ),
 				'wp_template'
 			)
 		);
@@ -305,12 +320,12 @@ class TemplatePartsTest extends WP_UnitTestCase {
 	 * Nothing is provided on a classic theme.
 	 */
 	public function test_nothing_is_provided_on_a_classic_theme() {
-		$this->enable( array( 'traktivity-watch-stats' ) );
+		$this->enable( array( 'traktivity-recent-compact' ) );
 
 		add_filter( 'wp_is_block_theme', '__return_false' );
 		$part = Traktivity_Templates::provide_template_part(
 			null,
-			Traktivity_Templates::part_id( 'traktivity-watch-stats' ),
+			Traktivity_Templates::part_id( 'traktivity-recent-compact' ),
 			'wp_template_part'
 		);
 		remove_filter( 'wp_is_block_theme', '__return_false' );
