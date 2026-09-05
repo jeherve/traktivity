@@ -30,21 +30,24 @@ $traktivity_network = traktivity_get_show_network( $traktivity_term->term_id );
 $traktivity_minutes = traktivity_get_show_runtime( $traktivity_term->term_id );
 $traktivity_runtime = $traktivity_minutes > 0 ? Traktivity_Stats::convert_time( $traktivity_minutes ) : '';
 
-/*
- * A 16:9 still from TMDb rather than the 2:3 poster the meta key suggests, so
- * it gets a landscape frame. Built here rather than inline below, so the
- * escaping annotation sits on one line the sniff can read.
- */
-$traktivity_art = Traktivity_Blocks::frame(
-	isset( $traktivity_poster['id'] ) ? (int) $traktivity_poster['id'] : 0,
-	$traktivity_term->name,
-	'landscape'
-);
-
 $traktivity_wrapper = get_block_wrapper_attributes( array( 'class' => 'traktivity-showhead' ) );
 ?>
 <header <?php echo $traktivity_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Prepared by get_block_wrapper_attributes(). ?>>
 	<?php if ( ! isset( $attributes['showImage'] ) || $attributes['showImage'] ) : ?>
+		<?php
+		/*
+		 * A 16:9 still from TMDb rather than the 2:3 poster the meta key
+		 * suggests, so it gets a landscape frame. Built into a variable rather
+		 * than inline so the escaping annotation sits on one line the sniff can
+		 * read, and built in here so a header with its image turned off never
+		 * asks for the attachment.
+		 */
+		$traktivity_art = Traktivity_Blocks::frame(
+			isset( $traktivity_poster['id'] ) ? (int) $traktivity_poster['id'] : 0,
+			$traktivity_term->name,
+			'landscape'
+		);
+		?>
 		<div class="traktivity-showhead__art">
 			<?php echo $traktivity_art; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in Traktivity_Blocks::frame(). ?>
 		</div>

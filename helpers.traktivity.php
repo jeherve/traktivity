@@ -67,14 +67,23 @@ function traktivity_empty_event_context(): array {
  *
  * @return WP_Term|null First term, or null when there is none.
  */
-function traktivity_first_term( int $post_id, string $taxonomy ) {
+function traktivity_first_term( int $post_id, string $taxonomy ): ?WP_Term {
 	$terms = get_the_terms( $post_id, $taxonomy );
 
 	if ( is_wp_error( $terms ) || empty( $terms ) ) {
 		return null;
 	}
 
-	return $terms[0];
+	/*
+	 * reset() rather than $terms[0]. get_the_terms() hands its array through a
+	 * filter before returning, and anything narrowing it with array_filter()
+	 * keeps the original keys, so index 0 is not guaranteed to be there.
+	 * Anything that is not a term counts as no term, rather than reaching a
+	 * caller that reads ->name off it.
+	 */
+	$term = reset( $terms );
+
+	return $term instanceof WP_Term ? $term : null;
 }
 
 /**
@@ -153,7 +162,15 @@ function traktivity_get_event( int $post_id ): array {
 	 * @param array $context Event context.
 	 * @param int   $post_id Event post ID.
 	 */
-	return (array) apply_filters( 'traktivity_event_context', $context, $post_id );
+	$traktivity_filtered = apply_filters( 'traktivity_event_context', $context, $post_id );
+
+	/*
+	 * A filter returning something other than an array is ignored rather than
+	 * cast: (array) null is empty and (array) 'x' is a one-item list, and
+	 * either leaves callers with a context missing every documented key, which
+	 * they read without checking.
+	 */
+	return is_array( $traktivity_filtered ) ? $traktivity_filtered : $context;
 }
 
 /**

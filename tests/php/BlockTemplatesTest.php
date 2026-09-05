@@ -11,11 +11,49 @@
 class BlockTemplatesTest extends WP_UnitTestCase {
 
 	/**
+	 * Theme active before a test switched it.
+	 *
+	 * @var string
+	 */
+	private $previous_theme = '';
+
+	/**
 	 * Start each test with nothing switched on.
 	 */
 	public function set_up() {
 		parent::set_up();
 		delete_option( Traktivity_Templates::OPTION );
+	}
+
+	/**
+	 * Put any switched theme back.
+	 */
+	public function tear_down() {
+		if ( '' !== $this->previous_theme ) {
+			switch_theme( $this->previous_theme );
+			$this->previous_theme = '';
+		}
+
+		parent::tear_down();
+	}
+
+	/**
+	 * Switch to a block theme.
+	 *
+	 * Query shaping only happens where our templates can actually render, so
+	 * anything testing it has to be on a theme that consults the registry.
+	 *
+	 * @return bool Whether a block theme was available.
+	 */
+	private function use_block_theme() {
+		if ( ! wp_get_theme( 'twentytwentyfour' )->exists() ) {
+			return false;
+		}
+
+		$this->previous_theme = get_stylesheet();
+		switch_theme( 'twentytwentyfour' );
+
+		return true;
 	}
 
 	/**
@@ -145,47 +183,31 @@ class BlockTemplatesTest extends WP_UnitTestCase {
 	 * a bundled block theme for the duration.
 	 */
 	public function test_enabled_template_registers() {
-		$theme = wp_get_theme( 'twentytwentyfour' );
-
-		if ( ! $theme->exists() ) {
+		if ( ! $this->use_block_theme() ) {
 			$this->markTestSkipped( 'No block theme available to switch to.' );
 		}
-
-		$previous = get_stylesheet();
-		switch_theme( 'twentytwentyfour' );
 
 		$this->enable( array( 'single-traktivity_event' ) );
 		Traktivity_Templates::register_templates();
 
 		$registered = get_block_templates( array( 'slug__in' => array( 'single-traktivity_event' ) ) );
-		$slugs      = wp_list_pluck( $registered, 'slug' );
 
-		switch_theme( $previous );
-
-		$this->assertContains( 'single-traktivity_event', $slugs );
+		$this->assertContains( 'single-traktivity_event', wp_list_pluck( $registered, 'slug' ) );
 	}
 
 	/**
 	 * A template that is off does not register.
 	 */
 	public function test_disabled_template_does_not_register() {
-		$theme = wp_get_theme( 'twentytwentyfour' );
-
-		if ( ! $theme->exists() ) {
+		if ( ! $this->use_block_theme() ) {
 			$this->markTestSkipped( 'No block theme available to switch to.' );
 		}
-
-		$previous = get_stylesheet();
-		switch_theme( 'twentytwentyfour' );
 
 		Traktivity_Templates::register_templates();
 
 		$registered = get_block_templates( array( 'slug__in' => array( 'archive-traktivity_event' ) ) );
-		$slugs      = wp_list_pluck( $registered, 'slug' );
 
-		switch_theme( $previous );
-
-		$this->assertNotContains( 'archive-traktivity_event', $slugs );
+		$this->assertNotContains( 'archive-traktivity_event', wp_list_pluck( $registered, 'slug' ) );
 	}
 
 	/**
@@ -236,6 +258,10 @@ class BlockTemplatesTest extends WP_UnitTestCase {
 	 * round for it.
 	 */
 	public function test_series_archive_reads_oldest_first() {
+		if ( ! $this->use_block_theme() ) {
+			$this->markTestSkipped( 'No block theme available to switch to.' );
+		}
+
 		$this->enable( array( 'taxonomy-trakt_show' ) );
 
 		$query    = $this->series_archive_query( 'some-series' );
@@ -271,6 +297,10 @@ class BlockTemplatesTest extends WP_UnitTestCase {
 	 * two and a half rows tall.
 	 */
 	public function test_archive_page_size_follows_the_template() {
+		if ( ! $this->use_block_theme() ) {
+			$this->markTestSkipped( 'No block theme available to switch to.' );
+		}
+
 		$this->enable( array( 'archive-traktivity_event', 'taxonomy-trakt_show' ) );
 
 		$archive             = new WP_Query();
@@ -295,6 +325,10 @@ class BlockTemplatesTest extends WP_UnitTestCase {
 	 * The page size is filterable, so a site can hand control back to itself.
 	 */
 	public function test_archive_page_size_is_filterable() {
+		if ( ! $this->use_block_theme() ) {
+			$this->markTestSkipped( 'No block theme available to switch to.' );
+		}
+
 		$this->enable( array( 'archive-traktivity_event' ) );
 
 		add_filter( 'traktivity_archive_posts_per_page', static fn() => 5 );
@@ -327,6 +361,39 @@ class BlockTemplatesTest extends WP_UnitTestCase {
 		$GLOBALS['wp_the_query'] = $previous;
 
 		$this->assertSame( '', $archive->get( 'posts_per_page' ) );
+	}
+
+	/**
+	 * A classic theme's archives are left exactly as the theme wrote them.
+	 *
+	 * Our templates are never consulted there, so reordering the query or
+	 * changing its page size would reshape a page somebody else is drawing.
+	 */
+	public function test_classic_themes_are_left_alone() {
+		$this->enable( array( 'archive-traktivity_event', 'taxonomy-trakt_show' ) );
+
+		$archive                       = new WP_Query();
+		$archive->is_archive           = true;
+		$archive->is_post_type_archive = true;
+		$archive->set( 'post_type', 'traktivity_event' );
+
+		$series   = $this->series_archive_query( 'classic-series' );
+		$previous = $GLOBALS['wp_the_query'];
+
+		add_filter( 'wp_is_block_theme', '__return_false' );
+
+		$GLOBALS['wp_the_query'] = $archive;
+		Traktivity_Templates::shape_archive_query( $archive );
+
+		$GLOBALS['wp_the_query'] = $series;
+		Traktivity_Templates::shape_archive_query( $series );
+
+		remove_filter( 'wp_is_block_theme', '__return_false' );
+		$GLOBALS['wp_the_query'] = $previous;
+
+		$this->assertSame( '', $archive->get( 'posts_per_page' ) );
+		$this->assertSame( '', $series->get( 'posts_per_page' ) );
+		$this->assertSame( '', $series->get( 'order' ) );
 	}
 
 	/**

@@ -201,6 +201,30 @@ class Traktivity_Templates {
 	}
 
 	/**
+	 * Whether one of our templates is the one actually rendering.
+	 *
+	 * Switched on is not enough. The registry is only consulted by block
+	 * themes, and where the active theme carries the same slug its own
+	 * template wins over ours. In both cases the markup on screen belongs to
+	 * somebody else, and shaping the query would reorder a page we are not
+	 * drawing. The settings screen says as much on a theme-provided template,
+	 * so it had better be true.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param string $slug Template slug.
+	 *
+	 * @return bool
+	 */
+	private static function applies( string $slug ): bool {
+		if ( ! self::is_enabled( $slug ) || ! wp_is_block_theme() ) {
+			return false;
+		}
+
+		return ! in_array( $slug, self::theme_provided_slugs(), true );
+	}
+
+	/**
 	 * Shape the archive queries our templates inherit.
 	 *
 	 * Two things the templates cannot do for themselves.
@@ -226,7 +250,7 @@ class Traktivity_Templates {
 			return;
 		}
 
-		if ( $query->is_tax( 'trakt_show' ) && self::is_enabled( 'taxonomy-trakt_show' ) ) {
+		if ( $query->is_tax( 'trakt_show' ) && self::applies( 'taxonomy-trakt_show' ) ) {
 			/**
 			 * Filter the order a single series' archive reads in.
 			 *
@@ -242,14 +266,14 @@ class Traktivity_Templates {
 			return;
 		}
 
-		if ( $query->is_post_type_archive( 'traktivity_event' ) && self::is_enabled( 'archive-traktivity_event' ) ) {
+		if ( $query->is_post_type_archive( 'traktivity_event' ) && self::applies( 'archive-traktivity_event' ) ) {
 			$query->set( 'posts_per_page', self::posts_per_page( 'archive-traktivity_event', 24 ) );
 
 			return;
 		}
 
 		foreach ( array( 'trakt_genre', 'trakt_year', 'trakt_type' ) as $taxonomy ) {
-			if ( $query->is_tax( $taxonomy ) && self::is_enabled( 'taxonomy-' . $taxonomy ) ) {
+			if ( $query->is_tax( $taxonomy ) && self::applies( 'taxonomy-' . $taxonomy ) ) {
 				$query->set( 'posts_per_page', self::posts_per_page( 'taxonomy-' . $taxonomy, 24 ) );
 
 				return;
@@ -349,21 +373,21 @@ class Traktivity_Templates {
 	 * @return string[] Slugs the theme provides.
 	 */
 	public static function theme_provided_slugs(): array {
-		if ( ! wp_is_block_theme() || ! function_exists( 'get_block_templates' ) ) {
+		if ( ! wp_is_block_theme() ) {
 			return array();
 		}
 
-		$slugs = array_keys( self::available() );
-		$found = get_block_templates( array( 'slug__in' => $slugs ), 'wp_template' );
-		$ours  = array();
+		$slugs      = array_keys( self::available() );
+		$found      = get_block_templates( array( 'slug__in' => $slugs ), 'wp_template' );
+		$from_theme = array();
 
 		foreach ( $found as $template ) {
 			if ( 'theme' === $template->source ) {
-				$ours[] = $template->slug;
+				$from_theme[] = $template->slug;
 			}
 		}
 
-		return array_values( array_unique( $ours ) );
+		return array_values( array_unique( $from_theme ) );
 	}
 
 	/**
@@ -457,7 +481,7 @@ class Traktivity_Templates {
 	 *
 	 * @return WP_Block_Template|null Null when the markup is unreadable.
 	 */
-	private static function build_part( string $slug, array $part ) {
+	private static function build_part( string $slug, array $part ): ?WP_Block_Template {
 		$content = self::content( $part['file'] );
 
 		if ( '' === $content ) {
