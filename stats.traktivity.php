@@ -274,6 +274,13 @@ class Traktivity_Stats {
 		 */
 		$summary = (array) apply_filters( 'traktivity_stats_summary', $summary );
 
+		/*
+		 * A callback that drops a key would leave that hole in the cache for
+		 * half a day, and callers read these keys without checking they exist,
+		 * so anything missing goes back before the array is cached or returned.
+		 */
+		$summary = wp_parse_args( $summary, self::empty_summary() );
+
 		set_transient( self::SUMMARY_TRANSIENT, $summary, 12 * HOUR_IN_SECONDS );
 
 		return $summary;
@@ -326,10 +333,21 @@ class Traktivity_Stats {
 	 *
 	 * @since 3.1.0
 	 *
-	 * @param int $post_id Post ID.
+	 * @param int          $post_id Post ID.
+	 * @param WP_Post|null $post    Post object, as passed by both hooks.
 	 */
-	public static function flush_on_event_change( $post_id ) {
-		if ( 'traktivity_event' === get_post_type( $post_id ) ) {
+	public static function flush_on_event_change( $post_id, $post = null ) {
+		/*
+		 * deleted_post fires once the row is gone, so the object the hook
+		 * hands over is the only thing guaranteed to still describe it. Today
+		 * the lookup happens to work because core cleans the post cache after
+		 * the hook rather than before, which is not something to rely on. The
+		 * lookup stays as a fallback for anything firing this with one
+		 * argument.
+		 */
+		$type = $post instanceof WP_Post ? $post->post_type : get_post_type( $post_id );
+
+		if ( 'traktivity_event' === $type ) {
 			self::flush();
 		}
 	}
@@ -392,5 +410,5 @@ class Traktivity_Stats {
 	}
 }
 
-add_action( 'save_post', array( 'Traktivity_Stats', 'flush_on_event_change' ) );
-add_action( 'deleted_post', array( 'Traktivity_Stats', 'flush_on_event_change' ) );
+add_action( 'save_post', array( 'Traktivity_Stats', 'flush_on_event_change' ), 10, 2 );
+add_action( 'deleted_post', array( 'Traktivity_Stats', 'flush_on_event_change' ), 10, 2 );

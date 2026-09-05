@@ -91,9 +91,11 @@ class WatchStatsBlockTest extends WP_UnitTestCase {
 		$html = $this->render();
 
 		$this->assertStringContainsString( 'traktivity-stats', $html );
+		$this->assertStringContainsString( 'Hours', $html );
 		$this->assertStringContainsString( 'Entries', $html );
 		$this->assertStringContainsString( 'Episodes', $html );
 		$this->assertStringContainsString( 'Films', $html );
+		$this->assertStringContainsString( 'Series', $html );
 		$this->assertStringContainsString( 'Logging since', $html );
 	}
 
@@ -108,6 +110,16 @@ class WatchStatsBlockTest extends WP_UnitTestCase {
 		$html = $this->render( array( 'figures' => array( 'films', 'entries' ) ) );
 
 		$this->assertStringNotContainsString( 'Episodes', $html );
+
+		/*
+		 * Both labels have to be there before their positions mean anything: a
+		 * missing one makes strpos() return false, which compares as earlier
+		 * than every real position and would pass the order check below on a
+		 * block that rendered nothing.
+		 */
+		$this->assertStringContainsString( 'Films', $html );
+		$this->assertStringContainsString( 'Entries', $html );
+
 		$this->assertLessThan(
 			strpos( $html, 'Entries' ),
 			strpos( $html, 'Films' ),

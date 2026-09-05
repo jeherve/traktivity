@@ -184,7 +184,7 @@ class EventDetailsBlockTest extends WP_UnitTestCase {
 	/**
 	 * A runtime of one minute is singular.
 	 */
-	public function test_runtime_is_pluralised() {
+	public function test_runtime_of_one_minute_is_singular() {
 		$post_id = $this->make_event(
 			array(
 				'trakt_show_id' => 6,

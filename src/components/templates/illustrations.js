@@ -146,18 +146,23 @@ export function CompactList() {
  */
 export default function illustrationFor( slug ) {
 	switch ( slug ) {
+		// Templates.
 		case 'single-traktivity_event':
 			return <SingleEntry />;
 		case 'taxonomy-trakt_show':
 			return <SeriesArchive />;
-		case 'traktivity-latest-watch':
+
+		// Placements. Keyed on the placement, not on the block or part behind
+		// it, because that is what the settings screen puts on a card.
+		case 'traktivity-latest-on-archive':
 			return <Hero />;
-		case 'traktivity-watch-stats':
+		case 'traktivity-totals-on-archive':
 			return <StatsBand />;
-		case 'traktivity-series-index':
+		case 'traktivity-series-after-entry':
 			return <SeriesIndex />;
-		case 'traktivity-recent-compact':
+		case 'traktivity-recent-in-footer':
 			return <CompactList />;
+
 		default:
 			return <ArchiveGrid />;
 	}

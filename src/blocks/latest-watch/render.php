@@ -103,9 +103,21 @@ $traktivity_wrapper = get_block_wrapper_attributes( array( 'class' => 'traktivit
 			<p class="traktivity-hero__kicker"><?php echo esc_html( $traktivity_kicker ); ?></p>
 		<?php endif; ?>
 
-		<?php if ( '' !== $traktivity_event['show_name'] && '' !== $traktivity_event['show_link'] ) : ?>
+		<?php if ( '' !== $traktivity_event['show_name'] ) : ?>
 			<p class="traktivity-hero__show">
-				<a href="<?php echo esc_url( $traktivity_event['show_link'] ); ?>"><?php echo esc_html( $traktivity_event['show_name'] ); ?></a>
+				<?php
+				/*
+				 * get_term_link() can fail, which empties show_link and leaves
+				 * the name behind. The name is the useful half, so it degrades
+				 * to plain text rather than disappearing, the way the event
+				 * card and the event title already do.
+				 */
+				?>
+				<?php if ( '' !== $traktivity_event['show_link'] ) : ?>
+					<a href="<?php echo esc_url( $traktivity_event['show_link'] ); ?>"><?php echo esc_html( $traktivity_event['show_name'] ); ?></a>
+				<?php else : ?>
+					<?php echo esc_html( $traktivity_event['show_name'] ); ?>
+				<?php endif; ?>
 			</p>
 		<?php endif; ?>
 

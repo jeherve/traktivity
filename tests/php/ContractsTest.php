@@ -109,9 +109,15 @@ class ContractsTest extends WP_UnitTestCase {
 	public function test_event_accessor_returns_the_full_shape() {
 		$post_id = $this->factory->post->create();
 
+		$expected = array_keys( traktivity_empty_event_context() );
+		$actual   = array_keys( traktivity_get_event( $post_id ) );
+
+		sort( $expected );
+		sort( $actual );
+
 		$this->assertSame(
-			array_keys( traktivity_empty_event_context() ),
-			array_keys( traktivity_get_event( $post_id ) ),
+			$expected,
+			$actual,
 			'traktivity_get_event() returned a different shape to the documented one.'
 		);
 	}
@@ -135,18 +141,28 @@ class ContractsTest extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_link_accessors
 	 *
-	 * @param string $accessor Function name.
+	 * @param string   $accessor Function name.
+	 * @param callable $subject  Builds something for the accessor to describe.
 	 */
-	public function test_link_accessor_shape( $accessor ) {
-		$links = $accessor( 0 );
+	public function test_link_accessor_shape( $accessor, $subject ) {
+		$links = $accessor( $subject() );
 
-		$this->assertIsArray( $links, "{$accessor}() should return an array." );
+		/*
+		 * Built against a real event and a real show. Passing 0 returns an
+		 * empty array from both, so the loop below never ran and the shape it
+		 * describes went unchecked.
+		 */
+		$this->assertNotEmpty( $links, "{$accessor}() found nothing to describe." );
 
 		foreach ( $links as $service => $link ) {
 			$this->assertIsString( $service, 'Links are keyed by service name.' );
+
+			$keys = array_keys( $link );
+			sort( $keys );
+
 			$this->assertSame(
 				array( 'label', 'url' ),
-				array_keys( $link ),
+				$keys,
 				"{$accessor}() entries carry a label and a url."
 			);
 		}
@@ -155,12 +171,32 @@ class ContractsTest extends WP_UnitTestCase {
 	/**
 	 * The accessors that return external links.
 	 *
-	 * @return array<string, array{string}>
+	 * Each case carries a callable that builds something for the accessor to
+	 * describe, since a data provider runs before the test case exists and
+	 * cannot make posts or terms itself.
+	 *
+	 * @return array<string, array{string, callable}>
 	 */
 	public function data_link_accessors() {
 		return array(
-			'event links' => array( 'traktivity_get_event_links' ),
-			'show links'  => array( 'traktivity_get_show_links' ),
+			'event links' => array(
+				'traktivity_get_event_links',
+				static function () {
+					$post_id = self::factory()->post->create( array( 'post_type' => 'traktivity_event' ) );
+					update_post_meta( $post_id, 'trakt_movie_id', 4242 );
+
+					return $post_id;
+				},
+			),
+			'show links'  => array(
+				'traktivity_get_show_links',
+				static function () {
+					$term = self::factory()->term->create_and_get( array( 'taxonomy' => 'trakt_show' ) );
+					update_term_meta( $term->term_id, 'show_external_ids', array( 'trakt' => 4242 ) );
+
+					return $term->term_id;
+				},
+			),
 		);
 	}
 
