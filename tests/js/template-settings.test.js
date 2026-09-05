@@ -29,7 +29,8 @@ const PLACEMENT = {
 	editSlug: '',
 	editType: '',
 	title: 'Totals above the archive',
-	description: 'Hours, entries, episodes, films and series, at the top of your archive.',
+	description:
+		'Hours, entries, episodes, films and series, at the top of your archive.',
 	enabled: false,
 	themeProvides: false,
 };
@@ -70,7 +71,9 @@ describe( 'TemplateSettings', () => {
 		render( <TemplateSettings /> );
 
 		expect( screen.getByText( 'Everything watched' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Totals above the archive' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Totals above the archive' )
+		).toBeInTheDocument();
 	} );
 
 	it( 'says the plugin does the placing, and it can be moved after', () => {
