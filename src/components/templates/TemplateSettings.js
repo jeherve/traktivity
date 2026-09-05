@@ -33,9 +33,24 @@ function editUrlFor( template ) {
 		return '';
 	}
 
+	/*
+	 * A placement has no template of its own. The ones built from a part point
+	 * at that part, so "Preview and edit" opens the layout being placed; the
+	 * ones that hook a block have nothing to open until the block is in a
+	 * template, so they get no link.
+	 */
+	const postType =
+		template.type === 'placement' ? template.editType : template.type;
+	const slug =
+		template.type === 'placement' ? template.editSlug : template.slug;
+
+	if ( ! postType || ! slug ) {
+		return '';
+	}
+
 	return addQueryArgs( settings.siteEditorUrl, {
-		postType: template.type,
-		postId: `${ settings.themeStylesheet }//${ template.slug }`,
+		postType,
+		postId: `${ settings.themeStylesheet }//${ slug }`,
 		canvas: 'edit',
 	} );
 }

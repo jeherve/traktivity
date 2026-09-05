@@ -302,27 +302,39 @@ class Traktivity_Templates {
 				'title'       => __( 'Recently watched', 'traktivity' ),
 				'description' => __( 'The last few things you watched, as a grid of cards.', 'traktivity' ),
 			),
-			'traktivity-latest-watch'   => array(
-				'file'        => 'parts/traktivity-latest-watch.html',
-				'title'       => __( 'Last watched, large', 'traktivity' ),
-				'description' => __( 'The most recent thing you watched, shown large.', 'traktivity' ),
-			),
-			'traktivity-watch-stats'    => array(
-				'file'        => 'parts/traktivity-watch-stats.html',
-				'title'       => __( 'Watch totals', 'traktivity' ),
-				'description' => __( 'Hours, entries, episodes, films and series, as a band.', 'traktivity' ),
-			),
-			'traktivity-series-index'   => array(
-				'file'        => 'parts/traktivity-series-index.html',
-				'title'       => __( 'Every series, A to Z', 'traktivity' ),
-				'description' => __( 'A full index of every series you have logged.', 'traktivity' ),
-			),
 			'traktivity-recent-compact' => array(
 				'file'        => 'parts/traktivity-recent-compact.html',
 				'title'       => __( 'Recently watched, compact', 'traktivity' ),
 				'description' => __( 'A short text list, for a sidebar or a footer.', 'traktivity' ),
 			),
 		);
+	}
+
+	/**
+	 * Whether a part is needed by something that is switched on.
+	 *
+	 * A part is not switched on in its own right. It exists to give a
+	 * placement its markup, so it is provided exactly when a placement using
+	 * it is on. One switch per thing the site owner actually sees.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param string $slug Part slug.
+	 *
+	 * @return bool
+	 */
+	public static function part_is_needed( string $slug ): bool {
+		foreach ( Traktivity_Placements::available() as $placement_slug => $placement ) {
+			if (
+				'part' === $placement['type']
+				&& $placement['part'] === $slug
+				&& Traktivity_Placements::is_enabled( $placement_slug )
+			) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -379,18 +391,11 @@ class Traktivity_Templates {
 			);
 		}
 
-		foreach ( self::available_parts() as $slug => $part ) {
-			$entries[] = array(
-				'slug'          => $slug,
-				'type'          => 'wp_template_part',
-				'title'         => $part['title'],
-				'description'   => $part['description'],
-				'enabled'       => self::is_enabled( $slug ),
-				'themeProvides' => false,
-			);
-		}
-
-		return $entries;
+		/*
+		 * Parts are absent on purpose. One is never switched on by itself; it
+		 * backs a placement, and the placement's card links to it for editing.
+		 */
+		return array_merge( $entries, Traktivity_Placements::for_settings() );
 	}
 
 	/**
@@ -406,7 +411,10 @@ class Traktivity_Templates {
 	 * @return array The stored value.
 	 */
 	public static function save_enabled( array $enabled ): array {
-		$known = array_merge( array_keys( self::available() ), array_keys( self::available_parts() ) );
+		$known = array_merge(
+			array_keys( self::available() ),
+			array_keys( Traktivity_Placements::available() )
+		);
 		$clean = array();
 
 		foreach ( $known as $slug ) {
@@ -503,7 +511,7 @@ class Traktivity_Templates {
 		$wanted   = isset( $query['slug__in'] ) ? (array) $query['slug__in'] : array();
 
 		foreach ( self::available_parts() as $slug => $part ) {
-			if ( in_array( $slug, $existing, true ) || ! self::is_enabled( $slug ) ) {
+			if ( in_array( $slug, $existing, true ) || ! self::part_is_needed( $slug ) ) {
 				continue;
 			}
 
@@ -538,7 +546,7 @@ class Traktivity_Templates {
 		}
 
 		foreach ( self::available_parts() as $slug => $part ) {
-			if ( self::part_id( $slug ) !== $id || ! self::is_enabled( $slug ) ) {
+			if ( self::part_id( $slug ) !== $id || ! self::part_is_needed( $slug ) ) {
 				continue;
 			}
 

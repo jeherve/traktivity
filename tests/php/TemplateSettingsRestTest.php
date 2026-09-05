@@ -90,7 +90,7 @@ class TemplateSettingsRestTest extends WP_UnitTestCase {
 		$slugs = wp_list_pluck( $data['templates'], 'slug' );
 
 		$this->assertContains( 'single-traktivity_event', $slugs );
-		$this->assertContains( 'traktivity-watch-stats', $slugs );
+		$this->assertContains( 'traktivity-totals-on-archive', $slugs );
 
 		foreach ( $data['templates'] as $template ) {
 			$this->assertFalse( $template['enabled'], "{$template['slug']} is on by default." );
@@ -106,7 +106,7 @@ class TemplateSettingsRestTest extends WP_UnitTestCase {
 		$types = wp_list_pluck( $this->request( 'GET' )->get_data()['templates'], 'type', 'slug' );
 
 		$this->assertSame( 'wp_template', $types['single-traktivity_event'] );
-		$this->assertSame( 'wp_template_part', $types['traktivity-watch-stats'] );
+		$this->assertSame( 'placement', $types['traktivity-totals-on-archive'] );
 	}
 
 	/**
@@ -194,6 +194,6 @@ class TemplateSettingsRestTest extends WP_UnitTestCase {
 
 		$this->assertArrayHasKey( 'single-traktivity_event', $flags );
 		$this->assertIsBool( $flags['single-traktivity_event'] );
-		$this->assertFalse( $flags['traktivity-watch-stats'], 'A part is never theme-provided.' );
+		$this->assertFalse( $flags['traktivity-totals-on-archive'], 'A placement is never theme-provided.' );
 	}
 }
