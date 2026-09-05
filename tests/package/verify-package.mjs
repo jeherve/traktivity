@@ -80,12 +80,6 @@ check(
 		leaked.length ? `: ${ leaked.join( ', ' ) }` : ''
 	}`
 );
-check(
-	leaked.length === 0,
-	`no development files ship${
-		leaked.length ? `: ${ leaked.join( ', ' ) }` : ''
-	}`
-);
 
 // The files WordPress needs to boot the plugin and its dashboard.
 for ( const required of [

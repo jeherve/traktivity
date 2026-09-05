@@ -350,10 +350,10 @@ class Traktivity_List_Widget extends WP_Widget {
 		$event_title .= '<div class="episode-details">';
 
 		$event_title .= sprintf(
-			/* translators: additional informaton about each episode displayed in the widget listing recent watched TV shows. */
+			/* translators: 1: link to the show. 2: season number. 3: episode number. */
 			_x(
 				'%1$s, season %2$d, episode %3$d',
-				'1: Episode title. 2. Show title. 3. Season number. 4. Episode number.',
+				'Episode details listed under each event in the recent watches widget',
 				'traktivity'
 			),
 			$show_title,
