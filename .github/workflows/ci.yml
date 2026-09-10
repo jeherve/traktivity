@@ -91,6 +91,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Only Chromium is needed, and the runner needs the system libraries that
+      # come with it, so install it here rather than letting wp-scripts pull
+      # every browser family down at test time.
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
@@ -102,6 +105,8 @@ jobs:
 
       - name: End-to-end tests
         run: npm run test:e2e
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 'true'
 
       - name: Upload failure artifacts
         if: failure()
