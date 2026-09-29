@@ -63,6 +63,6 @@
     "@wordpress/env": "^11.14.0",
     "@wordpress/i18n": "^6.27.0",
     "@wordpress/jest-console": "^9.2.0",
-    "@wordpress/scripts": "^35.0.0"
+    "@wordpress/scripts": "^36.0.0"
   }
 }
