@@ -46,7 +46,7 @@ function event( id, title, withMedia = true ) {
 							},
 						},
 					],
-			  }
+				}
 			: undefined,
 	};
 }

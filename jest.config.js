@@ -1,13 +1,17 @@
 /**
  * Jest configuration.
  *
- * Builds on the @wordpress/scripts defaults, and points Jest at tests/js so
- * that test files stay out of the directory webpack compiles.
+ * Builds on the WordPress Jest preset, and points Jest at tests/js so that
+ * test files stay out of the directory webpack compiles.
  */
-const defaultConfig = require( '@wordpress/scripts/config/jest-unit.config' );
-
 module.exports = {
-	...defaultConfig,
+	preset: '@wordpress/jest-preset-default',
+	transform: {
+		'\\.[jt]sx?$': [
+			'babel-jest',
+			{ presets: [ '@wordpress/babel-preset-default' ] },
+		],
+	},
 	rootDir: __dirname,
 	testMatch: [ '<rootDir>/tests/js/**/*.test.js' ],
 
