@@ -13,7 +13,7 @@ Are you a TV addict, and want to keep track of all the shows you've binge-watche
 
 This plugin allows you to log your watched TV series on Trakt.tv.
 
-**You need a Trakt.tv VIP account to set this up.** The plugin reads your watch history through the Trakt.tv API, and since the middle of 2026 only VIP accounts can create the API application that key comes from. If you already had a key before that change, it should keep working. See the FAQ below for the details. :(
+**You need a Trakt.tv API application to set this up.** The plugin reads your watch history through the Trakt.tv API, with a key that comes from an application you create on [the Trakt.tv developer portal](https://developer.trakt.tv/apps). It's free, but Trakt.tv will ask you to connect a GitHub account before you can create one. See the FAQ below for the details.
 
 Since 3.1.0 it also gives you ways to show that data. Seven blocks, default templates for your entries and archives, and a handful of editable parts you can drop wherever you like. All of it is off until you switch it on, from Traktivity > Dashboard.
 
@@ -45,13 +45,13 @@ Do you like that header image? Me too! Credit goes to [Andrew Branch](https://un
 
 = Do I need a Trakt.tv VIP account? =
 
-To set the plugin up from scratch, yes. The plugin needs a Trakt.tv API key to read your watch history, and creating the API application that gives you that key became a VIP feature in the middle of 2026. Trakt.tv also removed applications that belonged to free accounts.
+No. In the middle of 2026, creating a Trakt.tv API application became a VIP feature for a while, and Trakt.tv removed the applications that belonged to free accounts. That's no longer the case; free accounts can create applications again.
 
-This is what Trakt.tv support said about it:
+= Where do I create my Trakt.tv API application? =
 
-> Creating an API application is a VIP feature for now, so API applications of free accounts where they were the only users have been removed. We should have more options in the future, but for now, API applications is a VIP feature.
+Trakt.tv now manages applications on [their developer portal](https://developer.trakt.tv/apps). Before you can create one there, you'll need to connect a GitHub account to your Trakt.tv account. Once your application exists, copy its Client ID into the plugin's settings, along with your Trakt.tv username.
 
-So it may change again later. Nothing on the WordPress side changed here, and if you already have a working key the plugin keeps syncing exactly as it did before.
+If you already have a working key, you don't need to do anything; the plugin keeps syncing exactly as it did before. If your application was removed during the VIP-only period, you can create a new one.
 
 There is more discussion in [issue #678](https://github.com/jeherve/traktivity/issues/678).
 
