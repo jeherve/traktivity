@@ -12,10 +12,11 @@ change has to follow, and `src/blocks/README.md` covers adding a block.
 - Node, at the version in `.nvmrc`
 - PHP 7.4 or later, and Composer
 - Docker, for the local WordPress environments
-- A Trakt.tv VIP account, but only to test against the real Trakt.tv API.
-  Creating a Trakt.tv API application has been a VIP feature since the middle of
-  2026. The end-to-end tests answer both APIs locally, so they need no account
-  and no keys.
+- A Trakt.tv API application, but only to test against the real Trakt.tv API.
+  You create it on the [Trakt.tv developer portal](https://developer.trakt.tv/apps),
+  which asks you to connect a GitHub account first; a VIP account isn't needed.
+  The end-to-end tests answer both APIs locally, so they need no account and no
+  keys.
 
 ## Getting set up
 
