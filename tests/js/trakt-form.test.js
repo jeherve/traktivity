@@ -42,25 +42,22 @@ describe( 'TraktForm', () => {
 		);
 	} );
 
-	it( 'warns that creating a Trakt.tv API key now needs VIP', () => {
+	it( 'sends people to the Trakt.tv developer portal to create an app', () => {
 		setup();
 
-		// The Notice renders a screen reader copy alongside the visible text.
 		expect(
-			screen.getAllByText( /requires a VIP account/ ).length
-		).toBeGreaterThan( 0 );
-
-		expect(
-			screen.getByRole( 'link', { name: /Trakt\.tv VIP/ } )
-		).toHaveAttribute( 'href', 'https://trakt.tv/vip' );
+			screen.getByRole( 'link', { name: /Create your app on Trakt\.tv/ } )
+		).toHaveAttribute( 'href', 'https://developer.trakt.tv/apps' );
 	} );
 
-	it( 'keeps the VIP warning visible once a key is stored', () => {
-		setup( { trakt: { username: 'jeherve', key: 'stored-key' } } );
+	it( 'mentions the GitHub requirement rather than VIP', () => {
+		setup();
 
+		expect( screen.getByText( /connect a GitHub account/ ) ).toBeVisible();
+		expect( screen.queryByText( /requires a VIP account/ ) ).toBeNull();
 		expect(
-			screen.getAllByText( /requires a VIP account/ ).length
-		).toBeGreaterThan( 0 );
+			screen.queryByRole( 'link', { name: /Trakt\.tv VIP/ } )
+		).toBeNull();
 	} );
 
 	it( 'cannot be submitted until both fields are filled in', async () => {
