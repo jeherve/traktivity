@@ -3,7 +3,7 @@ Contributors: jeherve
 Tags: Trakt.tv, TV, Activity, Movies, Log
 Stable tag: 3.0.1
 Requires at least: 7.0
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 7.4
 License: GPLv2+
 
@@ -70,6 +70,10 @@ There is more discussion in [issue #678](https://github.com/jeherve/traktivity/i
 Needs WordPress 7.0 and PHP 7.4.
 
 == Changelog ==
+
+= Unreleased =
+
+* Use the new outline video camera icon for the Traktivity admin menu on WordPress 7.2, so it matches the rest of the menu. Older versions of WordPress keep the previous icon.
 
 = 3.0.1 =
 Release date: September 3, 2026
