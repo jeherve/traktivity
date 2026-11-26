@@ -1,6 +1,5 @@
 {
 	"core": null,
-	"plugins": [ "." ],
 	"port": 8889,
 	"testsEnvironment": false,
 	"config": {
@@ -10,6 +9,10 @@
 		"SCRIPT_DEBUG": true
 	},
 	"mappings": {
+		"wp-content/plugins/traktivity": ".",
 		"wp-content/mu-plugins": "./tests/e2e/mu-plugins"
+	},
+	"lifecycleScripts": {
+		"afterStart": "wp-env --config=.wp-env.tests.json run cli wp plugin activate traktivity"
 	}
 }
