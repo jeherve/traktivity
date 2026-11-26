@@ -28,19 +28,22 @@ if ( '' === $traktivity_event['type'] ) {
 /*
  * Rows are a list of label and value pairs rather than an array keyed by
  * label, because labels are translated and two can come back as the same text.
- * Most values are escaped as they are added; the two taxonomy lists arrive from
- * get_the_term_list() as markup and go through wp_kses_post() instead. Nothing
- * is escaped again at output, so a new row has to escape itself here.
+ * Values are escaped as they are added, and nothing is escaped again at
+ * output, so a new row has to escape itself here.
  */
 $traktivity_rows = array();
+
+$traktivity_linked = static function ( string $name, string $link ): string {
+	return '' !== $link
+		? sprintf( '<a href="%1$s">%2$s</a>', esc_url( $link ), esc_html( $name ) )
+		: esc_html( $name );
+};
 
 if ( ! isset( $attributes['showTaxonomies'] ) || $attributes['showTaxonomies'] ) {
 	if ( '' !== $traktivity_event['show_name'] ) {
 		$traktivity_rows[] = array(
 			__( 'Series', 'traktivity' ),
-			'' !== $traktivity_event['show_link']
-				? sprintf( '<a href="%1$s">%2$s</a>', esc_url( $traktivity_event['show_link'] ), esc_html( $traktivity_event['show_name'] ) )
-				: esc_html( $traktivity_event['show_name'] ),
+			$traktivity_linked( $traktivity_event['show_name'], $traktivity_event['show_link'] ),
 		);
 	}
 
@@ -49,14 +52,21 @@ if ( ! isset( $attributes['showTaxonomies'] ) || $attributes['showTaxonomies'] )
 		$traktivity_rows[] = array( __( 'Episode', 'traktivity' ), esc_html( number_format_i18n( $traktivity_event['episode'] ) ) );
 	}
 
-	$traktivity_genres = get_the_term_list( $traktivity_post_id, 'trakt_genre', '', ', ' );
-	if ( ! is_wp_error( $traktivity_genres ) && ! empty( $traktivity_genres ) ) {
-		$traktivity_rows[] = array( __( 'Genre', 'traktivity' ), wp_kses_post( $traktivity_genres ) );
+	if ( ! empty( $traktivity_event['genres'] ) ) {
+		$traktivity_genres = array();
+
+		foreach ( $traktivity_event['genres'] as $traktivity_genre ) {
+			$traktivity_genres[] = $traktivity_linked( $traktivity_genre['name'], $traktivity_genre['link'] );
+		}
+
+		$traktivity_rows[] = array( __( 'Genre', 'traktivity' ), implode( ', ', $traktivity_genres ) );
 	}
 
-	$traktivity_years = get_the_term_list( $traktivity_post_id, 'trakt_year', '', ', ' );
-	if ( ! is_wp_error( $traktivity_years ) && ! empty( $traktivity_years ) ) {
-		$traktivity_rows[] = array( __( 'Released', 'traktivity' ), wp_kses_post( $traktivity_years ) );
+	if ( '' !== $traktivity_event['year'] ) {
+		$traktivity_rows[] = array(
+			__( 'Released', 'traktivity' ),
+			$traktivity_linked( $traktivity_event['year'], $traktivity_event['year_link'] ),
+		);
 	}
 }
 

@@ -30,7 +30,8 @@ defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
  *
  * @return array{
  *     type: string, title: string, permalink: string, watched: string,
- *     watched_iso: string, runtime: int, year: string, image_id: int,
+ *     watched_iso: string, runtime: int, year: string, year_link: string,
+ *     genres: array<int, array{name: string, link: string}>, image_id: int,
  *     show_name: string, show_link: string, season: int, episode: int,
  *     episode_code: string
  * } Empty event context.
@@ -44,6 +45,8 @@ function traktivity_empty_event_context(): array {
 		'watched_iso'  => '',
 		'runtime'      => 0,
 		'year'         => '',
+		'year_link'    => '',
+		'genres'       => array(),
 		'image_id'     => 0,
 		'show_name'    => '',
 		'show_link'    => '',
@@ -87,6 +90,51 @@ function traktivity_first_term( int $post_id, string $taxonomy ): ?WP_Term {
 }
 
 /**
+ * Link to a term's archive, or an empty string when it has none.
+ *
+ * @since 3.1.0
+ *
+ * @param WP_Term $term Term.
+ *
+ * @return string Archive URL, or an empty string.
+ */
+function traktivity_term_link( WP_Term $term ): string {
+	$link = get_term_link( $term );
+
+	return is_wp_error( $link ) ? '' : $link;
+}
+
+/**
+ * Every genre attached to an event, with the link to its archive.
+ *
+ * @since 3.1.0
+ *
+ * @param int $post_id Event post ID.
+ *
+ * @return array<int, array{name: string, link: string}> Genres, possibly none.
+ */
+function traktivity_event_genres( int $post_id ): array {
+	$terms = get_the_terms( $post_id, 'trakt_genre' );
+
+	if ( is_wp_error( $terms ) || empty( $terms ) ) {
+		return array();
+	}
+
+	$genres = array();
+
+	foreach ( $terms as $term ) {
+		if ( $term instanceof WP_Term ) {
+			$genres[] = array(
+				'name' => $term->name,
+				'link' => traktivity_term_link( $term ),
+			);
+		}
+	}
+
+	return $genres;
+}
+
+/**
  * Collect everything needed to describe one watch event.
  *
  * `type` is either 'tv' or 'movie'. `episode_code` is a composed 'S3E2' for
@@ -123,6 +171,8 @@ function traktivity_get_event( int $post_id ): array {
 	$context['watched_iso'] = (string) get_the_date( 'c', $post_id );
 	$context['runtime']     = (int) get_post_meta( $post_id, 'trakt_runtime', true );
 	$context['year']        = null === $year ? '' : $year->name;
+	$context['year_link']   = null === $year ? '' : traktivity_term_link( $year );
+	$context['genres']      = traktivity_event_genres( $post_id );
 	$context['image_id']    = (int) get_post_thumbnail_id( $post_id );
 
 	if ( ! $is_movie ) {
