@@ -37,6 +37,13 @@ defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 class Traktivity_Placements {
 
 	/**
+	 * Markup of the parts rendered ahead of the page head, keyed by part slug.
+	 *
+	 * @var array<string, string>
+	 */
+	private static $rendered = array();
+
+	/**
 	 * Hook everything up.
 	 *
 	 * @since 3.1.0
@@ -146,15 +153,38 @@ class Traktivity_Placements {
 	/**
 	 * Render a part at the action its placement names.
 	 *
+	 * A block theme prints the CSS that blocks generate while rendering, such
+	 * as the columns of a grid, once, in the head. A part rendered at wp_footer
+	 * would arrive after that and lose it, so the part is rendered at the very
+	 * start of wp_head, before core collects that CSS, and printed later.
+	 *
 	 * @since 3.1.0
 	 *
 	 * @param array $placement Placement definition.
 	 */
 	private static function hook_part( array $placement ): void {
+		$part = $placement['part'];
+
+		add_action(
+			'wp_head',
+			static function () use ( $part ) {
+				ob_start();
+				self::render_part( $part );
+				self::$rendered[ $part ] = (string) ob_get_clean();
+			},
+			0
+		);
+
 		add_action(
 			$placement['action'],
-			static function () use ( $placement ) {
-				self::render_part( $placement['part'] );
+			static function () use ( $part ) {
+				if ( ! isset( self::$rendered[ $part ] ) ) {
+					self::render_part( $part );
+					return;
+				}
+
+				echo self::$rendered[ $part ]; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered by render_part(), which escapes its own output.
+				unset( self::$rendered[ $part ] );
 			}
 		);
 	}
