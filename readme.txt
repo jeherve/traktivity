@@ -76,7 +76,7 @@ Needs WordPress 7.0 and PHP 7.4.
 == Changelog ==
 
 = 3.1.0 =
-Release date: September 4, 2026
+Release date: November 26, 2026
 
 Traktivity has always logged your watch history and done almost nothing with it. This release is about showing it.
 
