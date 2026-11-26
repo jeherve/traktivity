@@ -3,12 +3,13 @@
  * Test scaffolding for the end-to-end suite.
  *
  * Loaded only inside the wp-env container, by way of the mappings entry in
- * .wp-env.json. It is never part of a release.
+ * .wp-env.tests.json. It is never part of a release.
  *
- * It does two things. It answers outbound requests to Trakt.tv and TMDb
- * locally, so the wizard can be driven without real API keys and without
- * depending on two third-party services being up. And it exposes a reset
- * route, so each spec can start from a clean install.
+ * It answers outbound requests to Trakt.tv and TMDb locally, so the wizard can
+ * be driven without real API keys and without depending on two third-party
+ * services being up. It exposes a reset route, so each spec can start from a
+ * clean install. And it tells Playwright which checkout the site runs, so the
+ * suite never resets another checkout's site.
  *
  * @package Traktivity
  */
@@ -99,6 +100,16 @@ function traktivity_e2e_register_routes() {
 
 	register_rest_route(
 		'traktivity-e2e/v1',
+		'/checkout',
+		array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => 'traktivity_e2e_checkout',
+			'permission_callback' => '__return_true',
+		)
+	);
+
+	register_rest_route(
+		'traktivity-e2e/v1',
 		'/reset',
 		array(
 			'methods'             => WP_REST_Server::CREATABLE,
@@ -110,6 +121,25 @@ function traktivity_e2e_register_routes() {
 	);
 }
 add_action( 'rest_api_init', 'traktivity_e2e_register_routes' );
+
+/**
+ * Confirm that this site runs the checkout Playwright was started from.
+ *
+ * The Playwright config writes an ID for its checkout next to this file, and
+ * waits on this route with the same ID before running the suite. Playwright
+ * counts any status from 404 up as not ready.
+ *
+ * @param WP_REST_Request $request The request, with the ID to check.
+ *
+ * @return WP_REST_Response 200 for this checkout, 409 for any other.
+ */
+function traktivity_e2e_checkout( WP_REST_Request $request ) {
+	$file = __DIR__ . '/.checkout-id';
+	$id   = is_readable( $file ) ? trim( (string) file_get_contents( $file ) ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- A local file.
+	$same = '' !== $id && $id === $request->get_param( 'checkout' );
+
+	return new WP_REST_Response( array( 'checkout' => $same ), $same ? 200 : 409 );
+}
 
 /**
  * Return the plugin's stored options, so specs can assert on what was saved.

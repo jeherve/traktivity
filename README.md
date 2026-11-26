@@ -138,11 +138,11 @@ WP_ENV_PORT=8899 npm run test:e2e
 Pass it to `start` and `reset`, which write the port into the site's URL, and to
 `npm run test:e2e`, which reads it to find the site. `npm run test:php` and
 `stop` find the running containers on their own. Without it, a busy port fails
-the start rather than pointing the end-to-end tests at someone else's WordPress.
+the start. The end-to-end tests also check that the site they reach runs this
+checkout, so they never reset another worktree's site.
 
 Use `WP_ENV_PORT` rather than wp-env's `--auto-port` or a port in an override
-file: Playwright can't see those, and would test whichever site answers on 8889,
-another worktree's included.
+file: Playwright can't see those, so it waits on 8889 until it times out.
 
 ## Releasing
 

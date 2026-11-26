@@ -8,3 +8,4 @@
 .DS_Store
 npm-debug.log
 *.unison.tmp
+/tests/e2e/mu-plugins/.checkout-id
