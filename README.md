@@ -118,6 +118,33 @@ Keeping the mock out of the development environment matters: an intercepted
 request there looks exactly like a rejected API key, which is a confusing way to
 lose an afternoon. The mu-plugin never ships either way.
 
+### Worktrees and ports
+
+Both environments mount the checkout at `wp-content/plugins/traktivity`, whatever
+its folder is called, so a git worktree behaves like a normal clone. The plugin
+is mapped there rather than listed under `plugins`, because wp-env names a
+listed plugin after its folder. Lifecycle scripts activate it instead, after
+`start` and after `reset`.
+
+Each checkout gets containers of its own, but they all want ports 8888 and 8889.
+When another worktree or another project already holds one, pick a different
+port with `WP_ENV_PORT`:
+
+```sh
+WP_ENV_PORT=8898 npm run env start
+WP_ENV_PORT=8899 npm run env:tests start
+WP_ENV_PORT=8899 npm run test:e2e
+```
+
+Pass it to `start` and `reset`, which write the port into the site's URL, and to
+`npm run test:e2e`, which reads it to find the site. `npm run test:php` and
+`stop` find the running containers on their own. Without it, a busy port fails
+the start. The end-to-end tests also check that the site they reach runs this
+checkout, so they never reset another worktree's site.
+
+Use `WP_ENV_PORT` rather than wp-env's `--auto-port` or a port in an override
+file: Playwright can't see those, so it waits on 8889 until it times out.
+
 ## Releasing
 
 ```sh
