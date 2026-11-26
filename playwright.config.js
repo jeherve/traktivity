@@ -49,6 +49,7 @@ if (
 module.exports = {
 	...baseConfig,
 	testDir: path.join( __dirname, 'tests/e2e/specs' ),
+	globalSetup: require.resolve( './tests/e2e/global-setup.js' ),
 	webServer: {
 		...baseConfig.webServer,
 		command: 'npm run env:tests start',
@@ -58,6 +59,8 @@ module.exports = {
 		 * Another project's site, or another checkout's, answers this with a
 		 * 404 or a 409; Playwright then runs the command above, which fails on
 		 * the busy port instead of running the suite against the wrong site.
+		 * A site that answers 401 or 403 still counts as ready, so the global
+		 * setup checks the answer itself before logging in.
 		 */
 		port: undefined,
 		url: `${ baseConfig.use.baseURL }?rest_route=/traktivity-e2e/v1/checkout&checkout=${ checkoutId }`,
