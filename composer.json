@@ -20,13 +20,13 @@
     "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
     "phpcompatibility/phpcompatibility-wp": "^2.1",
     "phpstan/extension-installer": "^1.4",
-    "phpstan/phpstan": "^2.1",
-    "phpunit/phpunit": "^9.6",
+    "phpstan/phpstan": "^2.3",
+    "phpunit/phpunit": "^9.6.39",
     "squizlabs/php_codesniffer": "^3.13",
     "szepeviktor/phpstan-wordpress": "^2.0",
-    "wp-coding-standards/wpcs": "^3.2",
+    "wp-coding-standards/wpcs": "^3.4",
     "wp-phpunit/wp-phpunit": "^7.1",
-    "yoast/phpunit-polyfills": "^2.0"
+    "yoast/phpunit-polyfills": "^4.0"
   },
   "config": {
     "platform": {

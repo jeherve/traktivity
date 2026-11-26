@@ -1,7 +1,7 @@
 /**
  * Playwright configuration.
  *
- * Takes the @wordpress/scripts defaults and points them at tests/e2e.
+ * Takes the `@wordpress/scripts` defaults and points them at tests/e2e.
  *
  * The webServer command starts the tests environment rather than the
  * development one. They are separate wp-env configurations: only the tests

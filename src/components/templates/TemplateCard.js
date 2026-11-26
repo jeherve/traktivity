@@ -18,11 +18,11 @@ import illustrationFor from './illustrations';
  * visible title is borrowed as the checkbox's accessible name rather than
  * repeated in a hidden label.
  *
- * @param {Object}   props          Component props.
- * @param {Object}   props.template The template or part being offered.
- * @param {boolean}  props.disabled Whether the checkbox is unavailable.
- * @param {string}   props.editUrl  Site Editor URL, when there is a useful one.
- * @param {Function} props.onChange Called with ( slug, next ).
+ * @param {Object}                                  props          Component props.
+ * @param {Object}                                  props.template The template or part being offered.
+ * @param {boolean}                                 props.disabled Whether the checkbox is unavailable.
+ * @param {string}                                  props.editUrl  Site Editor URL, when there is a useful one.
+ * @param {( slug: string, next: boolean ) => void} props.onChange Called with ( slug, next ).
  * @return {Element} The card.
  */
 export default function TemplateCard( {

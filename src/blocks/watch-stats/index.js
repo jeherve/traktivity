@@ -33,9 +33,9 @@ const FIGURES = [
  * Order is the order they were ticked, so a checkbox list doubles as the
  * ordering control and there is no separate drag handle to build.
  *
- * @param {Object}   props               Block props.
- * @param {Object}   props.attributes    Block attributes.
- * @param {Function} props.setAttributes Attribute setter.
+ * @param {Object}                         props               Block props.
+ * @param {Object}                         props.attributes    Block attributes.
+ * @param {( attributes: Object ) => void} props.setAttributes Attribute setter.
  * @return {Element} The editor preview.
  */
 function Edit( { attributes, setAttributes } ) {

@@ -98,7 +98,7 @@ class Traktivity_Data_Storage {
 			'capabilities'        => array(
 				'create_posts' => 'do_not_allow',
 			),
-			'menu_icon'           => 'dashicons-format-video',
+			'menu_icon'           => function_exists( 'wp_is_valid_icon_name' ) ? 'core-admin/capture-video' : 'dashicons-format-video',
 			'show_in_rest'        => true,
 		);
 		register_post_type( 'traktivity_event', $args );

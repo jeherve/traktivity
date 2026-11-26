@@ -16,10 +16,10 @@ import './style.scss';
 /**
  * Preview the details table.
  *
- * @param {Object}   props               Block props.
- * @param {Object}   props.attributes    Block attributes.
- * @param {Function} props.setAttributes Attribute setter.
- * @param {Object}   props.context       Block context, carrying the post ID.
+ * @param {Object}                         props               Block props.
+ * @param {Object}                         props.attributes    Block attributes.
+ * @param {( attributes: Object ) => void} props.setAttributes Attribute setter.
+ * @param {Object}                         props.context       Block context, carrying the post ID.
  * @return {Element} The editor preview.
  */
 function Edit( { attributes, setAttributes, context } ) {
