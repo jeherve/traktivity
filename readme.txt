@@ -89,7 +89,8 @@ Traktivity has always logged your watch history and done almost nothing with it.
 **Templates**
 
 * Add default block templates for a single entry, the full archive, a series, and the genre, year and type archives.
-* Add five editable template parts: recently watched, last watched, watch totals, a series index, and a compact list for a sidebar.
+* Add two template parts you can edit in the Site Editor: your recent watches as a grid of cards, and as a compact list.
+* Let the plugin place things for you: your totals and your last watch above the archive, the series you watch most after each entry, and either of those two parts at the bottom of every page.
 * Everything is off until you switch it on, from Traktivity > Dashboard. Your own theme's templates always win.
 * Read a single series' archive oldest first, since a series is a run watched in order.
 
