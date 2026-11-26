@@ -68,6 +68,8 @@ class ContractsTest extends WP_UnitTestCase {
 			'watched_iso',
 			'runtime',
 			'year',
+			'year_link',
+			'genres',
 			'image_id',
 			'show_name',
 			'show_link',
@@ -91,13 +93,15 @@ class ContractsTest extends WP_UnitTestCase {
 	public function test_event_context_types() {
 		$context = traktivity_empty_event_context();
 
-		foreach ( array( 'type', 'title', 'permalink', 'watched', 'watched_iso', 'year', 'show_name', 'show_link', 'episode_code' ) as $key ) {
+		foreach ( array( 'type', 'title', 'permalink', 'watched', 'watched_iso', 'year', 'year_link', 'show_name', 'show_link', 'episode_code' ) as $key ) {
 			$this->assertIsString( $context[ $key ], "Event context '{$key}' should be a string." );
 		}
 
 		foreach ( array( 'runtime', 'image_id', 'season', 'episode' ) as $key ) {
 			$this->assertIsInt( $context[ $key ], "Event context '{$key}' should be an integer." );
 		}
+
+		$this->assertSame( array(), $context['genres'], "Event context 'genres' should be an empty list." );
 	}
 
 	/**

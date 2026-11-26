@@ -105,6 +105,36 @@ class EventContextTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Genres and the release year come with the links to their archives.
+	 *
+	 * Event Details lists both as links, and reads them from here rather than
+	 * from the taxonomies, so the context carries everything it needs.
+	 */
+	public function test_genres_and_year_come_with_their_links() {
+		$post_id = $this->make_event(
+			array( 'trakt_movie_id' => 7 ),
+			array(
+				'trakt_genre' => array( 'Drama', 'Science Fiction' ),
+				'trakt_year'  => '2019',
+			)
+		);
+
+		$event  = traktivity_get_event( $post_id );
+		$genres = $event['genres'];
+
+		usort(
+			$genres,
+			static function ( $a, $b ) {
+				return strcmp( $a['name'], $b['name'] );
+			}
+		);
+
+		$this->assertSame( array( 'Drama', 'Science Fiction' ), wp_list_pluck( $genres, 'name' ) );
+		$this->assertSame( get_term_link( 'drama', 'trakt_genre' ), $genres[0]['link'] );
+		$this->assertSame( get_term_link( '2019', 'trakt_year' ), $event['year_link'] );
+	}
+
+	/**
 	 * Type is read from the meta, not the translated trakt_type term.
 	 *
 	 * The sync names that term with esc_html__( 'Movie' ), so its slug is
