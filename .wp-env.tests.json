@@ -13,6 +13,8 @@
 		"wp-content/mu-plugins": "./tests/e2e/mu-plugins"
 	},
 	"lifecycleScripts": {
-		"afterStart": "wp-env --config=.wp-env.tests.json run cli wp plugin activate traktivity"
+		"afterStart": "wp-env --config=.wp-env.tests.json run cli wp plugin activate traktivity",
+		"afterReset": "wp-env --config=.wp-env.tests.json run cli wp plugin activate traktivity",
+		"afterClean": "wp-env --config=.wp-env.tests.json run cli wp plugin activate traktivity"
 	}
 }

@@ -122,7 +122,8 @@ lose an afternoon. The mu-plugin never ships either way.
 Both environments mount the checkout at `wp-content/plugins/traktivity`, whatever
 its folder is called, so a git worktree behaves like a normal clone. The plugin
 is mapped there rather than listed under `plugins`, because wp-env names a
-listed plugin after its folder; an `afterStart` script activates it instead.
+listed plugin after its folder. Lifecycle scripts activate it instead, after
+`start` and after `reset`.
 
 Each checkout gets containers of its own, but they all want ports 8888 and 8889.
 When another worktree or another project already holds one, pick a different
@@ -134,10 +135,10 @@ WP_ENV_PORT=8899 npm run env:tests start
 WP_ENV_PORT=8899 npm run test:e2e
 ```
 
-Only commands that start an environment need it, and `npm run test:e2e` reads
-it to find the site. `npm run test:php` and `stop` find the running containers
-on their own. Without it, a busy port fails the start rather than pointing the
-end-to-end tests at someone else's WordPress.
+Pass it to `start` and `reset`, which write the port into the site's URL, and to
+`npm run test:e2e`, which reads it to find the site. `npm run test:php` and
+`stop` find the running containers on their own. Without it, a busy port fails
+the start rather than pointing the end-to-end tests at someone else's WordPress.
 
 ## Releasing
 

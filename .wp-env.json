@@ -11,6 +11,8 @@
 		"wp-content/plugins/traktivity": "."
 	},
 	"lifecycleScripts": {
-		"afterStart": "wp-env run cli wp plugin activate traktivity"
+		"afterStart": "wp-env run cli wp plugin activate traktivity",
+		"afterReset": "wp-env run cli wp plugin activate traktivity",
+		"afterClean": "wp-env run cli wp plugin activate traktivity"
 	}
 }
