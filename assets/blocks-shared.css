@@ -39,10 +39,9 @@
  */
 .traktivity-frame--empty {
 	align-items: center;
-	background: currentcolor;
+	background: color-mix(in srgb, currentcolor 8%, transparent);
 	display: flex;
 	justify-content: center;
-	opacity: 0.08;
 }
 
 .traktivity-frame__label {
