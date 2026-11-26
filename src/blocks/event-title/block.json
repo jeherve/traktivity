@@ -5,7 +5,7 @@
 	"title": "Event Title",
 	"category": "traktivity",
 	"icon": "heading",
-	"description": "The event title, with its show and episode number restored from the taxonomies.",
+	"description": "The title of a watch event. For an episode, the series name and episode number come with it, so it makes sense on its own.",
 	"textdomain": "traktivity",
 	"usesContext": [ "postId", "postType" ],
 	"attributes": {
