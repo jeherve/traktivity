@@ -19,58 +19,159 @@
 class SeasonZeroTest extends WP_UnitTestCase {
 
 	/**
-	 * Attach terms the way the sync does, and read them back.
+	 * Season number the fake Trakt.tv reports for its one episode.
 	 *
-	 * @param mixed $value What the sync would pass for the season.
-	 *
-	 * @return string[] Term names attached.
+	 * @var int
 	 */
-	private function attach_season( $value ) {
-		$post_id = self::factory()->post->create(
+	private $season = 0;
+
+	/**
+	 * Point the plugin at a username and key, and swap Trakt.tv for the fake.
+	 *
+	 * No TMDb key is set, so the sync makes no artwork requests.
+	 */
+	public function set_up() {
+		parent::set_up();
+
+		update_option(
+			'traktivity',
 			array(
-				'post_type'   => 'traktivity_event',
-				'post_status' => 'publish',
+				'username' => 'jeherve',
+				'api_key'  => 'test-key',
 			)
 		);
 
-		wp_set_object_terms( $post_id, (array) $value, 'trakt_season', true );
-
-		$terms = get_the_terms( $post_id, 'trakt_season' );
-
-		return is_wp_error( $terms ) || empty( $terms ) ? array() : wp_list_pluck( $terms, 'name' );
+		add_filter( 'pre_http_request', array( $this, 'fake_trakt' ), 10, 3 );
 	}
 
 	/**
-	 * A season 0 special gets its season term.
+	 * Drop the fake so it cannot leak into other tests.
 	 */
-	public function test_season_zero_is_attached() {
-		$this->assertSame( array( '0' ), $this->attach_season( '0' ) );
+	public function tear_down() {
+		remove_filter( 'pre_http_request', array( $this, 'fake_trakt' ), 10 );
+
+		parent::tear_down();
 	}
 
 	/**
-	 * Ordinary seasons keep working.
+	 * Stand in for Trakt.tv's /users/:id/history endpoint, with one episode.
+	 *
+	 * The event has the shape Trakt.tv returns with extended=full, trimmed to
+	 * the fields the sync reads. The show's runtime is zero so the sync does
+	 * not go on to ask Trakt.tv for the rest of the show's episodes.
+	 *
+	 * @param false|array|WP_Error $response Preempted response. False to let the request through.
+	 * @param array                $args     Request arguments.
+	 * @param string               $url      Request URL.
+	 *
+	 * @return false|array Fake response, or the original for anything that is not Trakt.tv.
 	 */
-	public function test_ordinary_seasons_still_work() {
-		$this->assertSame( array( '3' ), $this->attach_season( '3' ) );
+	public function fake_trakt( $response, $args, $url ) {
+		if ( false === strpos( $url, 'api.trakt.tv' ) ) {
+			return $response;
+		}
+
+		$event = array(
+			'id'         => 9001,
+			'watched_at' => '2026-03-04T20:00:00.000Z',
+			'type'       => 'episode',
+			'episode'    => array(
+				'season'   => $this->season,
+				'number'   => 5,
+				'title'    => 'A Special',
+				'overview' => 'Something extra.',
+				'ids'      => array(
+					'trakt' => 77,
+					'imdb'  => 'tt0000077',
+					'tmdb'  => 777,
+				),
+			),
+			'show'       => array(
+				'title'    => 'Severance',
+				'year'     => 2022,
+				'overview' => 'Work and life, split in two.',
+				'network'  => 'Apple TV',
+				'runtime'  => 0,
+				'genres'   => array( 'drama', 'science-fiction' ),
+				'ids'      => array(
+					'trakt' => 11,
+					'imdb'  => 'tt11280740',
+					'tmdb'  => 95396,
+				),
+			),
+		);
+
+		return array(
+			'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary( array() ),
+			'body'     => wp_json_encode( array( $event ) ),
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+		);
 	}
 
 	/**
-	 * Values that arrive as an array, like genres, are unaffected.
+	 * Run the sync against the fake, and read back the event it created.
+	 *
+	 * @param int $season Season number for the fake episode.
+	 *
+	 * @return int Post ID of the imported event.
 	 */
-	public function test_array_values_are_unaffected() {
-		$post_id = self::factory()->post->create(
+	private function sync_one_episode( $season ) {
+		$this->season = $season;
+
+		( new Traktivity_Calls() )->publish_event();
+
+		$posts = get_posts(
 			array(
 				'post_type'   => 'traktivity_event',
-				'post_status' => 'publish',
+				'post_status' => 'any',
+				'fields'      => 'ids',
 			)
 		);
 
-		wp_set_object_terms( $post_id, (array) array( 'Drama', 'Science Fiction' ), 'trakt_genre', true );
+		$this->assertCount( 1, $posts, 'The sync should have imported the one episode.' );
+
+		return $posts[0];
+	}
+
+	/**
+	 * The sync attaches the season term, including season 0.
+	 *
+	 * @dataProvider data_seasons
+	 *
+	 * @param int    $season   Season number Trakt.tv reports.
+	 * @param string $expected Season term name.
+	 */
+	public function test_sync_attaches_the_season( $season, $expected ) {
+		$post_id = $this->sync_one_episode( $season );
+
+		$this->assertSame( array( $expected ), wp_list_pluck( get_the_terms( $post_id, 'trakt_season' ), 'name' ) );
+	}
+
+	/**
+	 * Seasons to sync.
+	 *
+	 * @return array[]
+	 */
+	public function data_seasons() {
+		return array(
+			'specials'       => array( 0, '0' ),
+			'ordinary event' => array( 3, '3' ),
+		);
+	}
+
+	/**
+	 * Genres, which arrive as a list rather than a single value, still attach.
+	 */
+	public function test_sync_attaches_every_genre() {
+		$post_id = $this->sync_one_episode( 1 );
 
 		$names = wp_list_pluck( get_the_terms( $post_id, 'trakt_genre' ), 'name' );
 		sort( $names );
 
-		$this->assertSame( array( 'Drama', 'Science Fiction' ), $names );
+		$this->assertSame( array( 'Drama', 'Science-fiction' ), $names );
 	}
 
 	/**
@@ -97,12 +198,7 @@ class SeasonZeroTest extends WP_UnitTestCase {
 	 * Once the term exists, the accessor composes the code for it.
 	 */
 	public function test_season_zero_gets_an_episode_code() {
-		$post_id = self::factory()->post->create( array( 'post_type' => 'traktivity_event' ) );
-
-		update_post_meta( $post_id, 'trakt_show_id', 1 );
-		wp_set_object_terms( $post_id, array( 'Some Show' ), 'trakt_show' );
-		wp_set_object_terms( $post_id, (array) '0', 'trakt_season' );
-		wp_set_object_terms( $post_id, (array) '5', 'trakt_episode' );
+		$post_id = $this->sync_one_episode( 0 );
 
 		$this->assertSame( 'S0E5', traktivity_get_event( $post_id )['episode_code'] );
 	}
