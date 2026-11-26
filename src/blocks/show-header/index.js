@@ -25,9 +25,9 @@ import './style.scss';
  * Anywhere else the server render is empty, so the editor says why rather than
  * leaving a blank area that looks like a bug.
  *
- * @param {Object}   props               Block props.
- * @param {Object}   props.attributes    Block attributes.
- * @param {Function} props.setAttributes Attribute setter.
+ * @param {Object}                         props               Block props.
+ * @param {Object}                         props.attributes    Block attributes.
+ * @param {( attributes: Object ) => void} props.setAttributes Attribute setter.
  * @return {Element} The editor preview.
  */
 function Edit( { attributes, setAttributes } ) {

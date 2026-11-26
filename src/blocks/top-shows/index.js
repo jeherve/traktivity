@@ -21,9 +21,9 @@ import './style.scss';
 /**
  * Configure and preview the series grid.
  *
- * @param {Object}   props               Block props.
- * @param {Object}   props.attributes    Block attributes.
- * @param {Function} props.setAttributes Attribute setter.
+ * @param {Object}                         props               Block props.
+ * @param {Object}                         props.attributes    Block attributes.
+ * @param {( attributes: Object ) => void} props.setAttributes Attribute setter.
  * @return {Element} The editor preview.
  */
 function Edit( { attributes, setAttributes } ) {
