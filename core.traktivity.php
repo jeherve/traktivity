@@ -678,7 +678,15 @@ class Traktivity_Calls {
 				 * Establish the relationship between terms and taxonomies.
 				 */
 				foreach ( $taxonomies as $taxonomy => $value ) {
-					$term_taxonomy_ids = wp_set_object_terms( $post_id, $value, $taxonomy, true );
+					/*
+					 * Cast, because wp_set_object_terms() normalises its terms
+					 * with empty(), and empty( "0" ) is true in PHP. A season 0
+					 * episode arrives here as the string "0", the list is read
+					 * as empty, and with $append set the call becomes a silent
+					 * no-op: specials have never had a season term. Genres are
+					 * already an array, so the cast leaves them alone.
+					 */
+					$term_taxonomy_ids = wp_set_object_terms( $post_id, (array) $value, $taxonomy, true );
 					/**
 					 * Since wp_set_object_terms returned an array of term_taxonomy_ids after running,
 					 * we can use it to add more info to each term.

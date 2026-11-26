@@ -1,5 +1,10 @@
 parameters:
 	level: 5
+	# PHPDoc is a claim, not a guarantee. tests/php/ContractsTest.php asserts at
+	# runtime that the documented shapes in helpers.traktivity.php are actually
+	# honoured, and with this on PHPStan reads those assertions as tautologies
+	# because it takes the docblock as proof of the very thing under test.
+	treatPhpDocTypesAsCertain: false
 	paths:
 		- .
 	excludePaths:
@@ -9,3 +14,8 @@ parameters:
 			- build/*
 	bootstrapFiles:
 		- tests/phpstan/bootstrap.php
+	# PHPStan sizes its worker pool from the CPU count, and on a CI runner that
+	# put enough workers in flight to exhaust the memory limit mid-analysis.
+	# The plugin is small enough that two workers cost no real wall-clock time.
+	parallel:
+		maximumNumberOfProcesses: 2

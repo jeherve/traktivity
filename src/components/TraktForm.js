@@ -25,12 +25,12 @@ const APPS_URL = 'https://developer.trakt.tv/apps';
  * Credentials are saved and checked once on submit rather than on every
  * keystroke, which is what the previous version did.
  *
- * @param {Object}   props
- * @param {Object}   props.trakt        Current Trakt settings.
- * @param {Function} props.saveCreds    Persists and verifies the credentials.
- * @param {Function} props.nextStep     Advances the wizard.
- * @param {Object}   [props.notice]     Status message to display.
- * @param {Function} props.removeNotice Clears the status message.
+ * @param {Object}                                           props
+ * @param {Object}                                           props.trakt        Current Trakt settings.
+ * @param {( ...credentials: string[] ) => Promise<boolean>} props.saveCreds    Persists and verifies the credentials.
+ * @param {() => void}                                       props.nextStep     Advances the wizard.
+ * @param {Object}                                           [props.notice]     Status message to display.
+ * @param {() => void}                                       props.removeNotice Clears the status message.
  * @return {Element} The form.
  */
 export default function TraktForm( {

@@ -23,12 +23,12 @@ const CREATE_APP_URL = 'https://www.themoviedb.org/login';
 /**
  * Step 3: collect and verify the TMDb API key. This step is optional.
  *
- * @param {Object}   props
- * @param {Object}   props.tmdb         Current TMDb settings.
- * @param {Function} props.saveCreds    Persists and verifies the key.
- * @param {Function} props.nextStep     Advances the wizard.
- * @param {Object}   [props.notice]     Status message to display.
- * @param {Function} props.removeNotice Clears the status message.
+ * @param {Object}                                           props
+ * @param {Object}                                           props.tmdb         Current TMDb settings.
+ * @param {( ...credentials: string[] ) => Promise<boolean>} props.saveCreds    Persists and verifies the key.
+ * @param {() => void}                                       props.nextStep     Advances the wizard.
+ * @param {Object}                                           [props.notice]     Status message to display.
+ * @param {() => void}                                       props.removeNotice Clears the status message.
  * @return {Element} The form.
  */
 export default function TmdbForm( {

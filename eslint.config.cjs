@@ -1,7 +1,7 @@
 /**
  * ESLint configuration.
  *
- * The @wordpress/scripts default lints unit tests as Vitest, but this
+ * The `@wordpress/scripts` default lints unit tests as Vitest, but this
  * project's unit tests run on Jest.
  */
 const wpPlugin = require( '@wordpress/eslint-plugin' );

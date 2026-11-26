@@ -1,0 +1,34 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "traktivity/top-shows",
+	"title": "Top Series",
+	"category": "traktivity",
+	"icon": "grid-view",
+	"description": "Series ordered by how many episodes have been logged.",
+	"textdomain": "traktivity",
+	"attributes": {
+		"number": { "type": "number", "default": 12 },
+		"columns": { "type": "number", "default": 4 },
+		"orderby": { "type": "string", "default": "count" },
+		"showImage": { "type": "boolean", "default": true },
+		"showCount": { "type": "boolean", "default": true },
+		"showNetwork": { "type": "boolean", "default": true },
+		"headingLevel": { "type": "number", "default": 3 }
+	},
+	"supports": {
+		"html": false,
+		"reusable": false,
+		"align": [ "wide", "full" ],
+		"color": {
+			"background": true,
+			"text": true,
+			"link": true
+		},
+		"spacing": { "margin": true, "padding": true, "blockGap": true },
+		"typography": { "fontSize": true, "lineHeight": true }
+	},
+	"editorScript": "file:./index.js",
+	"style": [ "traktivity-shared", "file:./style-index.css" ],
+	"render": "file:./render.php"
+}

@@ -13,9 +13,9 @@ import { __ } from '@wordpress/i18n';
  * interrupted, gave up, or ran on a version that stopped early leaves the rest
  * of the history sitting on Trakt.tv with nothing scheduled to go and get it.
  *
- * @param {Object}   props
- * @param {Object}   props.sync              Current sync state.
- * @param {Function} props.launchHistorySync Starts the history import.
+ * @param {Object}              props
+ * @param {Object}              props.sync              Current sync state.
+ * @param {() => Promise<void>} props.launchHistorySync Starts the history import.
  * @return {Element} The card.
  */
 export default function SyncHistory( { sync, launchHistorySync } ) {

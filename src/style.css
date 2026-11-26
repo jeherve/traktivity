@@ -90,3 +90,59 @@
 .traktivity-form .components-button {
 	width: auto;
 }
+
+/**
+ * Display settings.
+ *
+ * A grid of cards, one per template or part Traktivity can provide. The
+ * wireframes carry the selected state, since the checkbox alone is easy to
+ * miss at a glance.
+ */
+
+.traktivity-templates__grid {
+	display: grid;
+	gap: 24px;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	margin-top: 16px;
+}
+
+.traktivity-template-card__surface {
+	background: #fff;
+	border: 2px solid #dcdcde;
+	border-radius: 4px;
+	color: #1e1e1e;
+	cursor: pointer;
+	display: block;
+	padding: 12px;
+}
+
+.traktivity-template-card__surface[data-checked="true"] {
+	border-color: #3858e9;
+}
+
+.traktivity-template-card__surface:hover {
+	border-color: #949494;
+}
+
+.traktivity-template-card__body {
+	align-items: flex-start;
+	display: flex;
+	gap: 4px;
+	margin-top: 8px;
+}
+
+.traktivity-template-card__title {
+	font-weight: 600;
+	margin: 0;
+}
+
+.traktivity-template-card__description,
+.traktivity-template-card__note {
+	color: #50575e;
+	font-size: 12px;
+	margin: 4px 0 0;
+}
+
+.traktivity-template-card__note {
+	font-style: italic;
+}

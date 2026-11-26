@@ -14,6 +14,11 @@ const settings = {
 	syncPages: '0',
 	syncRuntime: '',
 	totalTimeWatched: '',
+	templates: [],
+	isBlockTheme: false,
+	themeStylesheet: '',
+	siteEditorUrl: '',
+	hasEvents: false,
 };
 
 export function resetSettings( overrides = {} ) {
@@ -22,6 +27,9 @@ export function resetSettings( overrides = {} ) {
 	} );
 	settings.step = '1';
 	settings.syncPages = '0';
+	settings.templates = [];
+	settings.isBlockTheme = false;
+	settings.hasEvents = false;
 	Object.assign( settings, overrides );
 }
 

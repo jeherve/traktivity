@@ -1,0 +1,51 @@
+/**
+ * Series Header.
+ *
+ * Artwork beside the details once there is room, stacked below that.
+ */
+
+.traktivity-showhead {
+	display: grid;
+	gap: var(--wp--style--block-gap, 1.5em);
+}
+
+@media (min-width: 782px) {
+
+	.traktivity-showhead {
+		align-items: start;
+		grid-template-columns: 2fr 3fr;
+	}
+}
+
+.traktivity-showhead__body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+}
+
+.traktivity-showhead__network {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	letter-spacing: 0.1em;
+	margin: 0;
+	opacity: 0.7;
+	text-transform: uppercase;
+}
+
+.traktivity-showhead__title {
+	margin: 0;
+}
+
+.traktivity-showhead__stats,
+.traktivity-showhead__links {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	margin: 0;
+	opacity: 0.8;
+}
+
+.traktivity-showhead__synopsis p {
+	margin: 0 0 0.75em;
+}
+
+.traktivity-showhead__synopsis p:last-child {
+	margin-bottom: 0;
+}
