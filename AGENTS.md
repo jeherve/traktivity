@@ -34,6 +34,7 @@ Plugin PHP sits at the root, named `<area>.traktivity.php`:
 | `src/` | Dashboard React app, and block sources under `src/blocks/` |
 | `assets/` | Static CSS that is not built, such as the shared block styles |
 | `tests/` | `php/`, `js/`, `e2e/`, `package/` |
+| `.wordpress-org/` | Banners, icons and screenshots for the wordpress.org page. A release mirrors this folder into SVN `assets/` and deletes whatever is missing from it, so keep every asset here, not only new ones |
 
 Those names look unusual because they are baked into the wordpress.org SVN
 layout. `phpcs.xml.dist` turns `WordPress.Files.FileName` off deliberately for

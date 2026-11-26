@@ -57,12 +57,13 @@ There is more discussion in [issue #678](https://github.com/jeherve/traktivity/i
 
 == Screenshots ==
 
-1. Dashboard: Discover the plugin and how to set it up.
-2. Configuration: Link the plugin to your Trakt.tv account to get started.
-3. Events: Everything you watch gets logged, right in your dashboard.
-4. Sort: you can then search and sort everything.
-5. Genres: Multiple details are logged for each event, like the movie or show's genre.
-6. Movie: example of a movie and some of the details logged for that movie.
+1. Your archive, with your totals and the last thing you watched above everything you have logged.
+2. Every entry as a card, with its series, its episode number and when you watched it.
+3. A series page, with its artwork, its network and every episode you have logged, oldest first.
+4. A single entry, with the series name and episode number back in its title.
+5. The details of an entry, below the series you watch most.
+6. Switch templates and placements on from Traktivity > Dashboard. Nothing on your site changes until you do.
+7. The Latest Watch block in the editor, one of seven Traktivity blocks.
 
 == Upgrade Notice ==
 
