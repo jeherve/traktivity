@@ -19,10 +19,10 @@ import './style.scss';
  * The show name and the episode numbers live in three taxonomies the editor
  * does not have to hand, so the preview is rendered on the server.
  *
- * @param {Object}   props               Block props.
- * @param {Object}   props.attributes    Block attributes.
- * @param {Function} props.setAttributes Attribute setter.
- * @param {Object}   props.context       Block context, carrying the post ID.
+ * @param {Object}                         props               Block props.
+ * @param {Object}                         props.attributes    Block attributes.
+ * @param {( attributes: Object ) => void} props.setAttributes Attribute setter.
+ * @param {Object}                         props.context       Block context, carrying the post ID.
  * @return {Element} The editor preview.
  */
 function Edit( { attributes, setAttributes, context } ) {

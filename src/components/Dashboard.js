@@ -17,9 +17,9 @@ import TemplateSettings from './templates/TemplateSettings';
 /**
  * Step 5: the dashboard shown once setup is complete.
  *
- * @param {Object}   props
- * @param {Object}   props.sync       Current sync state.
- * @param {Function} props.launchSync Starts a sync.
+ * @param {Object}                             props
+ * @param {Object}                             props.sync       Current sync state.
+ * @param {( type?: string ) => Promise<void>} props.launchSync Starts a sync.
  * @return {Element} The dashboard.
  */
 export default function Dashboard( { sync, launchSync } ) {

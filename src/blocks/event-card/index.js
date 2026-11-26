@@ -25,10 +25,10 @@ import './style.scss';
  * the editor has to hand, so ServerSideRender is the only way to show what a
  * reader will actually see rather than a guess at it.
  *
- * @param {Object}   props               Block props.
- * @param {Object}   props.attributes    Block attributes.
- * @param {Function} props.setAttributes Attribute setter.
- * @param {Object}   props.context       Block context, carrying the post ID.
+ * @param {Object}                         props               Block props.
+ * @param {Object}                         props.attributes    Block attributes.
+ * @param {( attributes: Object ) => void} props.setAttributes Attribute setter.
+ * @param {Object}                         props.context       Block context, carrying the post ID.
  * @return {Element} The editor preview.
  */
 function Edit( { attributes, setAttributes, context } ) {
