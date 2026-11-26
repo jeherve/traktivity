@@ -173,6 +173,38 @@ class TemplateSettingsRestTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Only a value that means "on" switches a template on.
+	 *
+	 * The list is documented as slugs mapped to booleans. A caller sending the
+	 * string "false" must not end up with the template switched on.
+	 *
+	 * @dataProvider data_switch_values
+	 *
+	 * @param mixed $value    Value sent for the template.
+	 * @param bool  $expected Whether the template should end up on.
+	 */
+	public function test_only_true_switches_a_template_on( $value, $expected ) {
+		$this->log_in_as_admin();
+
+		$this->request( 'POST', array( 'enabled' => array( 'single-traktivity_event' => $value ) ) );
+
+		$this->assertSame( $expected, Traktivity_Templates::is_enabled( 'single-traktivity_event' ) );
+	}
+
+	/**
+	 * Values a client might send for one template.
+	 *
+	 * @return array[]
+	 */
+	public function data_switch_values() {
+		return array(
+			'true'           => array( true, true ),
+			'false'          => array( false, false ),
+			'string "false"' => array( 'false', false ),
+		);
+	}
+
+	/**
 	 * A request with no list is rejected.
 	 */
 	public function test_missing_list_is_rejected() {

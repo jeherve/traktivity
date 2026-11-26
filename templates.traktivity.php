@@ -426,7 +426,8 @@ class Traktivity_Templates {
 	 * Save which templates and parts are switched on.
 	 *
 	 * Only slugs this plugin knows about are stored, so a stale or invented
-	 * key cannot accumulate in the option.
+	 * key cannot accumulate in the option. Only true switches one on: any
+	 * other value, such as the string "false", leaves it off.
 	 *
 	 * @since 3.1.0
 	 *
@@ -442,7 +443,7 @@ class Traktivity_Templates {
 		$clean = array();
 
 		foreach ( $known as $slug ) {
-			if ( ! empty( $enabled[ $slug ] ) ) {
+			if ( isset( $enabled[ $slug ] ) && true === $enabled[ $slug ] ) {
 				$clean[ $slug ] = true;
 			}
 		}

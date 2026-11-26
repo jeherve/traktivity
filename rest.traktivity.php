@@ -133,9 +133,10 @@ class Traktivity_Api {
 				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => array(
 					'enabled' => array(
-						'type'        => 'object',
-						'required'    => true,
-						'description' => __( 'Template slugs mapped to whether they are switched on.', 'traktivity' ),
+						'type'                 => 'object',
+						'required'             => true,
+						'additionalProperties' => array( 'type' => 'boolean' ),
+						'description'          => __( 'Template slugs mapped to whether they are switched on.', 'traktivity' ),
 					),
 				),
 			)
