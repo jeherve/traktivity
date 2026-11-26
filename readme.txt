@@ -57,12 +57,13 @@ There is more discussion in [issue #678](https://github.com/jeherve/traktivity/i
 
 == Screenshots ==
 
-1. Dashboard: Discover the plugin and how to set it up.
-2. Configuration: Link the plugin to your Trakt.tv account to get started.
-3. Events: Everything you watch gets logged, right in your dashboard.
-4. Sort: you can then search and sort everything.
-5. Genres: Multiple details are logged for each event, like the movie or show's genre.
-6. Movie: example of a movie and some of the details logged for that movie.
+1. Your archive, with your totals and the last thing you watched above everything you have logged.
+2. Every entry as a card, with its series, its episode number and when you watched it.
+3. A series page, with its artwork, its network and every episode you have logged, oldest first.
+4. A single entry, with the series name and episode number back in its title.
+5. The details of an entry, below the series you watch most.
+6. Switch templates and placements on from Traktivity > Dashboard. Nothing on your site changes until you do.
+7. The Latest Watch block in the editor, one of seven Traktivity blocks.
 
 == Upgrade Notice ==
 
@@ -89,7 +90,8 @@ Traktivity has always logged your watch history and done almost nothing with it.
 **Templates**
 
 * Add default block templates for a single entry, the full archive, a series, and the genre, year and type archives.
-* Add five editable template parts: recently watched, last watched, watch totals, a series index, and a compact list for a sidebar.
+* Add two template parts you can edit in the Site Editor: your recent watches as a grid of cards, and as a compact list.
+* Let the plugin place things for you: your totals and your last watch above the archive, the series you watch most after each entry, and either of those two parts at the bottom of every page.
 * Everything is off until you switch it on, from Traktivity > Dashboard. Your own theme's templates always win.
 * Read a single series' archive oldest first, since a series is a run watched in order.
 

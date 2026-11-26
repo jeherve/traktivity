@@ -168,9 +168,14 @@ function traktivity_get_event( int $post_id ): array {
 	 * A filter returning something other than an array is ignored rather than
 	 * cast: (array) null is empty and (array) 'x' is a one-item list, and
 	 * either leaves callers with a context missing every documented key, which
-	 * they read without checking.
+	 * they read without checking. For the same reason, a key a filter drops
+	 * comes back empty rather than missing.
 	 */
-	return is_array( $traktivity_filtered ) ? $traktivity_filtered : $context;
+	if ( ! is_array( $traktivity_filtered ) ) {
+		return $context;
+	}
+
+	return wp_parse_args( $traktivity_filtered, traktivity_empty_event_context() );
 }
 
 /**

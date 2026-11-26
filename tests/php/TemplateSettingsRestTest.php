@@ -182,6 +182,24 @@ class TemplateSettingsRestTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The callback itself answers an unreadable list with a WP_Error.
+	 *
+	 * The route's schema turns away a request without a list before the
+	 * callback runs, so this calls the callback directly, the way anything
+	 * reusing it would.
+	 */
+	public function test_callback_rejects_an_unreadable_list_with_a_wp_error() {
+		$request = new WP_REST_Request( 'POST', '/traktivity/v1/templates' );
+		$request->set_param( 'enabled', 'not-a-list' );
+
+		$response = ( new Traktivity_Api() )->post_templates( $request );
+
+		$this->assertWPError( $response );
+		$this->assertSame( 'traktivity_invalid_templates', $response->get_error_code() );
+		$this->assertSame( array( 'status' => 400 ), $response->get_error_data() );
+	}
+
+	/**
 	 * A template the theme already covers is flagged.
 	 *
 	 * A theme's own template wins, so offering to switch ours on without

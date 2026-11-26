@@ -283,6 +283,38 @@ class PlacementsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A part placed at wp_footer gets its layout CSS into the head.
+	 *
+	 * A block theme prints the CSS blocks generate while rendering, such as the
+	 * columns of a grid, once, in the head. Rendered at wp_footer, the grid part
+	 * kept its markup and lost that CSS, and collapsed into one column of
+	 * full-width images.
+	 */
+	public function test_footer_part_layout_css_reaches_the_head() {
+		if ( ! $this->use_block_theme() ) {
+			$this->markTestSkipped( 'No block theme available to switch to.' );
+		}
+
+		$this->enable( array( 'traktivity-recent-after-archive' ) );
+		Traktivity_Placements::register_placements();
+
+		$post_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'traktivity_event',
+				'post_status' => 'publish',
+				'post_title'  => 'Something Watched',
+			)
+		);
+		update_post_meta( $post_id, 'trakt_show_id', 1 );
+
+		ob_start();
+		do_action( 'wp_head' );
+		$head = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/\.wp-container-core-post-template-is-layout-[0-9a-f]+\s*\{[^}]*grid-template-columns/', $head );
+	}
+
+	/**
 	 * A single-entry placement still lands on a classic theme.
 	 *
 	 * There are no templates to hook into, so it goes after the content

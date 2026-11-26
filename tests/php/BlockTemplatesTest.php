@@ -409,6 +409,46 @@ class BlockTemplatesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A synced entry shows its artwork once on the single template.
+	 *
+	 * The sync sets the artwork as the featured image and also writes it into
+	 * the content as an image block, so a template that renders both shows the
+	 * same picture twice, one above the other.
+	 */
+	public function test_single_entry_shows_its_artwork_once() {
+		$post_id  = self::factory()->post->create(
+			array(
+				'post_type'   => 'traktivity_event',
+				'post_status' => 'publish',
+				'post_title'  => 'A Dark Web',
+			)
+		);
+		$image_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/33772.jpg', $post_id );
+
+		set_post_thumbnail( $post_id, $image_id );
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => sprintf(
+					'<!-- wp:image {"id":%1$d,"sizeSlug":"large"} --><figure class="wp-block-image size-large">%2$s</figure><!-- /wp:image --><!-- wp:paragraph --><p>Synopsis.</p><!-- /wp:paragraph -->',
+					$image_id,
+					wp_get_attachment_image( $image_id, 'large' )
+				),
+			)
+		);
+
+		$this->go_to( get_permalink( $post_id ) );
+		the_post();
+
+		$html = do_blocks( Traktivity_Templates::content( 'single-traktivity_event.html' ) );
+
+		wp_reset_postdata();
+
+		$this->assertStringContainsString( 'Synopsis.', $html );
+		$this->assertSame( 1, substr_count( $html, '<img' ) );
+	}
+
+	/**
 	 * Registration is wired to init.
 	 */
 	public function test_registration_is_hooked() {

@@ -50,7 +50,7 @@ function Edit( { attributes, setAttributes } ) {
 						value={ attributes.type }
 						options={ [
 							{
-								label: __( 'Anything', 'traktivity' ),
+								label: __( 'No limitations', 'traktivity' ),
 								value: 'any',
 							},
 							{

@@ -5,7 +5,7 @@
 	"title": "Event Card",
 	"category": "traktivity",
 	"icon": "video-alt2",
-	"description": "One watch event, with its show and episode number restored from the taxonomies.",
+	"description": "One watch event as a card, with its artwork, its series and episode number, and when you watched it.",
 	"textdomain": "traktivity",
 	"usesContext": [ "postId", "postType" ],
 	"attributes": {

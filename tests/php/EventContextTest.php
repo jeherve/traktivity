@@ -216,4 +216,30 @@ class EventContextTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'added', traktivity_get_event( $post_id )['extra'] );
 	}
+
+	/**
+	 * A filter that drops a documented key gets that key back, empty.
+	 *
+	 * The blocks read every documented key without checking it exists, so a
+	 * missing `type` is an undefined index in every render that follows.
+	 */
+	public function test_filter_cannot_drop_a_documented_key() {
+		$post_id = $this->make_event( array( 'trakt_show_id' => 10 ), array( 'trakt_show' => 'Severance' ) );
+
+		add_filter(
+			'traktivity_event_context',
+			static function ( $context ) {
+				unset( $context['type'], $context['show_name'] );
+				$context['extra'] = 'added';
+				return $context;
+			}
+		);
+
+		$event = traktivity_get_event( $post_id );
+
+		$this->assertSame( '', $event['type'] );
+		$this->assertSame( '', $event['show_name'] );
+		$this->assertSame( 'It Is All Good', $event['title'] );
+		$this->assertSame( 'added', $event['extra'] );
+	}
 }

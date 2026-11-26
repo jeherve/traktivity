@@ -39,10 +39,9 @@
  */
 .traktivity-frame--empty {
 	align-items: center;
-	background: currentcolor;
+	background: color-mix(in srgb, currentcolor 8%, transparent);
 	display: flex;
 	justify-content: center;
-	opacity: 0.08;
 }
 
 .traktivity-frame__label {
@@ -51,6 +50,19 @@
 	padding: 0.5em;
 	text-align: center;
 	text-transform: uppercase;
+}
+
+/*
+ * Parts placed at wp_footer print after the theme's own markup, outside
+ * .wp-site-blocks, so none of the theme's page padding or width reaches them.
+ * They borrow the same values from theme.json instead.
+ */
+.traktivity-placement {
+	box-sizing: border-box;
+	margin-inline: auto;
+	max-width: var(--wp--style--global--wide-size, 1280px);
+	padding-block: var(--wp--style--root--padding-top, 2rem) var(--wp--style--root--padding-bottom, 2rem);
+	padding-inline: var(--wp--style--root--padding-left, 1.5rem) var(--wp--style--root--padding-right, 1.5rem);
 }
 
 .traktivity-sep {
