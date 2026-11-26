@@ -196,6 +196,34 @@ class EventDetailsBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Two labels that translate to the same text still get a row each.
+	 *
+	 * Nothing stops a translation from giving two labels the same text, and
+	 * rows keyed by their label would let the second one overwrite the first.
+	 */
+	public function test_rows_with_the_same_label_are_both_kept() {
+		$post_id = $this->make_event(
+			array( 'trakt_show_id' => 7 ),
+			array(
+				'trakt_show'    => 'Some Show',
+				'trakt_season'  => '3',
+				'trakt_episode' => '2',
+			)
+		);
+
+		$same_label = static function ( $translation, $text, $domain ) {
+			return 'traktivity' === $domain && in_array( $text, array( 'Season', 'Episode' ), true ) ? 'No.' : $translation;
+		};
+		add_filter( 'gettext', $same_label, 10, 3 );
+		$html = $this->render( $post_id );
+		remove_filter( 'gettext', $same_label, 10 );
+
+		$this->assertSame( 2, substr_count( $html, '<dt>No.</dt>' ) );
+		$this->assertStringContainsString( '<dd>3</dd>', $html );
+		$this->assertStringContainsString( '<dd>2</dd>', $html );
+	}
+
+	/**
 	 * A post that is not an event renders nothing.
 	 */
 	public function test_other_post_types_render_nothing() {
