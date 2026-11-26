@@ -140,6 +140,10 @@ Pass it to `start` and `reset`, which write the port into the site's URL, and to
 `stop` find the running containers on their own. Without it, a busy port fails
 the start rather than pointing the end-to-end tests at someone else's WordPress.
 
+Use `WP_ENV_PORT` rather than wp-env's `--auto-port` or a port in an override
+file: Playwright can't see those, and would test whichever site answers on 8889,
+another worktree's included.
+
 ## Releasing
 
 ```sh
