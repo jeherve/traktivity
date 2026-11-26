@@ -1,0 +1,11 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "traktivity/example",
+	"title": "Example",
+	"category": "traktivity",
+	"description": "Fixture used to prove the registrar finds and registers a built block.",
+	"textdomain": "traktivity",
+	"supports": { "html": false },
+	"style": [ "traktivity-shared" ]
+}

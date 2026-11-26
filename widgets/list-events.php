@@ -39,8 +39,12 @@ class Traktivity_List_Widget extends WP_Widget {
 			$widget_ops
 		);
 
-		// Customize event titles for TV series.
-		add_action( 'traktivity_list_widget_single_event_title', array( $this, 'custom_tv_event_title' ), 20, 2 );
+		/*
+		 * Customize event titles for TV series. Fired with apply_filters() at
+		 * the call site, so it registers as a filter; add_action() worked only
+		 * because the two share an implementation.
+		 */
+		add_filter( 'traktivity_list_widget_single_event_title', array( $this, 'custom_tv_event_title' ), 20, 2 );
 	}
 
 	/**
@@ -308,97 +312,57 @@ class Traktivity_List_Widget extends WP_Widget {
 
 	/**
 	 * Custom event title for TV episodes.
-	 * Episode titles often aren't really well known. When the event type is TV series,
+	 * Episode titles often aren't really well known. When the event is a TV episode,
 	 * we'll add a new div including the show title, as well as the season and episode numbers.
 	 *
 	 * @since 1.2.0
 	 *
-	 * @param string $event_title  HTML output for the event title.
-	 * @param int    $post_id Post ID.
+	 * @param string $event_title HTML output for the event title.
+	 * @param int    $post_id     Post ID.
+	 *
+	 * @return string Event title, with episode details appended when we have them.
 	 */
 	public function custom_tv_event_title( $event_title, $post_id ) {
-		if ( has_term( 'TV Series', 'trakt_type', $post_id ) ) {
-			// Show title.
-			$show_title_terms = get_the_terms( $post_id, 'trakt_show' );
-			if ( $show_title_terms && ! is_wp_error( $show_title_terms ) ) {
-				// We only want to keep one element.
-				$first_show = true;
-				foreach ( $show_title_terms as $term ) {
-					if ( $first_show ) {
-						$show_title = sprintf(
-							'<a href="%1$s">%2$s</a>',
-							esc_url( get_term_link( $term->term_id, 'trakt_show' ) ),
-							esc_html( $term->name )
-						);
-						// Other shows won't be the first ones, we won't need them.
-						$first_show = false;
-					}
-				}
-			} else {
-				$show_title = '';
-			}
+		$event = traktivity_get_event( (int) $post_id );
 
-			// Season number.
-			$show_season_terms = get_the_terms( $post_id, 'trakt_season' );
-			if ( $show_season_terms && ! is_wp_error( $show_season_terms ) ) {
-				// We only want to keep one element.
-				$first_season_num = true;
-				foreach ( $show_season_terms as $term ) {
-					if ( $first_season_num ) {
-						$season_number = $term->name;
-						// Other shows won't be the first ones, we won't need them.
-						$first_season_num = false;
-					}
-				}
-			} else {
-				$season_number = '';
-			}
-
-			// Episode number.
-			$show_episode_terms = get_the_terms( $post_id, 'trakt_episode' );
-			if ( $show_episode_terms && ! is_wp_error( $show_episode_terms ) ) {
-				// We only want to keep one element.
-				$first_episode_num = true;
-				foreach ( $show_episode_terms as $term ) {
-					if ( $first_episode_num ) {
-						$episode_number = $term->name;
-						// Other shows won't be the first ones, we won't need them.
-						$first_episode_num = false;
-					}
-				}
-			} else {
-				$episode_number = '';
-			}
-
-			// If we don't have extra info, don't display it.
-			if (
-				empty( $show_title )
-				|| empty( $season_number )
-				|| empty( $episode_number )
-			) {
-				return $event_title;
-			}
-
-			// Build our new event title, including extra info.
-			$event_title .= '<div class="episode-details">';
-
-			$event_title .= sprintf(
-				/* translators: additional informaton about each episode displayed in the widget listing recent watched TV shows. */
-				_x(
-					'%1$s, season %2$d, episode %3$d',
-					'1: Episode title. 2. Show title. 3. Season number. 4. Episode number.',
-					'traktivity'
-				),
-				$show_title,
-				absint( $season_number ),
-				absint( $episode_number )
-			);
-
-			$event_title .= '</div>';
-
-			return $event_title;
-		} else {
+		/*
+		 * This used to test has_term( 'TV Series', 'trakt_type' ) and walk the
+		 * show, season and episode taxonomies by hand. The term name is
+		 * translated when the sync creates it, so that test only ever matched
+		 * on an English site, and every episode on a translated install lost
+		 * its details here.
+		 */
+		if (
+			'tv' !== $event['type']
+			|| '' === $event['show_name']
+			|| '' === $event['show_link']
+			|| '' === $event['episode_code']
+		) {
 			return $event_title;
 		}
+
+		$show_title = sprintf(
+			'<a href="%1$s">%2$s</a>',
+			esc_url( $event['show_link'] ),
+			esc_html( $event['show_name'] )
+		);
+
+		$event_title .= '<div class="episode-details">';
+
+		$event_title .= sprintf(
+			/* translators: 1: link to the show. 2: season number. 3: episode number. */
+			_x(
+				'%1$s, season %2$d, episode %3$d',
+				'Episode details listed under each event in the recent watches widget',
+				'traktivity'
+			),
+			$show_title,
+			absint( $event['season'] ),
+			absint( $event['episode'] )
+		);
+
+		$event_title .= '</div>';
+
+		return $event_title;
 	}
 }

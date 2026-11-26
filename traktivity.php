@@ -4,7 +4,7 @@
  * Plugin URI: https://wordpress.org/plugins/traktivity
  * Description: Log your activity on Trakt.tv
  * Author: Jeremy Herve
- * Version: 3.0.1
+ * Version: 3.1.0
  * Author URI: https://jeremy.hu
  * Requires at least: 7.0
  * Requires PHP: 7.4
@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-define( 'TRAKTIVITY__VERSION', '3.0.1' );
+define( 'TRAKTIVITY__VERSION', '3.1.0' );
 define( 'TRAKTIVITY__API_URL', 'https://api.trakt.tv' );
 define( 'TRAKTIVITY__API_VERSION', '2' );
 define( 'TRAKTIVITY__TMDB_API_URL', 'https://api.themoviedb.org' );
@@ -127,6 +127,16 @@ class Traktivity {
 		require_once TRAKTIVITY__PLUGIN_DIR . 'rest.traktivity.php';
 		require_once TRAKTIVITY__PLUGIN_DIR . 'content.traktivity.php';
 		require_once TRAKTIVITY__PLUGIN_DIR . 'stats.traktivity.php';
+		require_once TRAKTIVITY__PLUGIN_DIR . 'helpers.traktivity.php';
+
+		/*
+		 * Wired ahead of the code that fills them, so the 3.1.0 blocks and
+		 * templates work lands in a file that already exists rather than
+		 * every branch editing this list and conflicting with the others.
+		 */
+		require_once TRAKTIVITY__PLUGIN_DIR . 'blocks.traktivity.php';
+		require_once TRAKTIVITY__PLUGIN_DIR . 'templates.traktivity.php';
+		require_once TRAKTIVITY__PLUGIN_DIR . 'placements.traktivity.php';
 
 		// Settings panel.
 		if ( is_admin() ) {

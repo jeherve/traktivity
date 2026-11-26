@@ -8,9 +8,9 @@ import { __ } from '@wordpress/i18n';
 /**
  * Step 4: offer to back-fill everything watched so far.
  *
- * @param {Object}   props
- * @param {Function} props.launchSync Starts the full sync.
- * @param {Function} props.nextStep   Advances to the dashboard.
+ * @param {Object}              props
+ * @param {() => Promise<void>} props.launchSync Starts the full sync.
+ * @param {() => void}          props.nextStep   Advances to the dashboard.
  * @return {Element} The form.
  */
 export default function SyncForm( { launchSync, nextStep } ) {

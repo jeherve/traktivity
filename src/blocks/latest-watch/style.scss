@@ -1,0 +1,60 @@
+/**
+ * Latest Watch.
+ *
+ * Side by side once there is room, stacked below that. The image keeps its
+ * ratio from the shared frame rules.
+ */
+
+.traktivity-hero {
+	display: grid;
+	gap: var(--wp--style--block-gap, 1.5em);
+}
+
+@media (min-width: 782px) {
+
+	.traktivity-hero {
+		align-items: center;
+		grid-template-columns: 3fr 2fr;
+	}
+}
+
+.traktivity-hero__link {
+	display: block;
+	text-decoration: none;
+}
+
+.traktivity-hero__kicker {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	letter-spacing: 0.1em;
+	margin: 0;
+	opacity: 0.7;
+	text-transform: uppercase;
+}
+
+.traktivity-hero__body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35em;
+}
+
+.traktivity-hero__show {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	letter-spacing: 0.06em;
+	margin: 0;
+	text-transform: uppercase;
+}
+
+.traktivity-hero__title {
+	margin: 0;
+}
+
+.traktivity-hero__code {
+	opacity: 0.7;
+	white-space: nowrap;
+}
+
+.traktivity-hero__meta {
+	font-size: var(--wp--preset--font-size--small, 0.8125rem);
+	margin: 0;
+	opacity: 0.75;
+}

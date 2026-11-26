@@ -23,7 +23,7 @@ jest.mock( '../../src/components/stats/StatsOverview', () => () => null );
  * Render the finished-setup dashboard with a given sync state.
  *
  * @param {Object} sync Sync state to render with.
- * @return {Function} The launchSync spy the dashboard was given.
+ * @return {jest.Mock} The launchSync spy the dashboard was given.
  */
 function renderDashboard( sync ) {
 	resetSettings();

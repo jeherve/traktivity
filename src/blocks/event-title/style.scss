@@ -1,0 +1,15 @@
+/**
+ * Event Title.
+ *
+ * Each part is wrapped so a theme can style the show name and the episode code
+ * separately from the episode name, which most designs want to do.
+ */
+
+.traktivity-event-title__show,
+.traktivity-event-title__code {
+	opacity: 0.7;
+}
+
+.traktivity-event-title__code {
+	white-space: nowrap;
+}
